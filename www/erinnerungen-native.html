@@ -1,0 +1,80 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Erinnerungszentrum · Alltagsbegleiter 13</title>
+<script src="shared-store.js"></script>
+<script src="native-alarm.js"></script>
+<style>
+:root{--parch:#eee3cb;--paper:#f8f1e2;--cream:#fffaf0;--wine:#67202d;--wine2:#46131d;--gold:#d4b36c;--sage:#617058;--ink:#30271d;--muted:#6c5f50;--line:#d6c39c}
+*{box-sizing:border-box}body{margin:0;background:var(--parch);font-family:Georgia,serif;color:var(--ink)}
+header{position:relative;background:linear-gradient(135deg,var(--wine2),var(--wine));color:#fff;padding:30px 18px;text-align:center}.back{position:absolute;left:14px;top:14px;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff20;color:#fff;text-decoration:none}
+main{max-width:850px;margin:auto;padding:16px}.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--cream);font:inherit;margin-bottom:10px}textarea{min-height:90px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:999px;padding:12px 16px;background:var(--wine);color:#fff;font-weight:700;cursor:pointer}.secondary{background:var(--gold);color:var(--wine2)}.danger{background:#8f3030}
+.item{background:var(--cream);border-left:4px solid var(--gold);border-radius:11px;padding:12px;margin:9px 0}.meta{font-size:12px;color:var(--muted);margin:5px 0}.notice{background:#fff4d7;border-left:4px solid var(--gold);padding:12px;border-radius:10px}
+@media(max-width:600px){.row{grid-template-columns:1fr}button{width:100%;margin-top:6px}}
+</style><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body>
+<header><a class="back" href="index.html">←</a><h1>🔔 Erinnerungszentrum</h1><p>Zuverlässige Android-Erinnerungen – auch bei geschlossener App</p></header>
+<main>
+<section class="card"><div id="nativeState" class="notice"></div></section>
+<section class="card">
+<h2>Neue Erinnerung</h2>
+<input id="title" placeholder="Titel, z. B. Abendmedikation">
+<textarea id="text" placeholder="Hinweistext"></textarea>
+<div class="row"><input id="date" type="date"><input id="time" type="time"></div>
+<select id="repeat">
+<option value="0">Einmalig</option>
+<option value="86400000">Täglich</option>
+<option value="604800000">Wöchentlich</option>
+<option value="2592000000">Alle 30 Tage</option>
+<option value="31536000000">Jährlich</option>
+</select>
+<button id="save">Erinnerung speichern</button>
+</section>
+<section class="card"><h2>Gespeicherte Erinnerungen</h2><div id="list"></div></section>
+</main>
+<script>
+const A=AlltagsbegleiterNativeAlarms;
+date.value=new Date().toISOString().slice(0,10);
+time.value='09:00';
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function render(){
+ const items=A.list(),box=document.getElementById('list');
+ box.innerHTML=items.length?'':'<p>Noch keine nativen Erinnerungen.</p>';
+ items.sort((a,b)=>a.triggerAt-b.triggerAt).forEach(x=>{
+   const d=document.createElement('div');d.className='item';
+   d.innerHTML='<b>'+esc(x.title)+'</b><div>'+esc(x.text)+'</div><div class="meta">'+new Date(x.triggerAt).toLocaleString('de-DE')+(x.repeatMs?' · wiederkehrend':'')+'</div><button class="danger" data-id="'+x.id+'">Löschen</button>';
+   box.appendChild(d);
+ });
+}
+if(!A.available){
+ nativeState.innerHTML='<b>Web-Version erkannt.</b><br>Native Erinnerungen funktionieren erst in der installierten Android-App.';
+ save.disabled=true;
+}else if(!A.exactAllowed()){
+ nativeState.innerHTML='<b>Exakte Alarme sind noch nicht freigegeben.</b><br><button class="secondary" onclick="A.requestExact()">Android-Freigabe öffnen</button>';
+}else{
+ nativeState.innerHTML='<b>Native Android-Erinnerungen sind aktiv.</b><br>Sie funktionieren auch bei geschlossener App und werden nach einem Neustart wiederhergestellt.';
+}
+save.onclick=()=>{
+ const when=new Date(date.value+'T'+time.value);
+ if(!title.value.trim()||isNaN(when.getTime()))return;
+ const id=Math.floor(Date.now()%2000000000);
+ A.schedule({id,triggerAt:when.getTime(),title:title.value.trim(),text:text.value.trim()||'Erinnerung',repeatMs:Number(repeat.value)});
+ title.value='';text.value='';render();
+};
+document.addEventListener('click',e=>{if(e.target.dataset.id){A.cancel(Number(e.target.dataset.id));render()}});
+render();
+</script><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

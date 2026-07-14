@@ -1,0 +1,6 @@
+Alltagsbegleiter PWA Version 14.1
+
+- In der Heute- und Tabletansicht sind Medikamente jetzt direkt über einen sichtbaren Knopf eintragbar.
+- Termine und Geburtstage sind direkt über einen sichtbaren Knopf eintragbar.
+- Aufgaben haben einen eigenen Eintragen-Knopf.
+- Bestehende Daten bleiben erhalten.

@@ -1,0 +1,9 @@
+Alltagsbegleiter PWA – Version 17
+
+- Direkte Eingabedialoge in Tablet- und Heute-Ansicht
+- Medikamente direkt anlegen
+- Termine und Geburtstage direkt anlegen
+- Aufgaben direkt anlegen
+- Speicherung in denselben lokalen Datenspeichern wie die Verwaltungsseiten
+- Verwaltungsseiten bleiben für Bearbeiten und Löschen erreichbar
+- Offline-Cache auf Version 17 aktualisiert

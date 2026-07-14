@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gewicht &amp; Körperwerte – Tablet</title>
+<style>
+  :root{
+    --parchment:#f4ecd9;
+    --parchment-dim:#ece0c8;
+    --wine:#6d2b3a;
+    --wine-dark:#521f2b;
+    --gold:#b8912f;
+    --ink:#3a2e20;
+    --ink-soft:#6b5c46;
+    --line:#d8c8a6;
+    --card:#fffdf8;
+    --green:#5f7a45;
+    --green-bg:#e5ecdb;
+    --amber:#b8802f;
+    --amber-bg:#f3e4c8;
+    --red:#a3423a;
+    --red-bg:#f2dcd6;
+    --shadow: 0 2px 10px rgba(58,46,32,0.10);
+    --radius: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--parchment);
+    color:var(--ink);
+    font-family:'EB Garamond', Georgia, serif;
+    font-size:18px;
+    line-height:1.45;
+    padding-bottom:60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .layout{
+    display:grid; grid-template-columns:400px 1fr; gap:22px;
+    max-width:1180px; margin:0 auto; padding:14px 24px 40px;
+    align-items:start;
+  }
+  .col-left, .col-right{ display:flex; flex-direction:column; gap:18px; }
+  .topbar{ padding:18px 28px; }
+  .topbar h1{ font-size:1.8rem; }
+  .range-tabs{ max-width:1180px; margin:0 auto; padding:16px 24px 4px; }
+  .range-tabs button{ padding:11px 6px; font-size:1.02rem; }
+  @media (max-width:880px){
+    .layout{ grid-template-columns:1fr; }
+  }
+  h1,h2,h3,.display{
+    font-family:'Cormorant Garamond', Georgia, serif;
+    font-weight:600;
+    color:var(--wine-dark);
+  }
+  ::selection{background:var(--gold);color:#fff;}
+
+  /* Topbar */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--wine);
+    color:#fbf3e3;
+    padding:14px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow:var(--shadow);
+  }
+  .topbar h1{color:#fbf3e3; font-size:1.5rem; margin:0; letter-spacing:.02em;}
+  .icon-btn{
+    background:none; border:none; color:#fbf3e3; font-size:1.4rem;
+    padding:6px 10px; cursor:pointer; border-radius:10px;
+  }
+  .icon-btn:active{background:rgba(255,255,255,0.15);}
+  .icon-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:3px solid var(--gold); outline-offset:2px;
+  }
+
+  /* Range tabs */
+  .range-tabs{
+    display:flex; gap:6px; padding:12px 14px 4px;
+  }
+  .range-tabs button{
+    flex:1; border:1px solid var(--line); background:var(--card);
+    color:var(--ink-soft); padding:9px 4px; border-radius:12px;
+    font-family:'EB Garamond',serif; font-size:0.95rem; cursor:pointer;
+  }
+  .range-tabs button.active{
+    background:var(--wine); color:#fbf3e3; border-color:var(--wine);
+    font-weight:600;
+  }
+
+  /* Date nav */
+  .date-nav{
+    display:flex; align-items:center; justify-content:center; gap:16px;
+    padding:10px 0 4px; font-size:1.05rem; color:var(--ink-soft);
+  }
+  .date-nav button{
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--line);
+    background:var(--card); font-size:1rem; cursor:pointer; color:var(--wine-dark);
+  }
+  .date-nav .label{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:1.15rem; color:var(--wine-dark);}
+
+  /* Hero */
+  .hero{
+    text-align:center; padding:18px 20px 8px;
+  }
+  .hero .icon{font-size:2.2rem;}
+  .hero .weight{
+    font-size:3.4rem; font-weight:700; color:var(--ink);
+    display:flex; align-items:baseline; justify-content:center; gap:6px;
+  }
+  .hero .weight .unit{font-size:1.4rem; color:var(--ink-soft); font-family:'EB Garamond',serif;}
+  .hero .ziel{color:var(--ink-soft); font-size:0.95rem;}
+  .hero .trend-badge{
+    display:inline-flex; align-items:center; gap:6px; margin-top:8px;
+    padding:5px 12px; border-radius:999px; font-size:0.9rem; font-weight:600;
+  }
+  .trend-up{background:var(--red-bg); color:var(--red);}
+  .trend-down{background:var(--green-bg); color:var(--green);}
+  .trend-flat{background:var(--amber-bg); color:var(--amber);}
+
+  /* Sections */
+  section.block{padding:10px 16px;}
+  .section-title{
+    font-size:1.15rem; margin:6px 0 10px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .section-title small{font-size:0.8rem; font-weight:400; color:var(--ink-soft); font-family:'EB Garamond',serif;}
+
+  /* Ampel grid */
+  .ampel-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  .ampel-card{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:12px 12px; position:relative; border-left:6px solid var(--line);
+  }
+  .ampel-card.green{border-left-color:var(--green);}
+  .ampel-card.amber{border-left-color:var(--amber);}
+  .ampel-card.red{border-left-color:var(--red);}
+  .ampel-card .label{font-size:0.82rem; color:var(--ink-soft);}
+  .ampel-card .value{font-size:1.35rem; font-weight:700; margin:2px 0;}
+  .ampel-card .value .u{font-size:0.85rem; font-weight:400; color:var(--ink-soft);}
+  .ampel-card .status{
+    font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;
+  }
+  .ampel-card.green .status{color:var(--green);}
+  .ampel-card.amber .status{color:var(--amber);}
+  .ampel-card.red .status{color:var(--red);}
+  .ampel-card .norm{font-size:0.72rem; color:var(--ink-soft); margin-top:2px;}
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .green .dot{background:var(--green);}
+  .amber .dot{background:var(--amber);}
+  .red .dot{background:var(--red);}
+
+  /* Chart */
+  .chart-card{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px;
+  }
+  .metric-chips{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .metric-chips button{
+    border:1px solid var(--line); background:var(--parchment-dim); color:var(--ink-soft);
+    border-radius:999px; padding:5px 12px; font-size:0.82rem; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .metric-chips button.active{background:var(--gold); color:#fff; border-color:var(--gold); font-weight:600;}
+  canvas{width:100%; display:block;}
+
+  /* Stats */
+  .stats-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
+  .stat-box{background:var(--card); border-radius:12px; box-shadow:var(--shadow); padding:10px 6px; text-align:center;}
+  .stat-box .v{font-size:1.05rem; font-weight:700; color:var(--wine-dark);}
+  .stat-box .l{font-size:0.68rem; color:var(--ink-soft);}
+
+  /* History */
+  .history-item{
+    background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+    padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .history-item .hd{font-weight:600; color:var(--wine-dark); font-size:0.95rem;}
+  .history-item .sub{font-size:0.78rem; color:var(--ink-soft); margin-top:2px;}
+  .history-item .actions button{
+    border:none; background:none; font-size:1.1rem; padding:4px 8px; cursor:pointer; color:var(--ink-soft);
+  }
+  .empty-state{
+    text-align:center; padding:30px 20px; color:var(--ink-soft);
+  }
+  .empty-state .big{font-size:2rem; margin-bottom:8px;}
+
+  /* FAB */
+  .fab{
+    position:fixed; right:20px; bottom:24px; width:60px; height:60px; border-radius:50%;
+    background:var(--wine); color:#fbf3e3; border:none; font-size:1.8rem; box-shadow:0 4px 16px rgba(0,0,0,0.25);
+    cursor:pointer; z-index:30;
+  }
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(58,46,32,0.55); display:none;
+    align-items:center; justify-content:center; z-index:50;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--parchment); width:100%; max-width:620px; border-radius:20px;
+    max-height:88vh; overflow-y:auto; padding:26px 32px 32px; box-shadow:0 10px 40px rgba(0,0,0,0.35);
+  }
+  .modal h2{margin:0 0 14px; font-size:1.4rem;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:0.85rem; color:var(--ink-soft); margin-bottom:4px;}
+  .field input, .field select{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
+    background:var(--card); font-family:'EB Garamond',serif; font-size:1rem; color:var(--ink);
+  }
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+  .modal-actions{display:flex; gap:10px; margin-top:16px;}
+  .btn{
+    flex:1; padding:12px; border-radius:12px; border:none; font-size:1rem; cursor:pointer;
+    font-family:'EB Garamond',serif; font-weight:600;
+  }
+  .btn-primary{background:var(--wine); color:#fbf3e3;}
+  .btn-secondary{background:var(--parchment-dim); color:var(--ink); border:1px solid var(--line);}
+  .btn-danger{background:var(--red-bg); color:var(--red); border:1px solid var(--red);}
+  .menu-list{list-style:none; margin:0; padding:0;}
+  .menu-list li{border-bottom:1px solid var(--line);}
+  .menu-list button{
+    width:100%; text-align:left; background:none; border:none; padding:14px 4px;
+    font-size:1.02rem; font-family:'EB Garamond',serif; color:var(--ink); cursor:pointer;
+    display:flex; align-items:center; gap:10px;
+  }
+  .hint{font-size:0.78rem; color:var(--ink-soft); margin-top:6px;}
+  input[type=file]{display:none;}
+
+  @media print{
+    .topbar,.range-tabs,.date-nav,.fab,.modal-overlay,.metric-chips,.chart-card,section.chart-section{display:none !important;}
+    body{padding:0; background:#fff;}
+    .ampel-grid{grid-template-columns:1fr 1fr;}
+    .history-item{box-shadow:none; border:1px solid #ccc;}
+    #printReport{display:block !important;}
+  }
+  #printReport{display:none;}
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a class="icon-btn" href="vorsorgezentrum.html" aria-label="Zurück zum Schrank" title="Zurück zum Schrank" style="text-decoration:none;display:inline-flex;align-items:center;">←</a>
+    <h1>Gewicht &amp; Körperwerte</h1>
+  </div>
+  <div>
+    <button class="icon-btn" id="btnSettings" aria-label="Einstellungen" title="Einstellungen">⚙</button>
+    <button class="icon-btn" id="btnMenu" aria-label="Menü" title="Menü">⋮</button>
+  </div>
+</header>
+
+<nav class="range-tabs" role="tablist">
+  <button data-range="1T" class="active">1T</button>
+  <button data-range="7T">7 Ta.</button>
+  <button data-range="4W">4 Wo.</button>
+  <button data-range="1J">1 J</button>
+  <button data-range="ALL">Alle</button>
+</nav>
+
+<div class="date-nav" id="dateNav">
+  <button id="prevDay" aria-label="Vorheriger Tag">‹</button>
+  <span class="label" id="dateLabel">Heute</span>
+  <button id="nextDay" aria-label="Nächster Tag">›</button>
+</div>
+
+<main class="layout">
+  <div class="col-left">
+    <section class="hero" id="heroSection">
+      <div class="icon">⚖️</div>
+      <div class="weight"><span id="heroWeight">–</span><span class="unit">kg</span></div>
+      <div class="ziel" id="heroZiel">Ziel: –</div>
+      <div id="heroTrend"></div>
+    </section>
+
+    <section class="block">
+      <div class="section-title">Ampel-Übersicht <small id="ampelSub">im Vergleich zur Altersgruppe</small></div>
+      <div class="ampel-grid" id="ampelGrid"></div>
+    </section>
+  </div>
+
+  <div class="col-right">
+    <section class="block chart-section">
+      <div class="section-title">Verlauf</div>
+      <div class="chart-card">
+        <div class="metric-chips" id="metricChips"></div>
+        <canvas id="trendChart" height="220"></canvas>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-title">Statistik <small id="statsSub"></small></div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </section>
+
+    <section class="block">
+      <div class="section-title">Einträge</div>
+      <div id="historyList"></div>
+    </section>
+  </div>
+</main>
+
+<button class="fab" id="btnAdd" aria-label="Neuer Eintrag">+</button>
+
+<!-- Entry Modal -->
+<div class="modal-overlay" id="entryModalOverlay">
+  <div class="modal">
+    <h2 id="entryModalTitle">Neuer Eintrag</h2>
+    <div class="field-row">
+      <div class="field"><label for="fDatum">Datum</label><input type="date" id="fDatum"></div>
+      <div class="field"><label for="fZeit">Uhrzeit</label><input type="time" id="fZeit"></div>
+    </div>
+    <div class="field"><label for="fGewicht">Gewicht (kg)</label><input type="number" step="0.1" id="fGewicht"></div>
+    <div class="field-row">
+      <div class="field"><label for="fBmi">BMI</label><input type="number" step="0.1" id="fBmi"></div>
+      <div class="field"><label for="fFett">Körperfett (%)</label><input type="number" step="0.1" id="fFett"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="fMuskel">Skelettmuskelmasse (kg)</label><input type="number" step="0.1" id="fMuskel"></div>
+      <div class="field"><label for="fKnochen">Knochenmasse (kg)</label><input type="number" step="0.1" id="fKnochen"></div>
+    </div>
+    <div class="field"><label for="fWasser">Körperwasser (%)</label><input type="number" step="0.1" id="fWasser"></div>
+    <div class="field"><label for="fNotiz">Notiz (optional)</label><input type="text" id="fNotiz"></div>
+    <div class="hint" id="bmiHint"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnEntryCancel">Abbrechen</button>
+      <button class="btn btn-primary" id="btnEntrySave">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModalOverlay">
+  <div class="modal">
+    <h2>Einstellungen</h2>
+    <div class="field"><label for="sZiel">Zielgewicht (kg)</label><input type="number" step="0.1" id="sZiel"></div>
+    <div class="field"><label for="sGroesse">Körpergröße (cm) – für automatischen BMI</label><input type="number" step="1" id="sGroesse"></div>
+    <div class="field-row">
+      <div class="field">
+        <label for="sGeschlecht">Geschlecht</label>
+        <select id="sGeschlecht"><option value="m">männlich</option><option value="w">weiblich</option></select>
+      </div>
+      <div class="field">
+        <label for="sAlter">Altersgruppe</label>
+        <select id="sAlter">
+          <option value="18-29">18–29</option>
+          <option value="30-49">30–49</option>
+          <option value="50-69">50–69</option>
+          <option value="70+">Ü70</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">Die Normwerte sind allgemeine Richtwerte aus gängigen Körperanalyse-Tabellen zur groben Orientierung – kein medizinischer Befund. Bei Fragen zu deinen individuellen Werten sprich mit deinem Arzt.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnSettingsCancel">Abbrechen</button>
+      <button class="btn btn-primary" id="btnSettingsSave">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu Modal -->
+<div class="modal-overlay" id="menuModalOverlay">
+  <div class="modal">
+    <h2>Menü</h2>
+    <ul class="menu-list">
+      <li><button id="mExportJson">⬇ Als JSON exportieren (Datensicherung)</button></li>
+      <li><button id="mExportCsv">⬇ Als CSV exportieren</button></li>
+      <li><button id="mImport">⬆ Daten importieren (JSON/CSV)</button></li>
+      <li><button id="mPrint">🖨 Bericht drucken</button></li>
+      <li><button id="mDeleteAll" style="color:var(--red);">🗑 Alle Daten löschen</button></li>
+    </ul>
+    <input type="file" id="fileImport" accept=".json,.csv">
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnMenuClose">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<script>
+(function(){
+  "use strict";
+  const STORAGE_KEY = 'gewichtstool_entries_v1';
+  const SETTINGS_KEY = 'gewichtstool_settings_v1';
+
+  const NORMS = {
+    m: {
+      '18-29': {bmi:[18.5,24.9], fett:[8,20], wasser:[50,65], muskel:[36,45], knochen:0.040},
+      '30-49': {bmi:[18.5,25.9], fett:[11,22], wasser:[50,65], muskel:[34,43], knochen:0.040},
+      '50-69': {bmi:[18.5,27.9], fett:[13,25], wasser:[48,63], muskel:[33,41], knochen:0.038},
+      '70+':   {bmi:[22,29],     fett:[13,25], wasser:[45,60], muskel:[32,40], knochen:0.036}
+    },
+    w: {
+      '18-29': {bmi:[18.5,24.9], fett:[19,30], wasser:[45,60], muskel:[30,38], knochen:0.032},
+      '30-49': {bmi:[18.5,25.9], fett:[21,32], wasser:[45,60], muskel:[28,36], knochen:0.032},
+      '50-69': {bmi:[18.5,27.9], fett:[23,34], wasser:[45,58], muskel:[27,35], knochen:0.030},
+      '70+':   {bmi:[22,29],     fett:[24,35], wasser:[42,56], muskel:[26,34], knochen:0.028}
+    }
+  };
+
+  const METRICS = [
+    {key:'gewicht', label:'Gewicht', unit:'kg', norm:null},
+    {key:'bmi', label:'BMI', unit:'', norm:'bmi'},
+    {key:'koerperfett', label:'Körperfett', unit:'%', norm:'fett'},
+    {key:'muskelmasse', label:'Skelettmuskelmasse', unit:'kg', norm:'muskelPct'},
+    {key:'knochenmasse', label:'Knochenmasse', unit:'kg', norm:'knochen'},
+    {key:'wasser', label:'Körperwasser', unit:'%', norm:'wasser'}
+  ];
+
+  let entries = [];
+  let settings = {zielgewicht:null, groesse:null, geschlecht:'m', altersgruppe:'70+'};
+  let currentRange = '1T';
+  let currentDate = new Date();
+  let editingId = null;
+  let chartMetric = 'gewicht';
+
+  function loadData(){
+    try{ entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }catch(e){ entries = []; }
+    try{ const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)); if(s) settings = Object.assign(settings, s); }catch(e){}
+  }
+  function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+  function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+
+  function fmtDate(d){ return d.toISOString().slice(0,10); }
+  function displayDate(dstr){
+    const d = new Date(dstr+'T00:00:00');
+    return d.toLocaleDateString('de-DE',{weekday:'long', day:'numeric', month:'long'});
+  }
+  function sortEntries(){ entries.sort((a,b)=> (a.datum+a.zeit).localeCompare(b.datum+b.zeit)); }
+
+  function currentNorms(){
+    return NORMS[settings.geschlecht][settings.altersgruppe];
+  }
+
+  // ---- Ampel logic ----
+  function ampelStatus(value, range){
+    if(value===null || value===undefined || isNaN(value)) return null;
+    const [lo,hi] = range;
+    const tol = (hi-lo)*0.12;
+    if(value>=lo && value<=hi) return 'green';
+    if(value>=lo-tol && value<=hi+tol) return 'amber';
+    return 'red';
+  }
+  function statusLabel(s){
+    if(s==='green') return 'im Normbereich';
+    if(s==='amber') return 'leicht abweichend';
+    if(s==='red') return 'auffällig';
+    return '–';
+  }
+
+  function computeBmi(gewicht){
+    if(settings.groesse && settings.groesse>0){
+      const h = settings.groesse/100;
+      return Math.round((gewicht/(h*h))*10)/10;
+    }
+    return null;
+  }
+
+  function getEntryValue(entry, key){
+    if(key==='muskelPctVal') return entry.muskelmasse && entry.gewicht ? (entry.muskelmasse/entry.gewicht*100) : null;
+    return entry[key];
+  }
+
+  function filteredEntries(){
+    if(entries.length===0) return [];
+    let list = entries.slice();
+    const today = new Date(); today.setHours(0,0,0,0);
+    if(currentRange==='1T'){
+      const dstr = fmtDate(currentDate);
+      return list.filter(e=>e.datum===dstr);
+    }
+    let cutoff = new Date();
+    if(currentRange==='7T') cutoff.setDate(cutoff.getDate()-7);
+    else if(currentRange==='4W') cutoff.setDate(cutoff.getDate()-28);
+    else if(currentRange==='1J') cutoff.setFullYear(cutoff.getFullYear()-1);
+    else return list;
+    const cutStr = fmtDate(cutoff);
+    return list.filter(e=>e.datum>=cutStr);
+  }
+
+  function latestEntryOnOrBefore(dstr){
+    const list = entries.filter(e=>e.datum<=dstr);
+    return list.length ? list[list.length-1] : null;
+  }
+
+  // ---- Rendering ----
+  function renderAll(){
+    renderDateNav();
+    renderHero();
+    renderAmpel();
+    renderChart();
+    renderStats();
+    renderHistory();
+  }
+
+  function renderDateNav(){
+    document.getElementById('dateNav').style.display = currentRange==='1T' ? 'flex' : 'none';
+    document.getElementById('dateLabel').textContent = displayDate(fmtDate(currentDate));
+  }
+
+  function renderHero(){
+    let entry;
+    if(currentRange==='1T'){
+      entry = entries.find(e=>e.datum===fmtDate(currentDate));
+    } else {
+      const list = filteredEntries();
+      entry = list.length ? list[list.length-1] : null;
+    }
+    const weightEl = document.getElementById('heroWeight');
+    const zielEl = document.getElementById('heroZiel');
+    const trendEl = document.getElementById('heroTrend');
+    if(!entry){
+      weightEl.textContent = '–';
+      zielEl.textContent = settings.zielgewicht ? 'Ziel: '+settings.zielgewicht.toLocaleString('de-DE') : 'Ziel: –';
+      trendEl.innerHTML='';
+      return;
+    }
+    weightEl.textContent = entry.gewicht.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
+    zielEl.textContent = settings.zielgewicht ? 'Ziel: '+settings.zielgewicht.toLocaleString('de-DE') : 'Ziel: –';
+
+    // find previous entry before this one
+    const idx = entries.findIndex(e=>e.id===entry.id);
+    const prev = idx>0 ? entries[idx-1] : null;
+    if(prev){
+      const diff = Math.round((entry.gewicht-prev.gewicht)*10)/10;
+      let cls = 'trend-flat', arrow='→', text='stabil';
+      if(diff>0.05){ cls='trend-up'; arrow='↑'; text='+'+diff.toLocaleString('de-DE')+' kg'; }
+      else if(diff<-0.05){ cls='trend-down'; arrow='↓'; text=diff.toLocaleString('de-DE')+' kg'; }
+      trendEl.innerHTML = '<span class="trend-badge '+cls+'">'+arrow+' '+text+' seit letztem Eintrag</span>';
+    } else {
+      trendEl.innerHTML='';
+    }
+  }
+
+  function renderAmpel(){
+    const norms = currentNorms();
+    let entry;
+    if(currentRange==='1T') entry = entries.find(e=>e.datum===fmtDate(currentDate));
+    else { const list = filteredEntries(); entry = list.length ? list[list.length-1] : null; }
+    const grid = document.getElementById('ampelGrid');
+    document.getElementById('ampelSub').textContent = 'vs. '+(settings.geschlecht==='m'?'Mann':'Frau')+', '+(settings.altersgruppe==='70+'?'Ü70':settings.altersgruppe);
+    grid.innerHTML='';
+    if(!entry){ grid.innerHTML = '<div class="empty-state">Noch keine Werte für diesen Tag.</div>'; return; }
+
+    const rows = [
+      {label:'BMI', value: entry.bmi, unit:'', range: norms.bmi},
+      {label:'Körperfett', value: entry.koerperfett, unit:'%', range: norms.fett},
+      {label:'Skelettmuskelmasse', value: entry.muskelmasse, unit:'kg', range: null, pctRange: norms.muskel, weight: entry.gewicht},
+      {label:'Knochenmasse', value: entry.knochenmasse, unit:'kg', range: null, factor: norms.knochen, weight: entry.gewicht},
+      {label:'Körperwasser', value: entry.wasser, unit:'%', range: norms.wasser}
+    ];
+
+    rows.forEach(r=>{
+      let status=null, normText='';
+      if(r.range){
+        status = ampelStatus(r.value, r.range);
+        normText = 'Norm: '+r.range[0]+'–'+r.range[1]+r.unit;
+      } else if(r.pctRange && r.weight && r.value){
+        const pct = r.value/r.weight*100;
+        status = ampelStatus(pct, r.pctRange);
+        normText = 'Norm: '+r.pctRange[0]+'–'+r.pctRange[1]+'% des Körpergewichts';
+      } else if(r.factor && r.weight && r.value){
+        const expected = r.factor*r.weight;
+        const range = [expected*0.85, expected*1.15];
+        status = ampelStatus(r.value, range);
+        normText = 'Richtwert: ca. '+expected.toFixed(1)+' kg';
+      }
+      const card = document.createElement('div');
+      card.className = 'ampel-card '+(status||'');
+      card.innerHTML = '<div class="label">'+r.label+'</div>'+
+        '<div class="value">'+(r.value!=null?r.value.toLocaleString('de-DE'):'–')+' <span class="u">'+r.unit+'</span></div>'+
+        (status? '<div class="status"><span class="dot"></span>'+statusLabel(status)+'</div>':'')+
+        (normText? '<div class="norm">'+normText+'</div>':'');
+      grid.appendChild(card);
+    });
+  }
+
+  function renderChart(){
+    const chips = document.getElementById('metricChips');
+    chips.innerHTML='';
+    METRICS.forEach(m=>{
+      const b = document.createElement('button');
+      b.textContent = m.label;
+      if(m.key===chartMetric) b.classList.add('active');
+      b.onclick = ()=>{ chartMetric = m.key; renderChart(); };
+      chips.appendChild(b);
+    });
+
+    const list = (currentRange==='1T' ? entries.slice(-14) : filteredEntries());
+    const canvas = document.getElementById('trendChart');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.clientWidth || 320;
+    const H = 220;
+    canvas.width = w; canvas.height = H;
+    ctx.clearRect(0,0,w,H);
+
+    if(list.length<2){
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--ink-soft');
+      ctx.font = '16px Georgia';
+      ctx.fillText('Mindestens 2 Einträge für einen Verlauf nötig.', 10, H/2);
+      return;
+    }
+    const vals = list.map(e=>e[chartMetric]).filter(v=>v!=null);
+    if(vals.length<2){
+      ctx.fillStyle = '#6b5c46'; ctx.font='16px Georgia';
+      ctx.fillText('Keine Werte für diese Kennzahl im Zeitraum.', 10, H/2);
+      return;
+    }
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const pad = (max-min)*0.15 || 1;
+    const yMin = min-pad, yMax = max+pad;
+    const plotH = H-30;
+    const stepX = (w-40)/(list.length-1);
+
+    ctx.strokeStyle = '#d8c8a6'; ctx.lineWidth=1;
+    for(let i=0;i<=3;i++){
+      const y = 15 + i*(plotH/3);
+      ctx.beginPath(); ctx.moveTo(30,y); ctx.lineTo(w-10,y); ctx.stroke();
+    }
+    ctx.strokeStyle = '#6d2b3a'; ctx.lineWidth=2.5;
+    ctx.beginPath();
+    list.forEach((e,i)=>{
+      const v = e[chartMetric];
+      if(v==null) return;
+      const x = 30 + i*stepX;
+      const y = 15 + (1-(v-yMin)/(yMax-yMin))*plotH;
+      if(i===0 || list[i-1][chartMetric]==null) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.fillStyle='#b8912f';
+    list.forEach((e,i)=>{
+      const v = e[chartMetric]; if(v==null) return;
+      const x = 30 + i*stepX;
+      const y = 15 + (1-(v-yMin)/(yMax-yMin))*plotH;
+      ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+    });
+    ctx.fillStyle = '#6b5c46'; ctx.font='12px Georgia';
+    ctx.fillText(yMax.toFixed(1), 2, 18);
+    ctx.fillText(yMin.toFixed(1), 2, H-8);
+  }
+
+  function renderStats(){
+    const list = filteredEntries();
+    const grid = document.getElementById('statsGrid');
+    document.getElementById('statsSub').textContent = list.length ? '('+list.length+' Einträge)':'';
+    if(list.length===0){ grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;">Keine Daten im Zeitraum.</div>'; return; }
+    const vals = list.map(e=>e.gewicht);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+    const first = list[0].gewicht, last = list[list.length-1].gewicht;
+    const change = Math.round((last-first)*10)/10;
+    grid.innerHTML = [
+      {v:last.toFixed(1), l:'Aktuell (kg)'},
+      {v:min.toFixed(1), l:'Minimum (kg)'},
+      {v:max.toFixed(1), l:'Maximum (kg)'},
+      {v:avg.toFixed(1), l:'Ø Gewicht (kg)'},
+      {v:(change>0?'+':'')+change.toFixed(1), l:'Veränderung'},
+    ].map(s=>'<div class="stat-box"><div class="v">'+s.v+'</div><div class="l">'+s.l+'</div></div>').join('');
+  }
+
+  function renderHistory(){
+    const list = filteredEntries().slice().reverse();
+    const el = document.getElementById('historyList');
+    if(list.length===0){ el.innerHTML = '<div class="empty-state"><div class="big">🗒</div>Noch keine Einträge – tippe auf + um zu starten.</div>'; return; }
+    el.innerHTML = list.map(e=>{
+      return '<div class="history-item">'+
+        '<div><div class="hd">'+e.gewicht.toLocaleString('de-DE')+' kg</div>'+
+        '<div class="sub">'+displayDate(e.datum)+' · '+(e.zeit||'')+
+        (e.bmi?(' · BMI '+e.bmi):'')+(e.koerperfett?(' · Fett '+e.koerperfett+'%'):'')+'</div></div>'+
+        '<div class="actions"><button data-edit="'+e.id+'" aria-label="Bearbeiten">✎</button>'+
+        '<button data-del="'+e.id+'" aria-label="Löschen">🗑</button></div></div>';
+    }).join('');
+    el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEntryModal(b.dataset.edit));
+    el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deleteEntry(b.dataset.del));
+  }
+
+  function deleteEntry(id){
+    if(!confirm('Diesen Eintrag wirklich löschen?')) return;
+    entries = entries.filter(e=>e.id!==id);
+    saveData(); renderAll();
+  }
+
+  // ---- Entry modal ----
+  function openEntryModal(id){
+    editingId = id || null;
+    const overlay = document.getElementById('entryModalOverlay');
+    const title = document.getElementById('entryModalTitle');
+    if(id){
+      const e = entries.find(x=>x.id===id);
+      title.textContent = 'Eintrag bearbeiten';
+      document.getElementById('fDatum').value = e.datum;
+      document.getElementById('fZeit').value = e.zeit||'';
+      document.getElementById('fGewicht').value = e.gewicht;
+      document.getElementById('fBmi').value = e.bmi||'';
+      document.getElementById('fFett').value = e.koerperfett||'';
+      document.getElementById('fMuskel').value = e.muskelmasse||'';
+      document.getElementById('fKnochen').value = e.knochenmasse||'';
+      document.getElementById('fWasser').value = e.wasser||'';
+      document.getElementById('fNotiz').value = e.notiz||'';
+    } else {
+      title.textContent = 'Neuer Eintrag';
+      const now = new Date();
+      document.getElementById('fDatum').value = fmtDate(currentRange==='1T'?currentDate:now);
+      document.getElementById('fZeit').value = now.toTimeString().slice(0,5);
+      ['fGewicht','fBmi','fFett','fMuskel','fKnochen','fWasser','fNotiz'].forEach(id=>document.getElementById(id).value='');
+    }
+    updateBmiHint();
+    overlay.classList.add('open');
+  }
+  function closeEntryModal(){ document.getElementById('entryModalOverlay').classList.remove('open'); }
+
+  function updateBmiHint(){
+    const g = parseFloat(document.getElementById('fGewicht').value);
+    const hint = document.getElementById('bmiHint');
+    const bmiField = document.getElementById('fBmi');
+    if(settings.groesse && g){
+      const auto = computeBmi(g);
+      bmiField.value = auto;
+      hint.textContent = 'BMI automatisch berechnet aus Größe ('+settings.groesse+' cm). Du kannst ihn überschreiben.';
+    } else {
+      hint.textContent = 'Hinterlege deine Größe in den Einstellungen, damit der BMI automatisch berechnet wird.';
+    }
+  }
+
+  document.getElementById('fGewicht').addEventListener('input', updateBmiHint);
+
+  document.getElementById('btnAdd').onclick = ()=>openEntryModal(null);
+  document.getElementById('btnEntryCancel').onclick = closeEntryModal;
+  document.getElementById('entryModalOverlay').addEventListener('click', e=>{ if(e.target.id==='entryModalOverlay') closeEntryModal(); });
+
+  document.getElementById('btnEntrySave').onclick = ()=>{
+    const gewicht = parseFloat(document.getElementById('fGewicht').value);
+    if(!gewicht){ alert('Bitte ein Gewicht eingeben.'); return; }
+    const datum = document.getElementById('fDatum').value || fmtDate(new Date());
+    const data = {
+      id: editingId || (Date.now()+'_'+Math.random().toString(36).slice(2,7)),
+      datum,
+      zeit: document.getElementById('fZeit').value,
+      gewicht,
+      bmi: parseFloat(document.getElementById('fBmi').value) || null,
+      koerperfett: parseFloat(document.getElementById('fFett').value) || null,
+      muskelmasse: parseFloat(document.getElementById('fMuskel').value) || null,
+      knochenmasse: parseFloat(document.getElementById('fKnochen').value) || null,
+      wasser: parseFloat(document.getElementById('fWasser').value) || null,
+      notiz: document.getElementById('fNotiz').value || ''
+    };
+    if(editingId){
+      const idx = entries.findIndex(e=>e.id===editingId);
+      entries[idx] = data;
+    } else {
+      entries.push(data);
+    }
+    sortEntries(); saveData(); closeEntryModal(); renderAll();
+  };
+
+  // ---- Settings modal ----
+  function openSettingsModal(){
+    document.getElementById('sZiel').value = settings.zielgewicht||'';
+    document.getElementById('sGroesse').value = settings.groesse||'';
+    document.getElementById('sGeschlecht').value = settings.geschlecht;
+    document.getElementById('sAlter').value = settings.altersgruppe;
+    document.getElementById('settingsModalOverlay').classList.add('open');
+  }
+  document.getElementById('btnSettings').onclick = openSettingsModal;
+  document.getElementById('btnSettingsCancel').onclick = ()=>document.getElementById('settingsModalOverlay').classList.remove('open');
+  document.getElementById('settingsModalOverlay').addEventListener('click', e=>{ if(e.target.id==='settingsModalOverlay') e.currentTarget.classList.remove('open'); });
+  document.getElementById('btnSettingsSave').onclick = ()=>{
+    settings.zielgewicht = parseFloat(document.getElementById('sZiel').value)||null;
+    settings.groesse = parseFloat(document.getElementById('sGroesse').value)||null;
+    settings.geschlecht = document.getElementById('sGeschlecht').value;
+    settings.altersgruppe = document.getElementById('sAlter').value;
+    saveSettings();
+    document.getElementById('settingsModalOverlay').classList.remove('open');
+    renderAll();
+  };
+
+  // ---- Menu / Export / Import / Print ----
+  document.getElementById('btnMenu').onclick = ()=>document.getElementById('menuModalOverlay').classList.add('open');
+  document.getElementById('btnMenuClose').onclick = ()=>document.getElementById('menuModalOverlay').classList.remove('open');
+  document.getElementById('menuModalOverlay').addEventListener('click', e=>{ if(e.target.id==='menuModalOverlay') e.currentTarget.classList.remove('open'); });
+
+  function download(filename, text){
+    const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('mExportJson').onclick = ()=>{
+    const payload = {app:'gewicht', entries, settings, exportedAt: new Date().toISOString()};
+    download('gewicht_backup_'+fmtDate(new Date())+'.json', JSON.stringify(payload, null, 2));
+  };
+
+  document.getElementById('mExportCsv').onclick = ()=>{
+    const header = ['Datum','Zeit','Gewicht_kg','BMI','Koerperfett_pct','Skelettmuskelmasse_kg','Knochenmasse_kg','Koerperwasser_pct','Notiz'];
+    const rows = entries.map(e=>[e.datum,e.zeit,e.gewicht,e.bmi||'',e.koerperfett||'',e.muskelmasse||'',e.knochenmasse||'',e.wasser||'',(e.notiz||'').replace(/;/g,',')]);
+    const csv = [header.join(';')].concat(rows.map(r=>r.join(';'))).join('\n');
+    download('gewicht_export_'+fmtDate(new Date())+'.csv', csv);
+  };
+
+  document.getElementById('mImport').onclick = ()=>document.getElementById('fileImport').click();
+  document.getElementById('fileImport').onchange = (ev)=>{
+    const file = ev.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        if(file.name.endsWith('.json')){
+          const data = JSON.parse(reader.result);
+          if(data.entries){
+            const existingIds = new Set(entries.map(e=>e.id));
+            data.entries.forEach(e=>{ if(!existingIds.has(e.id)) entries.push(e); });
+            if(data.settings) settings = Object.assign(settings, data.settings);
+          }
+        } else {
+          const lines = reader.result.split('\n').filter(l=>l.trim());
+          lines.slice(1).forEach(line=>{
+            const c = line.split(';');
+            entries.push({
+              id: Date.now()+'_'+Math.random().toString(36).slice(2,7),
+              datum:c[0], zeit:c[1]||'', gewicht:parseFloat(c[2]),
+              bmi:parseFloat(c[3])||null, koerperfett:parseFloat(c[4])||null,
+              muskelmasse:parseFloat(c[5])||null, knochenmasse:parseFloat(c[6])||null,
+              wasser:parseFloat(c[7])||null, notiz:c[8]||''
+            });
+          });
+        }
+        sortEntries(); saveData(); saveSettings();
+        document.getElementById('menuModalOverlay').classList.remove('open');
+        renderAll();
+        alert('Import abgeschlossen.');
+      }catch(err){ alert('Import fehlgeschlagen: Datei konnte nicht gelesen werden.'); }
+    };
+    reader.readAsText(file);
+  };
+
+  document.getElementById('mDeleteAll').onclick = ()=>{
+    if(confirm('Wirklich ALLE Einträge unwiderruflich löschen? Vorher exportieren empfohlen.')){
+      entries = []; saveData(); document.getElementById('menuModalOverlay').classList.remove('open'); renderAll();
+    }
+  };
+
+  document.getElementById('mPrint').onclick = ()=>{
+    const list = filteredEntries();
+    const norms = currentNorms();
+    let html = '<h1 style="font-family:Georgia;color:#521f2b;">Gewichts- und Körperwerte-Bericht</h1>';
+    html += '<p>Zeitraum: '+currentRange+' · Erstellt am '+new Date().toLocaleDateString('de-DE')+' · Vergleichsgruppe: '+(settings.geschlecht==='m'?'Mann':'Frau')+', '+(settings.altersgruppe==='70+'?'Ü70':settings.altersgruppe)+'</p>';
+    html += '<table style="width:100%;border-collapse:collapse;font-family:Georgia;font-size:13px;">';
+    html += '<tr style="background:#ece0c8;">'+['Datum','Zeit','Gewicht','BMI','Fett %','Muskel kg','Knochen kg','Wasser %'].map(h=>'<th style="border:1px solid #ccc;padding:5px;text-align:left;">'+h+'</th>').join('')+'</tr>';
+    list.forEach(e=>{
+      html += '<tr>'+[e.datum,e.zeit,e.gewicht,e.bmi||'-',e.koerperfett||'-',e.muskelmasse||'-',e.knochenmasse||'-',e.wasser||'-'].map(v=>'<td style="border:1px solid #ccc;padding:5px;">'+v+'</td>').join('')+'</tr>';
+    });
+    html += '</table>';
+    if(list.length){
+      const vals = list.map(e=>e.gewicht);
+      html += '<p style="margin-top:14px;">Minimum: '+Math.min(...vals).toFixed(1)+' kg · Maximum: '+Math.max(...vals).toFixed(1)+' kg · Durchschnitt: '+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)+' kg</p>';
+    }
+    html += '<p style="font-size:11px;color:#6b5c46;">Normwerte sind allgemeine Richtwerte, kein medizinischer Befund.</p>';
+    document.getElementById('printReport').innerHTML = html;
+    window.print();
+  };
+
+  // ---- Tab / date navigation ----
+  document.querySelectorAll('.range-tabs button').forEach(btn=>{
+    btn.onclick = ()=>{
+      document.querySelectorAll('.range-tabs button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = btn.dataset.range;
+      renderAll();
+    };
+  });
+  document.getElementById('prevDay').onclick = ()=>{ currentDate.setDate(currentDate.getDate()-1); renderAll(); };
+  document.getElementById('nextDay').onclick = ()=>{ currentDate.setDate(currentDate.getDate()+1); renderAll(); };
+
+  // ---- Init ----
+  loadData();
+  sortEntries();
+  renderAll();
+  window.addEventListener('resize', renderChart);
+})();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

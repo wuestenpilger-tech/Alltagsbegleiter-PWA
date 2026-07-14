@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Trainings-Schrank</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#24211B;
+    --ink-soft:#5B564C;
+    --paper:#EDE7D9;
+    --paper-2:#E1D9C6;
+    --card:#F4EFE4;
+    --indigo:#1E2A44;
+    --indigo-2:#131C31;
+    --brass:#B07C2A;
+    --brass-light:#D8AE58;
+    --maroon:#7B2E3B;
+    --sage:#5F7355;
+    --amber:#B8862E;
+    --red:#8C3B3B;
+    --border:#D9D0BC;
+    --font-display:'Fraunces', serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--font-body);-webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:920px;margin:0 auto;min-height:100vh;padding-bottom:56px;}
+
+  .hero{
+    background:radial-gradient(120% 90% at 50% -10%, var(--indigo) 0%, var(--indigo-2) 70%);
+    color:var(--paper);padding:52px 40px 42px;text-align:center;
+  }
+  .eyebrow{
+    margin:0 0 10px;letter-spacing:.18em;text-transform:uppercase;
+    font-size:15px;color:var(--brass-light);font-weight:600;
+  }
+  h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:48px;}
+  .hero p{margin:14px auto 0;max-width:520px;color:#C7C2B4;font-size:16px;line-height:1.5;}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:22px;
+    padding:40px 30px;
+  }
+  @media(max-width:640px){ .grid{grid-template-columns:1fr;} }
+
+  .tile{
+    display:block;background:var(--card);border:1px solid var(--border);
+    border-radius:20px;padding:26px 24px;text-decoration:none;color:var(--ink);
+    transition:transform .15s ease, box-shadow .15s ease;
+    position:relative;overflow:hidden;
+  }
+  .tile:active{transform:scale(0.98);}
+  .tile::before{
+    content:"";position:absolute;top:0;left:0;width:6px;height:100%;
+    background:var(--tile-accent, var(--brass));
+  }
+  .tile-icon{font-size:34px;margin-bottom:12px;display:block;}
+  .tile h2{
+    font-family:var(--font-display);font-size:23px;font-weight:700;
+    margin:0 0 6px;color:var(--ink);
+  }
+  .tile p{margin:0;font-size:15px;color:var(--ink-soft);line-height:1.45;}
+  .tile .tag{
+    display:inline-block;margin-top:14px;font-family:var(--font-mono);
+    font-size:12px;letter-spacing:.04em;color:var(--tile-accent, var(--brass));
+    font-weight:700;text-transform:uppercase;
+  }
+
+  .tile.brass{--tile-accent:var(--brass);}
+  .tile.maroon{--tile-accent:var(--maroon);}
+  .tile.sage{--tile-accent:var(--sage);}
+  .tile.amber{--tile-accent:var(--amber);}
+  .tile.red{--tile-accent:var(--red);}
+  .tile.indigo{--tile-accent:var(--indigo);}
+
+  footer{
+    text-align:center;padding:10px 30px 40px;color:var(--ink-soft);font-size:13px;
+  }
+
+  .backup-card{
+    margin:0 30px 30px;background:var(--card);border:1px solid var(--border);
+    border-radius:20px;padding:26px 24px;
+  }
+  .backup-card h2{
+    font-family:var(--font-display);font-size:21px;font-weight:700;margin:0 0 6px;
+  }
+  .backup-card p{margin:0 0 18px;font-size:14px;color:var(--ink-soft);line-height:1.45;}
+  .backup-buttons{display:flex;gap:14px;flex-wrap:wrap;}
+  .backup-btn{
+    flex:1;min-width:180px;font-family:var(--font-body);font-weight:600;font-size:15px;
+    padding:14px 18px;border-radius:12px;border:none;cursor:pointer;
+    background:var(--indigo);color:var(--paper);
+  }
+  .backup-btn.secondary{
+    background:transparent;border:1.5px solid var(--brass);color:var(--brass);
+  }
+  .backup-btn:active{transform:scale(0.98);}
+  #backupStatus{
+    margin-top:16px;font-family:var(--font-mono);font-size:13px;color:var(--ink-soft);
+    line-height:1.6;white-space:pre-line;
+  }
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <p class="eyebrow">Übersicht</p>
+    <h1>Trainings-Schrank</h1>
+    <p>Alle Trainings- und Gesundheits-Apps an einem Ort — Tablet-Ansicht.</p>
+  </div>
+
+  <div class="grid">
+
+    <a class="tile brass" href="trainingscheck-tablet.html">
+      <span class="tile-icon">🗒️</span>
+      <h2>Trainingscheck</h2>
+      <p>Täglicher Check deiner körperlichen Verfassung vor dem Training.</p>
+      <span class="tag">Öffnen →</span>
+    </a>
+
+    <a class="tile sage" href="nordicwalking-tablet.html">
+      <span class="tile-icon">🌲</span>
+      <h2>Nordic Walking</h2>
+      <p>Logbuch für Strecken, Zeiten, Puls und Wetter deiner Läufe.</p>
+      <span class="tag">Öffnen →</span>
+    </a>
+
+    <a class="tile maroon" href="blutdruck-app-tablet.html">
+      <span class="tile-icon">🩺</span>
+      <h2>Blutdruckprotokoll</h2>
+      <p>Blutdruck- und Pulswerte erfassen und farblich einordnen.</p>
+      <span class="tag">Öffnen →</span>
+    </a>
+
+    <a class="tile amber" href="apnoe-tracker-tablet.html">
+      <span class="tile-icon">🫁</span>
+      <h2>Apnoe-Tracker</h2>
+      <p>Atemanhalte-Übungen protokollieren und Fortschritt verfolgen.</p>
+      <span class="tag">Öffnen →</span>
+    </a>
+
+    <a class="tile red" href="Wecker-Tablet.html">
+      <span class="tile-icon">⏰</span>
+      <h2>Wecker & Timer</h2>
+      <p>Digitaluhr, Wecker und Countdown-Timer fürs Training.</p>
+      <span class="tag">Öffnen →</span>
+    </a>
+
+    <a class="tile indigo" href="energiezaehler_tablet.html">
+      <span class="tile-icon">⚡</span>
+      <h2>Energiezähler</h2>
+      <p>Zählerstände für Strom und Heizung erfassen, Verbrauch und Kosten im Blick behalten.</p>
+      <span class="tag">Öffnen →</span>
+    </a>
+
+  </div>
+
+  <div style="text-align:center;margin:0 30px 8px;">
+    <a href="vorsorgezentrum.html" style="font-family:var(--font-mono);font-size:12.5px;letter-spacing:.03em;color:var(--brass);text-decoration:none;font-weight:700;text-transform:uppercase;">↔ Zum Gesundheits-Schrank</a>
+  </div>
+
+  <div class="backup-card">
+    <h2>🗂️ Datensicherung — alle Tools</h2>
+    <p>Sichert oder stellt die Daten von Trainingscheck, Nordic Walking, Blutdruckprotokoll, Apnoe-Tracker und Energiezähler gebündelt wieder her — jedes Tool als eigene Datei. Der Wecker hat keine Trainingsdaten und wird daher übersprungen.</p>
+    <div class="backup-buttons">
+      <button class="backup-btn" id="backupAllBtn">Alle Daten sichern</button>
+      <button class="backup-btn secondary" id="restoreAllBtn">Daten wiederherstellen</button>
+      <input type="file" id="restoreFileInput" accept=".csv,.json" multiple style="display:none;">
+    </div>
+    <div id="backupStatus"></div>
+  </div>
+
+  <footer>Trainings-Schrank · lokale Sammlung</footer>
+</div>
+
+<script>
+function pad(n){ return n<10 ? '0'+n : ''+n; }
+function todayISO(){
+  const d = new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function downloadBlob(filename, content, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ================= EXPORT ================= */
+
+function exportApnoe(){
+  let entries;
+  try{ entries = JSON.parse(localStorage.getItem('apnoe_tracker_entries_v1') || '[]'); }catch(e){ entries = []; }
+  if(!entries.length) return false;
+  const CSV_HEADER = ['datum','ahi','schlafdauer','atemfreqmin','spo2min','spo2avg','atemfreq','ruhepuls','hrv','gewicht','aussentemp','luftfeuchtigkeit','erkaeltung','notiz'];
+  const sorted = [...entries].sort((a,b) => a.datum.localeCompare(b.datum));
+  const rows = [CSV_HEADER.join(';')];
+  sorted.forEach(e => {
+    const row = CSV_HEADER.map(key => {
+      let v = e[key];
+      if(v === null || v === undefined) v = '';
+      return String(v).replace(/;/g, ',').replace(/\n/g, ' ');
+    });
+    rows.push(row.join(';'));
+  });
+  downloadBlob('apnoe-tracker_' + todayISO() + '.csv', rows.join('\n'), 'text/csv;charset=utf-8;');
+  return true;
+}
+
+function fmtDateDE(iso){ const [y,m,d] = iso.split('-'); return d+'.'+m+'.'+y; }
+function weekdayDE(iso){
+  const days = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  return days[new Date(iso+'T00:00:00').getDay()];
+}
+function toCsvRowBD(fields){
+  return fields.map(f => {
+    if(f == null) return '';
+    const s = String(f);
+    if(s.includes(';') || s.includes('"') || s.includes('\n')) return '"'+s.replace(/"/g,'""')+'"';
+    return s;
+  }).join(';');
+}
+function computeSessionBD(sys, dia, puls){
+  sys = Number(sys); dia = Number(dia); puls = Number(puls);
+  const hasSys = !isNaN(sys), hasDia = !isNaN(dia);
+  const map = (hasSys && hasDia) ? Math.round(dia + (sys-dia)/3) : null;
+  const pp = (hasSys && hasDia) ? sys - dia : null;
+  return { sys: hasSys?sys:null, dia: hasDia?dia:null, puls: isNaN(puls)?null:puls, map, pp };
+}
+function exportBlutdruck(){
+  const entries = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('bp:entry:')){
+      try{ entries.push(JSON.parse(localStorage.getItem(k))); }catch(e){}
+    }
+  }
+  if(!entries.length) return false;
+  const header = ["Datum","Tag","Morgens_Sys","Morgens_Dia","Morgens_Puls","Morgens_MAP","Morgens_Pulsdruck","Mittags_Sys","Mittags_Dia","Mittags_Puls","Mittags_MAP","Mittags_Pulsdruck","Abends_Sys","Abends_Dia","Abends_Puls","Abends_MAP","Abends_Pulsdruck","OE_Sys","OE_Dia","OE_Puls","OE_MAP","OE_Pulsdruck","Notizen"];
+  const rows = [header];
+  const sessions = ['morgens','mittags','abends'];
+  entries.sort((a,b) => a.date < b.date ? -1 : 1);
+  entries.forEach(entry => {
+    const row = [fmtDateDE(entry.date), weekdayDE(entry.date)];
+    const sysVals=[], diaVals=[], pulsVals=[];
+    sessions.forEach(key => {
+      const d = entry[key] || {};
+      const c = computeSessionBD(d.sys, d.dia, d.puls);
+      row.push(c.sys!=null?c.sys:'', c.dia!=null?c.dia:'', c.puls!=null?c.puls:'', c.map!=null?c.map:'', c.pp!=null?c.pp:'');
+      if(c.sys!=null) sysVals.push(c.sys);
+      if(c.dia!=null) diaVals.push(c.dia);
+      if(c.puls!=null) pulsVals.push(c.puls);
+    });
+    const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : null;
+    const aSys=avg(sysVals), aDia=avg(diaVals), aPuls=avg(pulsVals);
+    let aMap=null, aPp=null;
+    if(aSys!=null && aDia!=null){ aMap = Math.round(aDia+(aSys-aDia)/3); aPp = aSys-aDia; }
+    row.push(aSys!=null?aSys:'', aDia!=null?aDia:'', aPuls!=null?aPuls:'', aMap!=null?aMap:'', aPp!=null?aPp:'');
+    row.push(entry.notes || '');
+    rows.push(row);
+  });
+  const csv = rows.map(toCsvRowBD).join('\r\n');
+  downloadBlob('Blutdruckprotokoll_Export.csv', '\ufeff'+csv, 'text/csv;charset=utf-8;');
+  return true;
+}
+
+function exportNordicWalking(){
+  let log;
+  try{ log = JSON.parse(localStorage.getItem('nordicwalking_log') || '[]'); }catch(e){ log = []; }
+  if(!log.length) return false;
+  const content = JSON.stringify({ app:'nordicwalking', exported:new Date().toISOString(), entries: log }, null, 2);
+  downloadBlob('nordicwalking_sicherung_' + todayISO() + '.json', content, 'application/json');
+  return true;
+}
+
+function exportTrainingscheck(){
+  const PREFIX = 'trainingscheck_';
+  const data = {};
+  let count = 0;
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith(PREFIX)){
+      data[k.slice(PREFIX.length)] = localStorage.getItem(k);
+      count++;
+    }
+  }
+  if(!count) return false;
+  const content = JSON.stringify({ app:'trainingscheck', exported:new Date().toISOString(), data }, null, 2);
+  downloadBlob('trainingscheck_sicherung_' + todayISO() + '.json', content, 'application/json');
+  return true;
+}
+
+function exportEnergiezaehler(){
+  let zaehlerListe, readings, archiv;
+  try{ zaehlerListe = JSON.parse(localStorage.getItem('ez_zaehler') || '[]'); }catch(e){ zaehlerListe = []; }
+  try{ readings = JSON.parse(localStorage.getItem('ez_readings') || '[]'); }catch(e){ readings = []; }
+  try{ archiv = JSON.parse(localStorage.getItem('ez_archiv') || '[]'); }catch(e){ archiv = []; }
+  if(!zaehlerListe.length && !readings.length && !archiv.length) return false;
+  const content = JSON.stringify({ app:'energiezaehler', exported:new Date().toISOString(), zaehlerListe, readings, archiv }, null, 2);
+  downloadBlob('energiezaehler_sicherung_' + todayISO() + '.json', content, 'application/json');
+  return true;
+}
+
+document.getElementById('backupAllBtn').addEventListener('click', function(){
+  const status = document.getElementById('backupStatus');
+  status.textContent = 'Sichere …';
+  const jobs = [
+    ['Trainingscheck', exportTrainingscheck],
+    ['Nordic Walking', exportNordicWalking],
+    ['Blutdruckprotokoll', exportBlutdruck],
+    ['Apnoe-Tracker', exportApnoe],
+    ['Energiezähler', exportEnergiezaehler]
+  ];
+  const results = [];
+  jobs.forEach(([name, fn], idx) => {
+    setTimeout(() => {
+      let ok;
+      try{ ok = fn(); }catch(e){ ok = 'error'; }
+      results[idx] = name + ': ' + (ok===true ? 'gesichert ✓' : ok==='error' ? 'Fehler' : 'keine Daten');
+      if(idx === jobs.length-1){ status.textContent = results.join('\n'); }
+    }, idx * 400);
+  });
+});
+
+/* ================= IMPORT ================= */
+
+function importNordicWalking(parsed){
+  let current;
+  try{ current = JSON.parse(localStorage.getItem('nordicwalking_log') || '[]'); }catch(e){ current = []; }
+  const byId = {};
+  current.concat(parsed.entries).forEach(e => { byId[e.id] = e; });
+  localStorage.setItem('nordicwalking_log', JSON.stringify(Object.values(byId)));
+}
+
+function importTrainingscheck(parsed){
+  const PREFIX = 'trainingscheck_';
+  Object.entries(parsed.data).forEach(([k, v]) => {
+    localStorage.setItem(PREFIX + k, v);
+  });
+}
+
+function importEnergiezaehler(parsed){
+  const currentZaehler = JSON.parse(localStorage.getItem('ez_zaehler') || '[]');
+  const currentReadings = JSON.parse(localStorage.getItem('ez_readings') || '[]');
+  const currentArchiv = JSON.parse(localStorage.getItem('ez_archiv') || '[]');
+
+  const zaehlerById = {};
+  currentZaehler.concat(parsed.zaehlerListe || []).forEach(z => { zaehlerById[z.id] = z; });
+
+  const readingsById = {};
+  currentReadings.concat(parsed.readings || []).forEach(r => { readingsById[r.id] = r; });
+
+  const archivByKey = {};
+  currentArchiv.concat(parsed.archiv || []).forEach(a => { archivByKey[a.zaehlerId + ':' + a.jahr] = a; });
+
+  localStorage.setItem('ez_zaehler', JSON.stringify(Object.values(zaehlerById)));
+  localStorage.setItem('ez_readings', JSON.stringify(Object.values(readingsById)));
+  localStorage.setItem('ez_archiv', JSON.stringify(Object.values(archivByKey)));
+  return Object.values(readingsById).length;
+}
+
+function importApnoeCsv(text){
+  const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+  if(lines.length < 2) return 0;
+  const header = lines[0].split(';').map(h => h.trim());
+  const imported = [];
+  for(let i=1;i<lines.length;i++){
+    const cols = lines[i].split(';');
+    const obj = {};
+    header.forEach((h, idx) => {
+      let v = cols[idx] !== undefined ? cols[idx] : '';
+      if(h === 'erkaeltung'){ obj[h] = (v === 'true' || v === '1'); }
+      else if(h !== 'datum' && h !== 'notiz'){ obj[h] = v === '' ? null : parseFloat(v.replace(',', '.')); }
+      else obj[h] = v;
+    });
+    if(obj.datum) imported.push(obj);
+  }
+  let entries;
+  try{ entries = JSON.parse(localStorage.getItem('apnoe_tracker_entries_v1') || '[]'); }catch(e){ entries = []; }
+  const importedDates = new Set(imported.map(x => x.datum));
+  entries = entries.filter(x => !importedDates.has(x.datum));
+  entries = entries.concat(imported);
+  entries.sort((a,b) => a.datum.localeCompare(b.datum));
+  localStorage.setItem('apnoe_tracker_entries_v1', JSON.stringify(entries));
+  return imported.length;
+}
+
+function parseCsvLineBD(line){
+  const out = []; let cur = ''; let inQuotes = false;
+  for(let i=0;i<line.length;i++){
+    const ch = line[i];
+    if(inQuotes){
+      if(ch === '"'){ if(line[i+1] === '"'){ cur += '"'; i++; } else inQuotes = false; }
+      else cur += ch;
+    } else {
+      if(ch === '"') inQuotes = true;
+      else if(ch === ';'){ out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+function deDateToIso(de){
+  const parts = de.split('.');
+  if(parts.length !== 3) return null;
+  const [d,m,y] = parts;
+  return y+'-'+pad(Number(m))+'-'+pad(Number(d));
+}
+function numOrNull(v){
+  if(v===undefined || v===null || v==="") return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+function importBlutdruckCsv(text){
+  const lines = text.replace(/^\ufeff/, '').split(/\r\n|\n/).filter(l => l.trim() !== '');
+  if(lines.length < 2) return 0;
+  const sessionCols = { morgens:[2,3,4], mittags:[7,8,9], abends:[12,13,14] };
+  let count = 0;
+  for(let i=1;i<lines.length;i++){
+    const cols = parseCsvLineBD(lines[i]);
+    const iso = deDateToIso(cols[0]);
+    if(!iso) continue;
+    const fileEntry = { date: iso, notes: cols[22] || '' };
+    let fileHasAny = false;
+    Object.keys(sessionCols).forEach(key => {
+      const [si,di,pi] = sessionCols[key];
+      const sys = numOrNull(cols[si]), dia = numOrNull(cols[di]), puls = numOrNull(cols[pi]);
+      if(sys!=null || dia!=null || puls!=null){ fileHasAny = true; fileEntry[key] = {sys,dia,puls}; }
+    });
+    if(!fileHasAny && !fileEntry.notes) continue;
+    const storeKey = 'bp:entry:' + iso;
+    let existing = null;
+    try{ const raw = localStorage.getItem(storeKey); existing = raw ? JSON.parse(raw) : null; }catch(e){ existing = null; }
+    const merged = existing ? {...existing} : { date: iso, notes: '' };
+    Object.keys(sessionCols).forEach(key => {
+      const existingHasData = existing && existing[key] && (existing[key].sys!=null || existing[key].dia!=null || existing[key].puls!=null);
+      if(!existingHasData && fileEntry[key]) merged[key] = fileEntry[key];
+    });
+    if(!merged.notes && fileEntry.notes) merged.notes = fileEntry.notes;
+    localStorage.setItem(storeKey, JSON.stringify(merged));
+    count++;
+  }
+  return count;
+}
+
+function detectAndImport(file, done){
+  const name = file.name.toLowerCase();
+  const isCsv = name.endsWith('.csv');
+  const isJson = name.endsWith('.json');
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    const text = evt.target.result;
+    try{
+      if(isJson){
+        const parsed = JSON.parse(text);
+        if(parsed.app === 'nordicwalking' && Array.isArray(parsed.entries)){
+          importNordicWalking(parsed);
+          done(file.name + ': Nordic Walking wiederhergestellt (' + parsed.entries.length + ' Runden)');
+          return;
+        }
+        if(parsed.app === 'trainingscheck' && parsed.data){
+          importTrainingscheck(parsed);
+          done(file.name + ': Trainingscheck wiederhergestellt (' + Object.keys(parsed.data).length + ' Einträge)');
+          return;
+        }
+        if(parsed.app === 'energiezaehler'){
+          const n = importEnergiezaehler(parsed);
+          done(file.name + ': Energiezähler wiederhergestellt (' + n + ' Zählerstände)');
+          return;
+        }
+        done(file.name + ': JSON nicht erkannt');
+        return;
+      }
+      if(isCsv){
+        const firstLine = text.replace(/^\ufeff/, '').split(/\r?\n/)[0] || '';
+        if(firstLine.startsWith('datum;ahi;')){
+          const n = importApnoeCsv(text);
+          done(file.name + ': Apnoe-Tracker importiert (' + n + ' Einträge)');
+          return;
+        }
+        if(firstLine.startsWith('Datum;Tag;Morgens_Sys')){
+          const n = importBlutdruckCsv(text);
+          done(file.name + ': Blutdruckprotokoll importiert (' + n + ' Tage)');
+          return;
+        }
+        done(file.name + ': CSV nicht erkannt');
+        return;
+      }
+      done(file.name + ': Dateityp nicht erkannt');
+    }catch(e){
+      done(file.name + ': Fehler beim Einlesen');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+document.getElementById('restoreAllBtn').addEventListener('click', function(){
+  document.getElementById('restoreFileInput').click();
+});
+document.getElementById('restoreFileInput').addEventListener('change', function(e){
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if(!files.length) return;
+  const status = document.getElementById('backupStatus');
+  status.textContent = 'Lese Dateien …';
+  const messages = new Array(files.length);
+  let done = 0;
+  files.forEach((file, idx) => {
+    detectAndImport(file, msg => {
+      messages[idx] = msg;
+      done++;
+      if(done === files.length){ status.textContent = messages.join('\n'); }
+    });
+  });
+});
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

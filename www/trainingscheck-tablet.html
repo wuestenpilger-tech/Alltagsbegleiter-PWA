@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Trainingscheck (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#24211B;
+    --ink-soft:#5B564C;
+    --paper:#EDE7D9;
+    --paper-2:#E1D9C6;
+    --card:#F4EFE4;
+    --indigo:#1E2A44;
+    --indigo-2:#131C31;
+    --brass:#B07C2A;
+    --brass-light:#D8AE58;
+    --maroon:#7B2E3B;
+    --sage:#5F7355;
+    --green:#5F7355;
+    --amber:#B8862E;
+    --red:#8C3B3B;
+    --font-display:'Fraunces', serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+  .app{max-width:760px;margin:0 auto;padding-bottom:64px;}
+
+  /* Hero */
+  .hero{
+    position:relative;
+    background:radial-gradient(120% 90% at 50% -10%, var(--indigo) 0%, var(--indigo-2) 70%);
+    color:var(--paper);
+    padding:48px 40px 40px;
+    text-align:center;
+  }
+  .eyebrow{margin:0 0 8px;letter-spacing:.14em;text-transform:uppercase;font-size:16px;color:var(--brass-light);font-weight:600;}
+  h1{margin:0 0 10px;font-family:var(--font-display);font-weight:700;font-size:46px;}
+  .sub{margin:0 0 30px;font-size:19px;color:#C9CFDC;line-height:1.5;}
+
+  /* Gauge */
+  .gauge-wrap{width:300px;margin:0 auto 8px;}
+  .gauge-num{font-family:var(--font-mono);font-size:48px;font-weight:700;margin-top:-52px;}
+  .gauge-label{font-size:17px;color:#C9CFDC;margin-bottom:2px;}
+  .verdict{
+    margin-top:14px;
+    font-family:var(--font-display);
+    font-size:27px;
+    font-weight:600;
+  }
+  .verdict-sub{font-size:18px;color:#C9CFDC;margin-top:6px;line-height:1.5;}
+
+  /* Datumsauswahl */
+  .entry-date-bar{
+    display:flex;
+    align-items:stretch;
+    gap:12px;
+    padding:26px 26px 0;
+  }
+  .date-nav{
+    flex:none;
+    width:58px;
+    border-radius:14px;
+    border:1.5px solid #d7cfba;
+    background:var(--card);
+    color:var(--ink);
+    font-size:24px;
+    cursor:pointer;
+  }
+  .date-nav:active{background:var(--paper-2);}
+  .date-field{
+    flex:1;
+    background:var(--card);
+    border:1.5px solid #d7cfba;
+    border-radius:14px;
+    padding:9px 18px;
+  }
+  .date-field label{display:block;font-size:14px;color:var(--ink-soft);margin-bottom:3px;}
+  .date-field input[type=date]{
+    width:100%;
+    border:none;
+    background:transparent;
+    font-family:var(--font-mono);
+    font-size:20px;
+    color:var(--ink);
+    padding:3px 0;
+  }
+  .date-field input[type=date]:focus{outline:none;}
+  .date-hint{
+    padding:10px 26px 0;
+    font-size:16px;
+    color:var(--ink-soft);
+    text-align:center;
+    min-height:20px;
+  }
+  .date-hint.today{color:var(--sage);font-weight:600;}
+
+  .restday-row{padding:14px 26px 0;}
+  .restday-label{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);
+    border:1.5px solid #d7cfba;
+    border-radius:14px;
+    padding:14px 20px;
+    font-size:17px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .restday-label input[type=checkbox]{
+    width:24px;height:24px;flex:none;accent-color:var(--indigo);
+  }
+  #params.restday-active{opacity:.35;pointer-events:none;filter:grayscale(0.6);transition:opacity .2s;}
+
+  /* Parameter cards */
+  .params{padding:30px 26px 6px;display:flex;flex-direction:column;gap:20px;}
+  .param{
+    background:var(--card);
+    border-radius:20px;
+    padding:22px 26px 20px;
+    border:1px solid #e2d9c2;
+  }
+  .param-top{display:flex;align-items:center;justify-content:space-between;gap:14px;}
+  .param-name{font-family:var(--font-display);font-size:24px;font-weight:600;}
+  .pill{
+    font-family:var(--font-mono);
+    font-size:15px;
+    font-weight:700;
+    padding:4px 14px;
+    border-radius:999px;
+    letter-spacing:.03em;
+    white-space:nowrap;
+  }
+  .pill.good{background:rgba(95,115,85,0.15);color:var(--green);}
+  .pill.ok{background:rgba(184,134,46,0.15);color:var(--amber);}
+  .pill.bad{background:rgba(140,59,59,0.15);color:var(--red);}
+  .param-row{display:flex;align-items:center;gap:14px;margin-top:16px;}
+  .param-row label{font-size:17px;color:var(--ink-soft);min-width:106px;}
+  .param-row input[type=number]{
+    flex:1;
+    font-family:var(--font-mono);
+    font-size:21px;
+    padding:11px 14px;
+    border-radius:10px;
+    border:1.5px solid #d7cfba;
+    background:#fff;
+    color:var(--ink);
+  }
+  .param-row input[type=number]:focus{outline:2px solid var(--brass); border-color:var(--brass);}
+  .unit{font-size:17px;color:var(--ink-soft);min-width:46px;}
+  .schlaf-preview{font-size:16px;color:var(--ink-soft);margin-top:8px;min-height:19px;}
+
+  .hrv-avg-row{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:14px;}
+  .hrv-avg-select{
+    font-family:var(--font-body);
+    font-size:17px;
+    color:var(--ink);
+    background:#fff;
+    border:1.5px solid #d7cfba;
+    border-radius:10px;
+    padding:8px 11px;
+  }
+  .hrv-avg-result{
+    font-size:17px;
+    color:var(--ink-soft);
+    margin-top:10px;
+    line-height:1.6;
+  }
+  .hrv-avg-result button{
+    font-size:15.5px;
+    padding:5px 11px;
+  }
+
+  .adjust-toggle{
+    margin-top:14px;
+    background:none;border:none;
+    font-size:17px;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+    font-family:var(--font-body);
+  }
+  .thresholds{
+    display:none;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed #d7cfba;
+    gap:14px;
+  }
+  .thresholds.open{display:flex;}
+  .thresholds .field{flex:1;}
+  .thresholds label{display:block;font-size:15px;color:var(--ink-soft);margin-bottom:5px;}
+  .thresholds input{
+    width:100%;
+    font-family:var(--font-mono);
+    font-size:19px;
+    padding:8px 11px;
+    border-radius:8px;
+    border:1.5px solid #d7cfba;
+    background:#fff;
+  }
+
+  footer.tip{
+    margin:30px 28px 0;
+    padding:22px 24px;
+    background:var(--paper-2);
+    border-radius:18px;
+    font-size:18px;
+    line-height:1.6;
+    color:var(--ink-soft);
+  }
+  footer.tip strong{color:var(--ink);}
+
+  /* Speichern */
+  .save-bar{padding:6px 26px 0;}
+  .save-btn{
+    width:100%;
+    background:var(--indigo);
+    color:var(--paper);
+    border:none;
+    border-radius:18px;
+    padding:20px 22px;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:20px;
+    cursor:pointer;
+  }
+  .save-btn:active{background:var(--indigo-2);}
+  .save-status{
+    text-align:center;
+    font-size:17px;
+    color:var(--ink-soft);
+    margin-top:11px;
+    min-height:20px;
+  }
+
+  /* Verlauf */
+  .history{padding:36px 26px 0;}
+  .history h2{
+    font-family:var(--font-display);
+    font-size:27px;
+    font-weight:600;
+    margin:0 0 16px;
+  }
+  .range-toggle{display:flex;gap:11px;margin-bottom:18px;}
+  .range-btn{
+    flex:1;
+    padding:13px 14px;
+    border-radius:13px;
+    border:1.5px solid #d7cfba;
+    background:var(--card);
+    color:var(--ink-soft);
+    font-family:var(--font-body);
+    font-size:17px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .range-btn.active{background:var(--indigo);color:var(--paper);border-color:var(--indigo);}
+
+  .history-summary{
+    background:var(--card);
+    border:1px solid #e2d9c2;
+    border-radius:18px;
+    padding:19px 22px;
+    font-size:17px;
+    color:var(--ink-soft);
+    line-height:1.7;
+    margin-bottom:18px;
+  }
+  .history-summary strong{color:var(--ink);}
+  .summary-row{display:flex;align-items:center;gap:11px;}
+  .dot{width:12px;height:12px;border-radius:50%;flex:none;}
+  .dot.good{background:var(--green);}
+  .dot.ok{background:var(--amber);}
+  .dot.bad{background:var(--red);}
+  .dot.none{background:#cfc6ac;}
+  .dot.rest{background:#8B93A0;}
+
+  .trend-card{
+    background:var(--card);
+    border:1px solid #e2d9c2;
+    border-radius:18px;
+    padding:19px 22px 14px;
+    margin-bottom:18px;
+  }
+  .trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
+  .trend-title{font-family:var(--font-display);font-size:20px;font-weight:600;}
+  .trend-tag{font-family:var(--font-mono);font-size:15px;font-weight:700;padding:4px 14px;border-radius:999px;background:#e2d9c2;color:var(--ink-soft);}
+  .trend-tag.up{background:rgba(95,115,85,0.15);color:var(--green);}
+  .trend-tag.down{background:rgba(140,59,59,0.15);color:var(--red);}
+  .trend-tag.flat{background:rgba(184,134,46,0.15);color:var(--amber);}
+  .trend-svg{width:100%;height:150px;display:block;}
+  .trend-caption{font-size:15px;color:var(--ink-soft);text-align:center;margin-top:6px;}
+
+  .day-strip{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    margin-bottom:20px;
+  }
+  .day-chip{
+    flex:none;
+    width:34px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .day-chip .dot{width:18px;height:18px;}
+  .day-chip .day-label{font-size:12.5px;color:var(--ink-soft);font-family:var(--font-mono);}
+
+  .history-list{display:flex;flex-direction:column;gap:11px;max-height:380px;overflow-y:auto;}
+  .history-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--card);
+    border:1px solid #e2d9c2;
+    border-radius:15px;
+    padding:14px 18px;
+    font-size:17px;
+  }
+  .history-item .hi-date{font-family:var(--font-mono);color:var(--ink-soft);}
+  .history-item .hi-verdict{font-weight:600;}
+  .history-item .hi-score{font-family:var(--font-mono);font-size:16px;color:var(--ink-soft);}
+  .history-empty{font-size:17px;color:var(--ink-soft);text-align:center;padding:18px 0;}
+  .backup-banner{
+    background:#F5E9D4;border:1.5px solid var(--brass);border-radius:14px;
+    padding:13px 18px;font-size:15.5px;color:#6B4A18;margin:14px 0 0;
+  }
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+</head>
+<body>
+<div class="app">
+
+  <header class="hero">
+    <p class="eyebrow">Tagescheck</p>
+    <h1>Trainingscheck</h1>
+    <p class="sub">Walking · Nordic-Walking · Laufband — passt es heute?</p>
+
+    <svg class="gauge-wrap" viewBox="0 0 200 118">
+      <path d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="#2A3654" stroke-width="14" stroke-linecap="round"/>
+      <path id="gaugeFill" d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="var(--brass)" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+      <circle id="needleDot" cx="20" cy="110" r="7" fill="#F3ECDD"/>
+    </svg>
+    <div class="gauge-num" id="scoreNum">0 / 10</div>
+
+    <div class="verdict" id="verdictText">Werte eintragen</div>
+    <div class="verdict-sub" id="verdictSub">Trag unten deine heutigen Werte ein, dann bekommst du eine Einschätzung.</div>
+
+    <button class="adjust-toggle" id="scoreToggle" style="color:#C9CFDC;margin-top:14px;">Ampel-Schwellen anpassen</button>
+    <div class="thresholds" id="scoreThresholds" style="border-top-color:#2A3654;">
+      <div class="field"><label style="color:#C9CFDC;">Grün ab (Pkt.)</label><input type="number" step="1" id="greenFrom" value="9"></div>
+      <div class="field"><label style="color:#C9CFDC;">Gelb ab (Pkt.)</label><input type="number" step="1" id="yellowFrom" value="6"></div>
+    </div>
+  </header>
+
+  <div class="entry-date-bar">
+    <button id="prevDay" class="date-nav" aria-label="Vorheriger Tag">‹</button>
+    <div class="date-field">
+      <label for="entryDate">Eintrag für</label>
+      <input type="date" id="entryDate">
+    </div>
+    <button id="nextDay" class="date-nav" aria-label="Nächster Tag">›</button>
+  </div>
+  <div class="date-hint" id="dateHint"></div>
+
+  <div class="restday-row" id="restdayRow">
+    <label class="restday-label" for="restdayToggle">
+      <input type="checkbox" id="restdayToggle">
+      <span>Ruhetag — heute bewusst pausieren, keine Werte eintragen</span>
+    </label>
+  </div>
+
+  <main class="params" id="params">
+
+    <article class="param" data-idx="0" data-key="schlaf" data-direction="high" data-good="7" data-ok="6">
+      <div class="param-top">
+        <span class="param-name">Schlafdauer</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div class="param-row">
+        <label>Stunden</label>
+        <input type="number" step="1" min="0" max="16" id="schlafStunden" placeholder="z. B. 7">
+        <span class="unit">Std.</span>
+      </div>
+      <div class="param-row">
+        <label>Minuten</label>
+        <input type="number" step="1" min="0" max="59" id="schlafMinuten" placeholder="z. B. 30">
+        <span class="unit">Min.</span>
+      </div>
+      <div class="schlaf-preview" id="schlafdauerPreview"></div>
+      <input type="hidden" data-value>
+      <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut ab</label><input type="number" step="0.1" data-good value="7"></div>
+        <div class="field"><label>Ok ab</label><input type="number" step="0.1" data-ok value="6"></div>
+      </div>
+    </article>
+
+    <article class="param" data-idx="1" data-key="ruhepuls" data-direction="low" data-good="60" data-ok="65">
+      <div class="param-top">
+        <span class="param-name">Ruhepuls</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div class="param-row">
+        <label>Wert</label>
+        <input type="number" step="1" data-value placeholder="z. B. 58">
+        <span class="unit">bpm</span>
+      </div>
+      <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut bis</label><input type="number" step="1" data-good value="60"></div>
+        <div class="field"><label>Ok bis</label><input type="number" step="1" data-ok value="65"></div>
+      </div>
+    </article>
+
+    <article class="param" data-idx="7" data-key="hrv" data-direction="high" data-good="40" data-ok="30">
+      <div class="param-top">
+        <span class="param-name">HRV (nachts)</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div class="param-row">
+        <label>Wert</label>
+        <input type="number" step="1" data-value placeholder="z. B. 38">
+        <span class="unit">ms</span>
+      </div>
+      <div class="hrv-avg-row">
+        <button class="adjust-toggle" id="hrvAvgToggle" type="button">Ø-Wert anzeigen</button>
+        <select id="hrvAvgRange" class="hrv-avg-select">
+          <option value="7">letzte 7 Tage</option>
+          <option value="14" selected>letzte 14 Tage</option>
+          <option value="28">letzte 28 Tage</option>
+        </select>
+      </div>
+      <div class="hrv-avg-result" id="hrvAvgResult" style="display:none;"></div>
+      <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut ab</label><input type="number" step="1" data-good value="40"></div>
+        <div class="field"><label>Ok ab</label><input type="number" step="1" data-ok value="30"></div>
+      </div>
+    </article>
+
+    <article class="param" data-idx="2" data-key="bodybattery" data-direction="high" data-good="70" data-ok="40">
+      <div class="param-top">
+        <span class="param-name">Body Battery</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div class="param-row">
+        <label>Wert</label>
+        <input type="number" step="1" min="0" max="100" data-value placeholder="z. B. 75">
+        <span class="unit">Pkt.</span>
+      </div>
+      <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut ab</label><input type="number" step="1" data-good value="70"></div>
+        <div class="field"><label>Ok ab</label><input type="number" step="1" data-ok value="40"></div>
+      </div>
+    </article>
+
+    <article class="param" data-idx="5" data-key="trainingsbereitschaft" data-direction="high" data-good="70" data-ok="40">
+      <div class="param-top">
+        <span class="param-name">Trainingsbereitschaft</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div class="param-row">
+        <label>Wert</label>
+        <input type="number" step="1" min="0" max="100" data-value placeholder="z. B. 65">
+        <span class="unit">Pkt.</span>
+      </div>
+      <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut ab</label><input type="number" step="1" data-good value="70"></div>
+        <div class="field"><label>Ok ab</label><input type="number" step="1" data-ok value="40"></div>
+      </div>
+    </article>
+
+    <article class="param" data-idx="3" data-key="ahi" data-direction="low" data-good="5" data-ok="15">
+      <div class="param-top">
+        <span class="param-name">Apnoe-Index (AHI)</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div class="param-row">
+        <label>Wert</label>
+        <input type="number" step="0.1" data-value placeholder="z. B. 4.2">
+        <span class="unit">Ev./h</span>
+      </div>
+      <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut bis</label><input type="number" step="0.1" data-good value="5"></div>
+        <div class="field"><label>Ok bis</label><input type="number" step="0.1" data-ok value="15"></div>
+      </div>
+    </article>
+
+    <article class="param" data-idx="4" data-key="spo2min" data-direction="high" data-good="90" data-ok="85">
+      <div class="param-top">
+        <span class="param-name">Min. Sauerstoffsättigung</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div class="param-row">
+        <label>Wert</label>
+        <input type="number" step="1" data-value placeholder="z. B. 92">
+        <span class="unit">%</span>
+      </div>
+      <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut ab</label><input type="number" step="1" data-good value="90"></div>
+        <div class="field"><label>Ok ab</label><input type="number" step="1" data-ok value="85"></div>
+      </div>
+    </article>
+
+    <article class="param" data-idx="6" data-key="wetter" data-direction="high" data-good="70" data-ok="40">
+      <div class="param-top">
+        <span class="param-name">Wetterfenster heute</span>
+        <span class="pill" data-pill>—</span>
+      </div>
+      <div id="weatherSummary" style="font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.5;">Lädt Wetterdaten…</div>
+      <div id="weatherWindows"></div>
+      <input type="hidden" data-value>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button class="adjust-toggle" id="weatherRefresh">Wetter neu laden</button>
+        <button class="adjust-toggle" data-toggle>Bereich anpassen</button>
+      </div>
+      <div class="thresholds" data-thresholds>
+        <div class="field"><label>Gut ab</label><input type="number" step="1" data-good value="70"></div>
+        <div class="field"><label>Ok ab</label><input type="number" step="1" data-ok value="40"></div>
+      </div>
+    </article>
+
+  </main>
+
+  <div class="save-bar">
+    <button class="save-btn" id="saveBtn">Heutigen Check speichern</button>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+
+  <section class="history">
+    <h2>Verlauf</h2>
+    <div class="range-toggle">
+      <button class="range-btn active" data-range="7">7 Tage</button>
+      <button class="range-btn" data-range="14">14 Tage</button>
+      <button class="range-btn" data-range="30">30 Tage</button>
+      <button class="range-btn" data-range="90">90 Tage</button>
+    </div>
+    <div class="history-summary" id="historySummary">Lädt…</div>
+
+    <div class="trend-card">
+      <div class="trend-head">
+        <span class="trend-title">Tendenz Score</span>
+        <span class="trend-tag" id="trendTag">—</span>
+      </div>
+      <svg id="trendSvg" viewBox="0 0 320 130" preserveAspectRatio="none" class="trend-svg"></svg>
+      <div class="trend-caption" id="trendCaption"></div>
+    </div>
+
+    <div class="day-strip" id="dayStrip"></div>
+    <div class="history-list" id="historyList"></div>
+    <div class="backup-banner" id="backupBanner" style="display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="range-btn" id="exportBtn" style="flex:1;">Daten sichern</button>
+      <button class="range-btn" id="importBtn" style="flex:1;">Daten wiederherstellen</button>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none;">
+    </div>
+    <div class="save-status" id="backupStatus" style="margin-top:6px;"></div>
+
+    <div class="history-summary" style="margin-top:14px;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div class="date-field" style="flex:1;">
+          <label for="printFrom">Von</label>
+          <input type="date" id="printFrom">
+        </div>
+        <div class="date-field" style="flex:1;">
+          <label for="printTo">Bis</label>
+          <input type="date" id="printTo">
+        </div>
+      </div>
+      <button class="range-btn" id="printBtn" style="width:100%;background:var(--indigo);color:var(--paper);border-color:var(--indigo);">🖨️ Bericht drucken</button>
+      <div class="save-status" id="printStatus" style="margin-top:6px;"></div>
+    </div>
+  </section>
+
+  <footer class="tip">
+    <strong>Hinweis:</strong> Der Score ist eine grobe Orientierung, kein medizinischer Rat. Grenzwerte sind Startwerte — passe sie über "Bereich anpassen" an deine eigenen Normalwerte an. Gespeicherte Checks bleiben dauerhaft erhalten, auch wenn du die Seite schließt.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const paramEls = Array.from(document.querySelectorAll('.param'));
+  const scoreNum = document.getElementById('scoreNum');
+  const verdictText = document.getElementById('verdictText');
+  const verdictSub = document.getElementById('verdictSub');
+  const gaugeFill = document.getElementById('gaugeFill');
+  const needleDot = document.getElementById('needleDot');
+  const restdayToggle = document.getElementById('restdayToggle');
+  const paramsEl = document.getElementById('params');
+
+  const GAUGE_LEN = 251.2; // Bogenlänge des Halbkreises
+
+  function classify(value, direction, good, ok){
+    if (isNaN(value)) return null;
+    if (direction === 'high') {
+      if (value >= good) return 'good';
+      if (value >= ok) return 'ok';
+      return 'bad';
+    } else {
+      if (value <= good) return 'good';
+      if (value <= ok) return 'ok';
+      return 'bad';
+    }
+  }
+
+  function pointsFor(status){
+    if (status === 'good') return 2;
+    if (status === 'ok') return 1;
+    if (status === 'bad') return 0;
+    return null;
+  }
+
+  function updateGauge(score, maxScore){
+    const ratio = maxScore > 0 ? score / maxScore : 0;
+    const offset = GAUGE_LEN * (1 - ratio);
+    gaugeFill.style.strokeDashoffset = offset;
+
+    // Farbverlauf rot -> gelb -> grün je nach ratio
+    let color = '#8C3B3B';
+    if (ratio >= 0.75) color = '#5F7355';
+    else if (ratio >= 0.45) color = '#B8862E';
+    gaugeFill.setAttribute('stroke', color);
+
+    // Nadel-Punkt entlang des Halbkreisbogens positionieren
+    const angle = Math.PI * (1 - ratio); // 180° (links) bis 0° (rechts)
+    const cx = 100, cy = 110, r = 80;
+    const x = cx - r * Math.cos(angle);
+    const y = cy - r * Math.sin(angle);
+    needleDot.setAttribute('cx', x);
+    needleDot.setAttribute('cy', y);
+  }
+
+  function updateGaugeRest(){
+    gaugeFill.style.strokeDashoffset = GAUGE_LEN;
+    gaugeFill.setAttribute('stroke', '#8B93A0');
+    needleDot.setAttribute('cx', 20);
+    needleDot.setAttribute('cy', 110);
+  }
+
+  function render(){
+    if (restdayToggle.checked) {
+      paramEls.forEach(card => {
+        const pill = card.querySelector('[data-pill]');
+        pill.textContent = '—';
+        pill.className = 'pill';
+      });
+      scoreNum.textContent = 'Ruhetag';
+      updateGaugeRest();
+      verdictText.textContent = 'Bewusster Ruhetag';
+      verdictSub.textContent = 'Kein Trainingsreiz heute — Erholung zählt auch als Fortschritt.';
+      return;
+    }
+
+    let total = 0;
+    let filled = 0;
+
+    paramEls.forEach(card => {
+      const direction = card.dataset.direction;
+      const valueInput = card.querySelector('[data-value]');
+      const goodInput = card.querySelector('[data-good]');
+      const okInput = card.querySelector('[data-ok]');
+      const pill = card.querySelector('[data-pill]');
+
+      const value = parseFloat(valueInput.value);
+      const good = parseFloat(goodInput.value);
+      const ok = parseFloat(okInput.value);
+
+      const status = classify(value, direction, good, ok);
+      const pts = pointsFor(status);
+
+      if (status === null) {
+        pill.textContent = '—';
+        pill.className = 'pill';
+      } else {
+        filled++;
+        total += pts;
+        pill.textContent = status === 'good' ? 'Gut' : status === 'ok' ? 'Ok' : 'Ungünstig';
+        pill.className = 'pill ' + status;
+      }
+    });
+
+    const maxScore = paramEls.length * 2;
+    scoreNum.textContent = total + ' / ' + maxScore;
+    updateGauge(total, maxScore);
+
+    if (filled === 0) {
+      verdictText.textContent = 'Werte eintragen';
+      verdictSub.textContent = 'Trag unten deine heutigen Werte ein, dann bekommst du eine Einschätzung.';
+      return;
+    }
+
+    const greenFrom = parseFloat(document.getElementById('greenFrom').value);
+    const yellowFrom = parseFloat(document.getElementById('yellowFrom').value);
+
+    if (total >= greenFrom) {
+      verdictText.textContent = 'Gutes Trainingsfenster';
+      verdictSub.textContent = 'Die Werte sprechen für ein normales Training heute.';
+    } else if (total >= yellowFrom) {
+      verdictText.textContent = 'Mit Vorsicht trainieren';
+      verdictSub.textContent = 'Tempo, Dauer oder Intensität lieber etwas reduzieren.';
+    } else {
+      verdictText.textContent = 'Lieber Regeneration';
+      verdictSub.textContent = 'lm Zweifel heute pausieren oder nur ganz locker bewegen.';
+    }
+  }
+
+  const schlafHiddenValue = document.querySelector('[data-key="schlaf"] [data-value]');
+  const schlafStundenInput = document.getElementById('schlafStunden');
+  const schlafMinutenInput = document.getElementById('schlafMinuten');
+  const schlafdauerPreview = document.getElementById('schlafdauerPreview');
+
+  function computeSchlafdauer(){
+    const sh = schlafStundenInput.value === '' ? null : parseFloat(schlafStundenInput.value);
+    const sm = schlafMinutenInput.value === '' ? null : parseFloat(schlafMinutenInput.value);
+    if ((sh === null || isNaN(sh)) && (sm === null || isNaN(sm))) return null;
+    const total = (isNaN(sh) ? 0 : (sh || 0)) + (isNaN(sm) ? 0 : (sm || 0)) / 60;
+    return Math.round(total * 100) / 100;
+  }
+
+  function updateSchlafdauerFromInputs(){
+    const val = computeSchlafdauer();
+    schlafHiddenValue.value = (val === null) ? '' : val;
+    schlafdauerPreview.textContent = (val !== null) ? `≈ ${val.toFixed(2)} Std.` : '';
+  }
+
+  [schlafStundenInput, schlafMinutenInput].forEach(el => {
+    el.addEventListener('input', updateSchlafdauerFromInputs);
+  });
+
+  paramEls.forEach(card => {
+    card.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', render);
+    });
+    const toggleBtn = card.querySelector('[data-toggle]');
+    const thresholds = card.querySelector('[data-thresholds]');
+    toggleBtn.addEventListener('click', () => {
+      const open = thresholds.classList.toggle('open');
+      toggleBtn.textContent = open ? 'Bereich schließen' : 'Bereich anpassen';
+    });
+  });
+
+  const scoreToggle = document.getElementById('scoreToggle');
+  const scoreThresholds = document.getElementById('scoreThresholds');
+  scoreToggle.addEventListener('click', () => {
+    const open = scoreThresholds.classList.toggle('open');
+    scoreToggle.textContent = open ? 'Ampel-Schwellen schließen' : 'Ampel-Schwellen anpassen';
+  });
+  document.getElementById('greenFrom').addEventListener('input', render);
+  document.getElementById('yellowFrom').addEventListener('input', render);
+
+  function updateSaveButtonLabel(){
+    const isRest = restdayToggle.checked;
+    const isToday = selectedDateKey === todayKey();
+    if (isRest) {
+      saveBtn.textContent = isToday ? 'Ruhetag speichern' : 'Ruhetag für ' + selectedDateKey + ' speichern';
+    } else {
+      saveBtn.textContent = isToday ? 'Heutigen Check speichern' : 'Check für ' + selectedDateKey + ' speichern';
+    }
+  }
+
+  function setRestMode(isRest){
+    paramsEl.classList.toggle('restday-active', isRest);
+    updateSaveButtonLabel();
+  }
+
+  restdayToggle.addEventListener('change', () => {
+    setRestMode(restdayToggle.checked);
+    render();
+  });
+
+  // ---------- Dauerhafte Speicherung & Verlauf ----------
+  // window.storage existiert nur, wenn diese App live innerhalb von Claude laeuft.
+  // Beim Oeffnen der heruntergeladenen Datei direkt im Browser gibt es das nicht -
+  // in dem Fall weichen wir automatisch auf den browsereigenen localStorage aus,
+  // der genauso dauerhaft ist, solange derselbe Browser auf diesem Geraet genutzt wird.
+  const hasClaudeStorage = (typeof window.storage !== 'undefined');
+  const LOCAL_PREFIX = 'trainingscheck_';
+
+  const storageAPI = {
+    async get(key) {
+      if (hasClaudeStorage) {
+        try { return await window.storage.get(key); } catch (e) { return null; }
+      }
+      const v = localStorage.getItem(LOCAL_PREFIX + key);
+      return v === null ? null : { key, value: v, shared: false };
+    },
+    async set(key, value) {
+      if (hasClaudeStorage) {
+        try { return await window.storage.set(key, value); } catch (e) { return null; }
+      }
+      try {
+        localStorage.setItem(LOCAL_PREFIX + key, value);
+        return { key, value, shared: false };
+      } catch (e) { return null; }
+    },
+    async list(prefix) {
+      if (hasClaudeStorage) {
+        try { return await window.storage.list(prefix); } catch (e) { return { keys: [] }; }
+      }
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(LOCAL_PREFIX + (prefix || ''))) keys.push(k.slice(LOCAL_PREFIX.length));
+      }
+      return { keys };
+    }
+  };
+
+  const STORAGE_PREFIX = 'checks:';
+  const SETTINGS_KEY = 'settings';
+  let currentRange = 7;
+
+  /* ---------- Backup-Erinnerung ---------- */
+  const BACKUP_TS_KEY = "trainingscheck_last_backup";
+  const BACKUP_REMINDER_DAYS = 30;
+
+  function markBackupDone(){
+    try{ localStorage.setItem(BACKUP_TS_KEY, new Date().toISOString()); }catch(e){}
+    renderBackupReminder();
+  }
+  function daysSinceBackup(){
+    let raw;
+    try{ raw = localStorage.getItem(BACKUP_TS_KEY); }catch(e){ raw = null; }
+    if (!raw) return null;
+    const then = new Date(raw);
+    if (isNaN(then.getTime())) return null;
+    return Math.floor((Date.now() - then.getTime()) / 86400000);
+  }
+  function renderBackupReminder(){
+    const el = document.getElementById("backupBanner");
+    if (!el) return;
+    const days = daysSinceBackup();
+    if (days === null){
+      el.style.display = "block";
+      el.innerHTML = "⚠️ <b>Noch keine Sicherung erstellt.</b> Bitte regelmäßig „Daten sichern“ nutzen, damit deine Einträge nicht verloren gehen.";
+    } else if (days >= BACKUP_REMINDER_DAYS){
+      el.style.display = "block";
+      el.innerHTML = "⚠️ <b>Letzte Sicherung vor " + days + " Tagen.</b> Zeit für ein neues Backup.";
+    } else {
+      el.style.display = "none";
+    }
+  }
+
+  function dateKeyFromDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function todayKey() { return dateKeyFromDate(new Date()); }
+
+  async function loadSettings() {
+    try {
+      const res = await storageAPI.get(SETTINGS_KEY);
+      return res ? JSON.parse(res.value) : null;
+    } catch (e) { return null; }
+  }
+
+  async function saveSettings() {
+    const settings = { thresholds: {}, score: {} };
+    paramEls.forEach(card => {
+      const key = card.dataset.key;
+      settings.thresholds[key] = {
+        good: card.querySelector('[data-good]').value,
+        ok: card.querySelector('[data-ok]').value
+      };
+    });
+    settings.score.greenFrom = document.getElementById('greenFrom').value;
+    settings.score.yellowFrom = document.getElementById('yellowFrom').value;
+    try { await storageAPI.set(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+  }
+
+  function applySettings(settings) {
+    if (!settings) return;
+    paramEls.forEach(card => {
+      const t = settings.thresholds && settings.thresholds[card.dataset.key];
+      if (!t) return;
+      if (t.good !== undefined) card.querySelector('[data-good]').value = t.good;
+      if (t.ok !== undefined) card.querySelector('[data-ok]').value = t.ok;
+    });
+    if (settings.score) {
+      if (settings.score.greenFrom !== undefined) document.getElementById('greenFrom').value = settings.score.greenFrom;
+      if (settings.score.yellowFrom !== undefined) document.getElementById('yellowFrom').value = settings.score.yellowFrom;
+    }
+  }
+
+  async function loadEntryForKey(dateKey) {
+    try {
+      const res = await storageAPI.get(STORAGE_PREFIX + dateKey);
+      return res ? JSON.parse(res.value) : null;
+    } catch (e) { return null; }
+  }
+
+  function applyEntryValues(entry) {
+    paramEls.forEach(card => {
+      const v = entry && entry.values ? entry.values[card.dataset.key] : undefined;
+      card.querySelector('[data-value]').value = (v !== undefined && v !== null) ? v : '';
+    });
+    if (schlafHiddenValue.value !== '') {
+      const totalMinutes = Math.round(parseFloat(schlafHiddenValue.value) * 60);
+      schlafStundenInput.value = Math.floor(totalMinutes / 60);
+      schlafMinutenInput.value = totalMinutes % 60;
+    } else {
+      schlafStundenInput.value = '';
+      schlafMinutenInput.value = '';
+    }
+    updateSchlafdauerFromInputs();
+    const isRest = !!(entry && entry.restDay);
+    restdayToggle.checked = isRest;
+    setRestMode(isRest);
+  }
+
+  function parseKeyToDate(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function addDaysToKey(key, delta) {
+    const d = parseKeyToDate(key);
+    d.setDate(d.getDate() + delta);
+    return dateKeyFromDate(d);
+  }
+  function formatKeyLong(key) {
+    const d = parseKeyToDate(key);
+    return d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  let selectedDateKey = todayKey();
+  const entryDateInput = document.getElementById('entryDate');
+  const dateHint = document.getElementById('dateHint');
+  const saveBtn = document.getElementById('saveBtn');
+
+  function updateDateUI(entryExists) {
+    entryDateInput.value = selectedDateKey;
+    entryDateInput.max = todayKey();
+    const isToday = selectedDateKey === todayKey();
+    dateHint.className = 'date-hint' + (isToday ? ' today' : '');
+    const label = formatKeyLong(selectedDateKey);
+    if (isToday) {
+      dateHint.textContent = entryExists ? `Heute (${label}) — bereits gespeichert, du kannst überschreiben.` : `Heute (${label})`;
+    } else {
+      dateHint.textContent = entryExists ? `${label} — bereits gespeichert, du kannst überschreiben.` : `${label} — noch kein Eintrag`;
+    }
+    updateSaveButtonLabel();
+  }
+
+  async function loadAndApplyForSelectedDate() {
+    const entry = await loadEntryForKey(selectedDateKey);
+    applyEntryValues(entry);
+    updateDateUI(!!entry);
+    render();
+    document.getElementById('saveStatus').textContent = '';
+  }
+
+  entryDateInput.addEventListener('change', () => {
+    const v = entryDateInput.value;
+    if (!v) return;
+    if (v > todayKey()) { entryDateInput.value = selectedDateKey; return; }
+    selectedDateKey = v;
+    loadAndApplyForSelectedDate();
+  });
+  document.getElementById('prevDay').addEventListener('click', () => {
+    selectedDateKey = addDaysToKey(selectedDateKey, -1);
+    loadAndApplyForSelectedDate();
+  });
+  document.getElementById('nextDay').addEventListener('click', () => {
+    if (selectedDateKey >= todayKey()) return;
+    selectedDateKey = addDaysToKey(selectedDateKey, 1);
+    loadAndApplyForSelectedDate();
+  });
+
+  async function saveTodayCheck() {
+    const saveStatus = document.getElementById('saveStatus');
+
+    if (restdayToggle.checked) {
+      const maxScore = paramEls.length * 2;
+      const entry = { date: selectedDateKey, restDay: true, values: {}, score: null, maxScore, status: 'rest', verdict: 'Ruhetag' };
+      saveStatus.textContent = 'Speichert…';
+      try {
+        await storageAPI.set(STORAGE_PREFIX + selectedDateKey, JSON.stringify(entry));
+        await saveSettings();
+        saveStatus.textContent = 'Ruhetag gespeichert für ' + selectedDateKey + '.';
+        updateDateUI(true);
+        await renderHistory();
+      } catch (e) {
+        saveStatus.textContent = 'Speichern fehlgeschlagen — bitte erneut versuchen.';
+      }
+      return;
+    }
+
+    const filledCount = paramEls.filter(card => card.querySelector('[data-value]').value !== '').length;
+    if (filledCount === 0) {
+      saveStatus.textContent = 'Bitte mindestens einen Wert eintragen.';
+      return;
+    }
+    const values = {};
+    paramEls.forEach(card => { values[card.dataset.key] = card.querySelector('[data-value]').value; });
+
+    const total = parseInt(String(scoreNum.textContent).split('/')[0].trim(), 10) || 0;
+    const maxScore = paramEls.length * 2;
+    const greenFrom = parseFloat(document.getElementById('greenFrom').value);
+    const yellowFrom = parseFloat(document.getElementById('yellowFrom').value);
+    const status = total >= greenFrom ? 'good' : total >= yellowFrom ? 'ok' : 'bad';
+
+    const entry = { date: selectedDateKey, values, score: total, maxScore, status, verdict: verdictText.textContent };
+
+    saveStatus.textContent = 'Speichert…';
+    try {
+      await storageAPI.set(STORAGE_PREFIX + selectedDateKey, JSON.stringify(entry));
+      await saveSettings();
+      saveStatus.textContent = 'Gespeichert für ' + selectedDateKey + '.';
+      updateDateUI(true);
+      await renderHistory();
+    } catch (e) {
+      saveStatus.textContent = 'Speichern fehlgeschlagen — bitte erneut versuchen.';
+    }
+  }
+
+  function fmtDayLabel(d, rangeDays) {
+    if (rangeDays <= 7) return ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()];
+    return String(d.getDate());
+  }
+
+  async function renderHistory() {
+    if (!Number.isFinite(currentRange) || currentRange <= 0) currentRange = 7;
+    const summaryEl = document.getElementById('historySummary');
+    const stripEl = document.getElementById('dayStrip');
+    const listEl = document.getElementById('historyList');
+    summaryEl.textContent = 'Lädt…';
+    stripEl.innerHTML = '';
+    listEl.innerHTML = '';
+
+    let keys = [];
+    try {
+      const res = await storageAPI.list(STORAGE_PREFIX);
+      keys = (res && res.keys) || [];
+    } catch (e) {
+      summaryEl.textContent = 'Verlauf konnte nicht geladen werden.';
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const days = [];
+    for (let i = currentRange - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      days.push(d);
+    }
+    const dayKeys = days.map(dateKeyFromDate);
+
+    const entries = {};
+    await Promise.all(dayKeys.map(async (dk) => {
+      if (!keys.includes(STORAGE_PREFIX + dk)) return;
+      try {
+        const res = await storageAPI.get(STORAGE_PREFIX + dk);
+        if (res) entries[dk] = JSON.parse(res.value);
+      } catch (e) {}
+    }));
+
+    let good = 0, ok = 0, bad = 0, rest = 0, none = 0;
+    dayKeys.forEach(dk => {
+      const e = entries[dk];
+      if (!e) { none++; return; }
+      if (e.restDay) { rest++; return; }
+      if (e.status === 'good') good++; else if (e.status === 'ok') ok++; else bad++;
+    });
+
+    summaryEl.innerHTML =
+      `<div class="summary-row"><span class="dot good"></span> <strong>${good}</strong>&nbsp;× gutes Fenster</div>` +
+      `<div class="summary-row"><span class="dot ok"></span> <strong>${ok}</strong>&nbsp;× mit Vorsicht</div>` +
+      `<div class="summary-row"><span class="dot bad"></span> <strong>${bad}</strong>&nbsp;× Regeneration</div>` +
+      (rest > 0 ? `<div class="summary-row"><span class="dot rest"></span> <strong>${rest}</strong>&nbsp;× Ruhetag</div>` : '') +
+      (none > 0 ? `<div class="summary-row"><span class="dot none"></span> <strong>${none}</strong>&nbsp;× kein Eintrag</div>` : '');
+
+    days.forEach(d => {
+      const dk = dateKeyFromDate(d);
+      const e = entries[dk];
+      const status = e ? (e.restDay ? 'rest' : e.status) : 'none';
+      const chip = document.createElement('div');
+      chip.className = 'day-chip';
+      chip.innerHTML = `<span class="dot ${status}"></span><span class="day-label">${fmtDayLabel(d, currentRange)}</span>`;
+      chip.title = dk + (e ? (e.restDay ? ' — Ruhetag' : ` — ${e.verdict} (${e.score}/${e.maxScore})`) : ' — kein Eintrag');
+      stripEl.appendChild(chip);
+    });
+
+    renderTrendChart(days, entries, paramEls.length * 2);
+
+    const sortedKeys = dayKeys.filter(dk => entries[dk]).sort().reverse();
+    if (sortedKeys.length === 0) {
+      listEl.innerHTML = '<div class="history-empty">Noch keine gespeicherten Checks in diesem Zeitraum.</div>';
+    } else {
+      sortedKeys.forEach(dk => {
+        const e = entries[dk];
+        const isRestEntry = !!e.restDay;
+        const color = isRestEntry ? '#8B93A0' : (e.status === 'good' ? 'var(--green)' : e.status === 'ok' ? 'var(--amber)' : 'var(--red)');
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML =
+          `<span class="hi-date">${dk}</span>` +
+          `<span class="hi-verdict" style="color:${color}">${isRestEntry ? 'Ruhetag' : e.verdict}</span>` +
+          `<span class="hi-score">${isRestEntry ? '–' : e.score + '/' + e.maxScore}</span>`;
+        listEl.appendChild(item);
+      });
+    }
+  }
+
+  /* ---------- Mittelwert-Berechnung (z. B. HRV-Baseline) ---------- */
+  async function computeAverageForKey(key, days) {
+    let keys = [];
+    try {
+      const res = await storageAPI.list(STORAGE_PREFIX);
+      keys = (res && res.keys) || [];
+    } catch (e) { return null; }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayKeys = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      dayKeys.push(dateKeyFromDate(d));
+    }
+
+    const vals = [];
+    await Promise.all(dayKeys.map(async (dk) => {
+      if (!keys.includes(STORAGE_PREFIX + dk)) return;
+      try {
+        const res = await storageAPI.get(STORAGE_PREFIX + dk);
+        if (!res) return;
+        const entry = JSON.parse(res.value);
+        if (entry.restDay) return;
+        const v = entry.values ? parseFloat(entry.values[key]) : NaN;
+        if (!isNaN(v)) vals.push(v);
+      } catch (e) {}
+    }));
+
+    if (!vals.length) return { avg: null, count: 0 };
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { avg: Math.round(avg * 10) / 10, count: vals.length };
+  }
+
+  const hrvAvgToggle = document.getElementById('hrvAvgToggle');
+  const hrvAvgRange = document.getElementById('hrvAvgRange');
+  const hrvAvgResult = document.getElementById('hrvAvgResult');
+  let hrvAvgOpen = false;
+
+  async function refreshHrvAvg() {
+    const days = parseInt(hrvAvgRange.value, 10) || 14;
+    hrvAvgResult.textContent = 'Berechne…';
+    const res = await computeAverageForKey('hrv', days);
+    if (!res || res.count === 0) {
+      hrvAvgResult.textContent = 'Noch keine HRV-Werte im gewählten Zeitraum gespeichert.';
+      return;
+    }
+    hrvAvgResult.innerHTML =
+      `Ø ${res.avg} ms über ${res.count} Nächte (${days} Tage Zeitraum) ` +
+      `<button class="adjust-toggle" id="hrvUseAvgBtn" type="button" style="margin-left:6px;">→ als "Gut ab" übernehmen</button>`;
+    const useBtn = document.getElementById('hrvUseAvgBtn');
+    if (useBtn) {
+      useBtn.addEventListener('click', () => {
+        const hrvCard = document.querySelector('[data-key="hrv"]');
+        hrvCard.querySelector('[data-good]').value = res.avg;
+        render();
+        hrvAvgResult.insertAdjacentHTML('beforeend', ' <span style="color:var(--sage);">✓ übernommen</span>');
+      });
+    }
+  }
+
+  if (hrvAvgToggle) {
+    hrvAvgToggle.addEventListener('click', () => {
+      hrvAvgOpen = !hrvAvgOpen;
+      hrvAvgResult.style.display = hrvAvgOpen ? 'block' : 'none';
+      hrvAvgToggle.textContent = hrvAvgOpen ? 'Ø-Wert ausblenden' : 'Ø-Wert anzeigen';
+      if (hrvAvgOpen) refreshHrvAvg();
+    });
+    hrvAvgRange.addEventListener('change', () => { if (hrvAvgOpen) refreshHrvAvg(); });
+  }
+
+  function renderTrendChart(days, entries, maxScore) {
+    const svg = document.getElementById('trendSvg');
+    const tag = document.getElementById('trendTag');
+    const caption = document.getElementById('trendCaption');
+    svg.innerHTML = '';
+
+    const dayKeys = days.map(dateKeyFromDate);
+    const points = dayKeys.map(dk => entries[dk] ? entries[dk].score : null);
+    const filledIdx = [];
+    points.forEach((p, i) => { if (p !== null) filledIdx.push(i); });
+
+    if (filledIdx.length === 0) {
+      tag.textContent = '—';
+      tag.className = 'trend-tag';
+      caption.textContent = 'Noch keine Einträge in diesem Zeitraum — trag Werte für vergangene Tage nach, um eine Tendenz zu sehen.';
+      return;
+    }
+
+    const plotLeft = 10, plotRight = 310, plotTop = 14, plotBottom = 104;
+    const plotW = plotRight - plotLeft, plotH = plotBottom - plotTop;
+    const n = days.length;
+    const xFor = i => n > 1 ? plotLeft + (plotW * i / (n - 1)) : (plotLeft + plotRight) / 2;
+    const yFor = score => plotBottom - (Math.max(0, Math.min(maxScore, score)) / maxScore) * plotH;
+
+    const greenFrom = parseFloat(document.getElementById('greenFrom').value);
+    const yellowFrom = parseFloat(document.getElementById('yellowFrom').value);
+    const ns = 'http://www.w3.org/2000/svg';
+    function el(tagName, attrs) {
+      const e = document.createElementNS(ns, tagName);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    if (!isNaN(greenFrom)) svg.appendChild(el('line', { x1: plotLeft, x2: plotRight, y1: yFor(greenFrom), y2: yFor(greenFrom), stroke: 'var(--green)', 'stroke-width': 1, 'stroke-dasharray': '3,3', opacity: 0.5 }));
+    if (!isNaN(yellowFrom)) svg.appendChild(el('line', { x1: plotLeft, x2: plotRight, y1: yFor(yellowFrom), y2: yFor(yellowFrom), stroke: 'var(--amber)', 'stroke-width': 1, 'stroke-dasharray': '3,3', opacity: 0.5 }));
+
+    let segment = '';
+    let inSegment = false;
+    points.forEach((p, i) => {
+      if (p === null) { inSegment = false; return; }
+      const cmd = (inSegment ? 'L' : 'M') + xFor(i).toFixed(1) + ',' + yFor(p).toFixed(1) + ' ';
+      segment += cmd;
+      inSegment = true;
+    });
+    if (segment) {
+      svg.appendChild(el('path', { d: segment.trim(), fill: 'none', stroke: 'var(--indigo)', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    }
+    points.forEach((p, i) => {
+      if (p === null) return;
+      const dk = dayKeys[i];
+      const status = entries[dk].status;
+      const color = status === 'good' ? 'var(--green)' : status === 'ok' ? 'var(--amber)' : 'var(--red)';
+      svg.appendChild(el('circle', { cx: xFor(i), cy: yFor(p), r: n > 40 ? 1.8 : 3, fill: color }));
+    });
+
+    dayKeys.forEach((dk, i) => {
+      const e = entries[dk];
+      if (e && e.restDay) {
+        svg.appendChild(el('circle', { cx: xFor(i), cy: plotBottom, r: n > 40 ? 1.6 : 2.6, fill: '#8B93A0' }));
+      }
+    });
+
+    let tagClass = 'flat', tagLabel = 'Stabil', changeTxt = '';
+    if (filledIdx.length >= 2) {
+      const xs = filledIdx.map(i => i);
+      const ys = filledIdx.map(i => points[i]);
+      const meanX = xs.reduce((a, b) => a + b, 0) / xs.length;
+      const meanY = ys.reduce((a, b) => a + b, 0) / ys.length;
+      let num = 0, den = 0;
+      xs.forEach((x, k) => { num += (x - meanX) * (ys[k] - meanY); den += (x - meanX) * (x - meanX); });
+      const slope = den !== 0 ? num / den : 0;
+      const first = xs[0], last = xs[xs.length - 1];
+      const predFirst = meanY + slope * (first - meanX);
+      const predLast = meanY + slope * (last - meanX);
+      const change = predLast - predFirst;
+      if (change > maxScore * 0.1) { tagClass = 'up'; tagLabel = 'Steigend'; }
+      else if (change < -maxScore * 0.1) { tagClass = 'down'; tagLabel = 'Fallend'; }
+      else { tagClass = 'flat'; tagLabel = 'Stabil'; }
+      changeTxt = ' · Veränderung ' + (change >= 0 ? '+' : '') + change.toFixed(1) + ' Pkt.';
+    }
+    tag.textContent = tagLabel;
+    tag.className = 'trend-tag ' + tagClass;
+
+    const avg = points.filter(p => p !== null).reduce((a, b) => a + b, 0) / filledIdx.length;
+    caption.textContent = `Ø ${avg.toFixed(1)} / ${maxScore} über ${filledIdx.length} Einträge (${n} Tage Zeitraum)` + changeTxt;
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', saveTodayCheck);
+
+  /* ---------- Export / Import (Datensicherung) ---------- */
+  async function exportData(){
+    const status = document.getElementById('backupStatus');
+    try {
+      const res = await storageAPI.list('');
+      const keys = (res && res.keys) || [];
+      const data = {};
+      for (const k of keys){
+        const item = await storageAPI.get(k);
+        if (item) data[k] = item.value;
+      }
+      const blob = new Blob([JSON.stringify({ app:'trainingscheck', exported:new Date().toISOString(), data }, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'trainingscheck_sicherung_' + todayKey() + '.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      status.textContent = 'Sicherung erstellt (' + keys.length + ' Einträge).';
+      markBackupDone();
+    } catch(e){
+      status.textContent = 'Sicherung fehlgeschlagen.';
+    }
+  }
+
+  async function importData(file){
+    const status = document.getElementById('backupStatus');
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || parsed.app !== 'trainingscheck' || !parsed.data) {
+        status.textContent = 'Datei nicht erkannt — bitte eine Trainingscheck-Sicherung wählen.';
+        return;
+      }
+      let count = 0;
+      for (const [k, v] of Object.entries(parsed.data)){
+        await storageAPI.set(k, v);
+        count++;
+      }
+      status.textContent = count + ' Einträge wiederhergestellt.';
+      const settings = await loadSettings();
+      applySettings(settings);
+      await loadAndApplyForSelectedDate();
+      renderHistory();
+    } catch(e){
+      status.textContent = 'Wiederherstellung fehlgeschlagen.';
+    }
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  /* ---------- Bericht drucken (frei wählbarer Zeitraum) ---------- */
+  function escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function setupPrintDefaults(){
+    const toEl = document.getElementById('printTo');
+    const fromEl = document.getElementById('printFrom');
+    const to = new Date();
+    const from = new Date(); from.setDate(from.getDate() - 29);
+    toEl.value = dateKeyFromDate(to);
+    fromEl.value = dateKeyFromDate(from);
+    toEl.max = todayKey();
+    fromEl.max = todayKey();
+  }
+
+  async function printReport(){
+    const status = document.getElementById('printStatus');
+    const from = document.getElementById('printFrom').value;
+    const to = document.getElementById('printTo').value;
+    if (!from || !to){ status.textContent = 'Bitte Von- und Bis-Datum wählen.'; return; }
+    if (from > to){ status.textContent = 'Das Von-Datum muss vor dem Bis-Datum liegen.'; return; }
+
+    status.textContent = 'Bericht wird erstellt…';
+
+    let keys = [];
+    try {
+      const res = await storageAPI.list(STORAGE_PREFIX);
+      keys = (res && res.keys) || [];
+    } catch (e) { status.textContent = 'Verlauf konnte nicht geladen werden.'; return; }
+
+    const dayKeys = keys
+      .filter(k => k.startsWith(STORAGE_PREFIX))
+      .map(k => k.slice(STORAGE_PREFIX.length))
+      .filter(dk => dk >= from && dk <= to)
+      .sort();
+
+    if (dayKeys.length === 0){
+      status.textContent = 'Keine gespeicherten Checks im gewählten Zeitraum.';
+      return;
+    }
+
+    const entries = [];
+    for (const dk of dayKeys){
+      try {
+        const res = await storageAPI.get(STORAGE_PREFIX + dk);
+        if (res) entries.push(JSON.parse(res.value));
+      } catch (e) {}
+    }
+
+    const paramMeta = paramEls.map(card => ({
+      key: card.dataset.key,
+      name: card.querySelector('.param-name').textContent,
+      unit: card.querySelector('.unit') ? card.querySelector('.unit').textContent.trim() : ''
+    }));
+
+    const headerCols = ['Datum', 'Status', 'Score'].concat(paramMeta.map(p => p.name));
+    const rows = entries.map(e => {
+      const dateLabel = e.date.split('-').reverse().join('.');
+      if (e.restDay){
+        return `<tr><td>${dateLabel}</td><td colspan="${2 + paramMeta.length}" style="color:#8B93A0;">Ruhetag</td></tr>`;
+      }
+      const statusLabel = e.status === 'good' ? 'Gut' : e.status === 'ok' ? 'Ok' : 'Ungünstig';
+      const cells = paramMeta.map(p => {
+        const v = e.values ? e.values[p.key] : '';
+        if (v === undefined || v === null || v === '') return '–';
+        return escHtml(v) + (p.unit ? ' ' + escHtml(p.unit) : '');
+      });
+      return `<tr><td>${dateLabel}</td><td>${statusLabel}</td><td>${e.score}/${e.maxScore}</td>` +
+        cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+    }).join('');
+
+    const goodCount = entries.filter(e => !e.restDay && e.status === 'good').length;
+    const okCount = entries.filter(e => !e.restDay && e.status === 'ok').length;
+    const badCount = entries.filter(e => !e.restDay && e.status === 'bad').length;
+    const restCount = entries.filter(e => e.restDay).length;
+
+    const fromLabel = from.split('-').reverse().join('.');
+    const toLabel = to.split('-').reverse().join('.');
+
+    const html = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+<title>Trainingscheck — Bericht ${fromLabel} bis ${toLabel}</title>
+<style>
+  body{font-family:'Work Sans', Arial, sans-serif; color:#24211B; margin:28px;}
+  h1{font-size:20px;margin:0 0 4px;}
+  .meta{font-size:12px;color:#5B564C;margin-bottom:16px;}
+  table{width:100%;border-collapse:collapse;font-size:10.5px;}
+  th, td{border-bottom:1px solid #d7cfba;padding:5px 7px;text-align:left;white-space:nowrap;}
+  th{background:#EDE7D9;}
+  .summary{margin-top:16px;font-size:12px;color:#5B564C;}
+  @page{ size: landscape; margin:12mm; }
+</style>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body>
+  <h1>Trainingscheck — Bericht</h1>
+  <div class="meta">Zeitraum: ${fromLabel} – ${toLabel} · erstellt am ${new Date().toLocaleDateString('de-DE')}</div>
+  <table>
+    <thead><tr>${headerCols.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="summary">
+    ${entries.length - restCount} Einträge · ${goodCount} × gutes Fenster · ${okCount} × mit Vorsicht · ${badCount} × Regeneration${restCount ? ' · ' + restCount + ' Ruhetag' + (restCount === 1 ? '' : 'e') : ''}
+  </div>
+
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    if (!win){ status.textContent = 'Popup wurde blockiert — bitte Pop-ups für diese Seite erlauben.'; return; }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    status.textContent = 'Bericht wird geöffnet …';
+    setTimeout(() => { win.focus(); win.print(); }, 250);
+  }
+
+  document.getElementById('printBtn').addEventListener('click', printReport);
+  document.querySelectorAll('.range-btn[data-range]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.range-btn[data-range]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = parseInt(btn.dataset.range, 10);
+      renderHistory();
+    });
+  });
+
+  /* ---------- Wetter (Open-Meteo, kein API-Key nötig) ---------- */
+  const FALLBACK_LAT = 51.1652, FALLBACK_LON = 7.0673; // Solingen
+  const WMO_DESC = {
+    0:'Klarer Himmel',1:'Überwiegend klar',2:'Teilweise bewölkt',3:'Bedeckt',
+    45:'Nebel',48:'Nebel mit Reifglätte',
+    51:'Leichter Nieselregen',53:'Nieselregen',55:'Starker Nieselregen',
+    56:'Gefrierender Niesel',57:'Starker gefrierender Niesel',
+    61:'Leichter Regen',63:'Regen',65:'Starker Regen',
+    66:'Gefrierender Regen',67:'Starker gefrierender Regen',
+    71:'Leichter Schneefall',73:'Schneefall',75:'Starker Schneefall',
+    77:'Schneegriesel',
+    80:'Leichte Regenschauer',81:'Regenschauer',82:'Starke Regenschauer',
+    85:'Leichte Schneeschauer',86:'Starke Schneeschauer',
+    95:'Gewitter',96:'Gewitter mit Hagel',99:'Starkes Gewitter mit Hagel'
+  };
+  const WMO_ICON = {
+    0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
+    51:'🌦️',53:'🌦️',55:'🌧️',56:'🌧️',57:'🌧️',
+    61:'🌧️',63:'🌧️',65:'🌧️',66:'🌧️',67:'🌧️',
+    71:'🌨️',73:'🌨️',75:'❄️',77:'❄️',
+    80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',
+    95:'⛈️',96:'⛈️',99:'⛈️'
+  };
+  function weatherDesc(code){ return WMO_DESC[code] || 'Unbekannt'; }
+  function weatherIcon(code){ return WMO_ICON[code] || '🌡️'; }
+
+  function hourScore(temp, precipProb, wind){
+    const tempPts = (temp >= 8 && temp <= 22) ? 2 : ((temp >= 3 && temp < 27) ? 1 : 0);
+    const rainPts = precipProb < 20 ? 2 : (precipProb < 50 ? 1 : 0);
+    const windPts = wind < 20 ? 2 : (wind < 35 ? 1 : 0);
+    const total = tempPts + rainPts + windPts;
+    return { total, pct: Math.round(total / 6 * 100) };
+  }
+
+  async function fetchWeatherData(lat, lon){
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,windspeed_10m,weathercode&timezone=auto&forecast_days=1`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Wetter-API Fehler');
+    return await res.json();
+  }
+
+  function renderWeather(data, sourceLabel){
+    const summaryEl = document.getElementById('weatherSummary');
+    const windowsEl = document.getElementById('weatherWindows');
+    const hiddenInput = document.querySelector('[data-key="wetter"] [data-value]');
+
+    const times = data.hourly.time;
+    const temps = data.hourly.temperature_2m;
+    const precs = data.hourly.precipitation_probability;
+    const winds = data.hourly.windspeed_10m;
+    const codes = data.hourly.weathercode;
+
+    const now = new Date();
+    let curIdx = times.findIndex(t => {
+      const d = new Date(t);
+      return d.getHours() === now.getHours() && d.getDate() === now.getDate();
+    });
+    if (curIdx < 0) curIdx = 0;
+
+    const curScore = hourScore(temps[curIdx], precs[curIdx], winds[curIdx]);
+    hiddenInput.value = curScore.pct;
+
+    summaryEl.innerHTML =
+      `${weatherIcon(codes[curIdx])} <strong>${Math.round(temps[curIdx])}°C</strong> gerade jetzt, ${weatherDesc(codes[curIdx])} · Regenwahrscheinlichkeit ${precs[curIdx]}% · Wind ${Math.round(winds[curIdx])} km/h` +
+      `<span style="display:block;font-size:11px;margin-top:3px;">Quelle: ${sourceLabel} · Open-Meteo</span>`;
+
+    const scored = [];
+    for (let i = curIdx; i < times.length; i++){
+      const s = hourScore(temps[i], precs[i], winds[i]);
+      scored.push({ hour:new Date(times[i]).getHours(), pct:s.pct, temp:temps[i], prec:precs[i], wind:winds[i], code:codes[i] });
+    }
+    const ranked = [...scored].sort((a,b) => b.pct - a.pct);
+    const top = ranked.slice(0, 3).sort((a,b) => a.hour - b.hour);
+
+    if (top.length){
+      windowsEl.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);margin:10px 0 6px;">Günstigste Zeitfenster heute:</div>' +
+        top.map(w => {
+          const cls = w.pct >= 70 ? 'good' : w.pct >= 40 ? 'ok' : 'bad';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #d7cfba;font-size:13px;">`+
+            `<span>${String(w.hour).padStart(2,'0')}:00 Uhr</span>`+
+            `<span>${weatherIcon(w.code)} ${Math.round(w.temp)}°C · ${w.prec}% Regen</span>`+
+            `<span class="pill ${cls}" style="font-size:10.5px;">${w.pct}%</span>`+
+          `</div>`;
+        }).join('');
+    } else {
+      windowsEl.innerHTML = '';
+    }
+
+    render();
+  }
+
+  function loadWeather(){
+    const summaryEl = document.getElementById('weatherSummary');
+    const windowsEl = document.getElementById('weatherWindows');
+    summaryEl.textContent = 'Lädt Wetterdaten…';
+    windowsEl.innerHTML = '';
+
+    function withCoords(lat, lon, label){
+      fetchWeatherData(lat, lon).then(data => renderWeather(data, label)).catch(() => {
+        summaryEl.textContent = 'Wetterdaten aktuell nicht verfügbar (keine Verbindung oder API nicht erreichbar).';
+        const hiddenInput = document.querySelector('[data-key="wetter"] [data-value]');
+        hiddenInput.value = '';
+        render();
+      });
+    }
+
+    if (navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        pos => withCoords(pos.coords.latitude, pos.coords.longitude, 'dein Standort'),
+        () => withCoords(FALLBACK_LAT, FALLBACK_LON, 'Solingen'),
+        { timeout: 5000 }
+      );
+    } else {
+      withCoords(FALLBACK_LAT, FALLBACK_LON, 'Solingen');
+    }
+  }
+
+  document.getElementById('weatherRefresh').addEventListener('click', loadWeather);
+
+  (async function init() {
+    const settings = await loadSettings();
+    applySettings(settings);
+    await loadAndApplyForSelectedDate();
+    renderHistory();
+    loadWeather();
+    setupPrintDefaults();
+    renderBackupReminder();
+  })();
+})();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

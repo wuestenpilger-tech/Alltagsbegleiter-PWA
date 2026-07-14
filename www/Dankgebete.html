@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Gebete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=EB+Garamond:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EEE1;
+    --paper-deep:#EAE0CB;
+    --ink:#2B241C;
+    --ink-soft:#6B6152;
+    --maroon:#6E1F2B;
+    --maroon-deep:#4A141C;
+    --gold:#B8935B;
+    --rule:#DDD1B2;
+    --font-display:'Cormorant Garamond', serif;
+    --font-body:'EB Garamond', serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-tap-highlight-color:transparent;
+  }
+  body{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- Menu screen ---------- */
+  #menu{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:8vh 10vw 6vh;
+    text-align:center;
+  }
+  #menu h1{
+    font-size:2.6rem;
+    letter-spacing:0.04em;
+    margin:0 0 0.25em;
+    color:var(--maroon-deep);
+    font-weight:400;
+  }
+  #menu .sub{
+    font-size:1.15rem;
+    color:var(--ink-soft);
+    margin:0 0 2.6em;
+    font-style:italic;
+  }
+  .nav-list{
+    list-style:none;
+    margin:0;padding:0;
+    width:100%;
+    max-width:760px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  .nav-btn{
+    display:flex;
+    align-items:center;
+    width:100%;
+    padding:38px 36px;
+    background:var(--paper-deep);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:1.55rem;
+    text-align:left;
+    cursor:pointer;
+    position:relative;
+  }
+  .nav-btn:active{
+    background:var(--maroon);
+    color:var(--paper);
+    border-color:var(--maroon);
+  }
+  .nav-name{flex:1;}
+  .nav-name small{
+    display:block;
+    font-size:1.02rem;
+    color:var(--ink-soft);
+    font-style:italic;
+    margin-top:6px;
+  }
+  .nav-btn:active .nav-name small{color:var(--paper);}
+
+  /* ---------- Reader screen ---------- */
+  #reader{
+    display:none;
+    flex-direction:column;
+    height:100vh;
+  }
+  #reader.active{display:flex;}
+  #menu.hidden{display:none;}
+
+  #reader-bar{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:26px 44px;
+    background:var(--maroon-deep);
+    color:var(--paper);
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  #back-btn{
+    background:none;
+    border:1px solid rgba(244,238,225,0.5);
+    color:var(--paper);
+    font-family:inherit;
+    font-size:1.15rem;
+    padding:11px 22px;
+    border-radius:6px;
+  }
+  #back-btn:active{background:rgba(244,238,225,0.15);}
+  #reader-title{
+    font-size:1.6rem;
+    letter-spacing:0.02em;
+    flex:1;
+    text-align:center;
+    padding-right:96px;
+  }
+
+  #font-controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:14px 44px;
+    background:var(--paper-deep);
+    border-bottom:1px solid var(--rule);
+  }
+  #font-controls span{
+    font-size:0.98rem;color:var(--ink-soft);margin-right:auto;font-style:italic;
+  }
+  .fbtn{
+    border:1px solid var(--rule);background:var(--paper);color:var(--maroon-deep);
+    border-radius:7px;width:44px;height:44px;font-size:1.15rem;font-family:inherit;
+    cursor:pointer;
+  }
+
+  #reader-body{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:44px 60px 100px;
+    max-width:840px;
+    margin:0 auto;
+    width:100%;
+    white-space:pre-wrap;
+    line-height:1.85;
+  }
+  #reader-body .cross{
+    text-align:center;color:var(--gold);opacity:.85;margin:30px 0;font-size:1.5rem;
+  }
+  #reader-body .blessing{
+    margin-top:38px;padding-top:24px;border-top:1px solid var(--rule);
+    font-style:italic;text-align:center;font-size:1.08rem;color:var(--ink-soft);
+  }
+  #reader-body .blessing .note{
+    display:block;margin-top:12px;font-size:0.9rem;font-style:normal;color:var(--gold);
+  }
+  .back-to-menu{
+    position:fixed;top:18px;right:18px;z-index:80;
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(184,147,91,0.16);color:var(--maroon);
+    text-decoration:none;font-size:20px;
+    transition:transform .15s ease;
+    box-shadow:0 2px 8px rgba(43,36,28,0.10);
+  }
+  .back-to-menu:active{transform:scale(0.93);}
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+
+<a class="back-to-menu" href="andachtsschrank.html" aria-label="Zurück zum Andachtsschrank" title="Zurück zum Andachtsschrank">←</a>
+
+<div id="menu">
+  <h1>Gebete</h1>
+  <p class="sub">Für Fürbitte, Fasten, Vergebung und Dank</p>
+  <ul class="nav-list">
+    <li><button class="nav-btn" data-target="welt">
+      <span class="nav-name">Gebet für die Welt<small>Fürbitte für die Menschheit</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="fastentag">
+      <span class="nav-name">Gebet am Fastentag<small>Fasten und Gebet mit dem Herzen</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="vergebung">
+      <span class="nav-name">Gebet um Vergebung<small>Vergeben und Frieden schließen</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="dankes">
+      <span class="nav-name">Gebet des Dankes<small>Dank für das Empfangene</small></span>
+    </button></li>
+  </ul>
+</div>
+
+<div id="reader">
+  <div id="reader-bar">
+    <button id="back-btn" onclick="showMenu()">‹ Zurück</button>
+    <div id="reader-title"></div>
+  </div>
+  <div id="font-controls">
+    <span>Schriftgröße</span>
+    <button class="fbtn" onclick="changeFont(-1)">A-</button>
+    <button class="fbtn" onclick="changeFont(1)">A+</button>
+  </div>
+  <div id="reader-body"></div>
+</div>
+
+<script>
+const BLESSING = `Der HERR segne und behüte uns;
+der HERR lasse sein Angesicht leuchten
+über uns und sei uns gnädig;
+der HERR hebe sein Angesicht
+über uns und gebe uns seinen Frieden.`;
+const BLESSING_NOTE = `(Der "Aaronitische Segen" ist der älteste biblische Segensspruch)`;
+
+const prayers = {
+
+welt: {
+title: "Gebet für die Welt",
+body: `Vater, Gott und Schöpfer unseres Lebens ...
+Betroffen von den Krisen und Katastrophen auf unserer Welt, sowie den damit verbundenen Schicksalen meiner Brüder und Schwestern, deiner geliebten Kinder, komme ich betend und bittend zu Dir.
+
+Lass mich beten für jene, deren Leben durch diese Erfahrungen, schwer belastet wird. Gib ihnen die Möglichkeit der unterstützenden Erfahrung auf ihrem Weg durch Begleitung und Fürsorge ihrer Brüder und Schwestern. Schenke ihnen die Möglichkeit zu heilen, für sich und alle, mit denen sie in geschwisterlicher Liebe verbunden sind.
+
+Sei allen Leidenden nahe, vor allem denen, die schwer erkrankt sind. Wache liebend über die, welche im Sterben liegen und bald vor dein Angesicht treten werden.
+
+Stehe denen barmherzig und verzeihend zur Seite, die du für sie völlig unerwartet, heute zu dir rufen wirst. Tröste mit deiner Liebe all jene, die trauern oder verzweifelt sind, weil sie geliebte Menschen verloren haben oder in naher Zukunft verlieren werden.
+
+Schenke unseren Ärzten, unseren Pflegenden, unseren Forschern, Weisheit, Energie und Kraft, für ihre Arbeit zum Wohle der Menschheit.
+
+Schenke jenen, die ihre Mitmenschen unterstützen, versorgen, betreuen oder begleiten, Kraft und Ausdauer für dieses große Werk der Nächstenliebe, für die große Verantwortung, die sie damit für sich und andere übernehmen.
+
+Gib unseren Politkern, den Mächtigen unserer Welt, Klarheit, Einsicht und Weitsicht, so das sie jederzeit die richtigen Entscheidungen, für das Wohl der ihnen anvertrauten Mitmenschen treffen.
+
+Hilf ihnen den Frieden in sich selbst, in ihrem Gegenüber immer wieder zu suchen, suchen zu wollen, ihn mit all ihren Möglichkeiten zu bewahren, ihn zum Wohle der ganzen Menschheit in friedvolle, in helfende, in unterstützende Handlungen umzusetzen zu wollen.
+
+Mögen sie die friedliche Lösung aller Kriege und Konflikte dieser Welt, als ihre wichtigste und vordringlichste Aufgabe ansehen, diese Aufgabe ernsthaft und verantwortungsvoll anzunehmen und zum Wohle aller realisieren zu wollen.
+
+Dankbar bete ich für alle, die durch ihre vielfältigen und unterschiedlichsten Tätigkeiten, die Versorgung und Sicherheit der Länder und Staaten auf der Welt aufrechterhalten.
+
+Lass mich beten für alle, die durch das Erleben von Krisen und Katastrophen in Panik geraten, von ihren Ängsten überwältigt werden, hilf- oder ratlos dieser Erfahrung, diesem Erleben gegenüber stehen.
+
+Lass mich beten für alle, welche materielle, körperliche oder seelische Schäden erleiden, erlitten haben, bzw. diese befürchten. Stelle ihnen Menschen an die Seite, die sie in diesen schwierigen Situationen auffangen, begleiten und unterstützen.
+
+Lass mich beten für meine Brüder und Schwestern aller Länder und Völker, die in Flüchtlingslagern, Auffangeinrichtungen oder in Abschiebehaft leben. Die sich in fremden Ländern, fern ihrer eigentlichen Heimat aufhalten müssen, gewollt oder ungewollt.
+
+Lass mich beten für alle die in Isolations- oder Untersuchungshaft, die in Straf- und Umerziehungslagern, in Gefängnissen, oftmals unter menschenunwürdigen Umständen leben und leiden müssen.
+
+Lass mich beten für meine Brüder und Schwestern, die auf unserer Welt Hunger und Armut ausgesetzt sind.
+
+Lass mich beten für alle, die krankheitsbedingt oder aus anderen Gründen unter Quarantäne stehen. Für alle, die sich einsam fühlen, die einsam sind, die niemanden an ihrer Seite haben der ihnen hilft, der für sie da ist oder sie in welcher Form auch immer, unterstützt.
+
+Tröste und begleite unsere behinderten Brüder und Schwestern. In den Einrichtungen, in denen sie leben und arbeiten, oder in ihrem häuslichen Umfeld. Unsere Brüder und Schwestern die gepflegt werden müssen, entweder in ihrer häuslichen Umgebung oder in unseren Pflege- und Senioreneinrichtungen.
+
+Begleite unsere akut und chronisch Erkrankten in unseren Krankenhäusern, in psychiatrischen Kliniken, in unseren Rehabilitationseinrichtungen.
+
+Tröste und begleite unsere Kinder, unsere Heranwachsenden, welche in unterschiedlichen Wohnformen leben und arbeiten, sowie alle die in sozialen Einrichtungen betreut, begleitet, leben und arbeiten. Berühre sie mit Deiner Sanftheit. Gib ihnen die Gewissheit, das wir Kraft deiner Liebe, immer mit ihnen in geschwisterlicher Liebe verbunden sind und sein werden.
+
+Lass mich beten um deine Fürsorge und Unterstützung für unsere Hilfs- und Katastrophendienste. Für die vielen freiwilligen und ehrenamtlichen Helfer, für alle, die unterstützend uns und anderen auf der Welt, mit großem Engagement in vielen Krisen beistehen.
+
+Mögen sie den, von uns an sie gestellten, sowie den an sich selbst gestellten Anforderungen gerecht werden können, ohne dabei durch ihre Unterstützung, selber zu erkranken oder darunter zu leiden.
+
+Gib ihnen die Kraft, die Stärke, sich in ihrer eigenen Bedürftigkeit an- und wahrnehmen zu können, so das sie rechtzeitig andere, um Hilfe und Unterstützung für sich selber bitten können.
+
+Lass mich beten für alle, die dein Sohn unter seinen besonderen Schutz gestellt hat. Für unsere Kinder, die mit ihnen verbundenen Familien. Beschütze und begleite sie mit all deiner Liebe, Gnade und Barmherzigkeit.
+
+Bewahre sie vor jedweder Gewalt, vor Missbrauch in jeglicher Form, vor Hass und Leid, vor Zwietracht und Missgunst untereinander, oder der Erfahrung dessen durch ihre Mitmenschen.
+
+Schütze ihre empfindsamen Seelen, ihre verletzlichen Körper, damit sie nie den Kontakt und das Vertrauen zu dir verlieren. Gib ihnen die Kraft, die Stärke, sich in ihrer eigenen Bedürftigkeit wahrzunehmen, sich anzunehmen, rechtzeitig selbst andere um Hilfe oder Unterstützung zu bitten. Stell ihnen Menschen an die Seite, die ihnen in diesen schwierigen Situationen glauben, sie begleiten und auffangen.
+
+Lass mich beten für alle Brüder und Schwestern in unseren Gefängnissen und Sicherheitseinrichtungen, welche wegen unterschiedlicher Straftaten an ihren Mitmenschen, zeitweise oder ein Leben lang, zu ihrem und unserem Schutz, begleitet und betreut werden.
+
+Lass mich beten für all jene, deren Taten noch im Dunkeln liegen, die nicht den Mut hatten oder haben, sich dazu zu bekennen.
+
+Zeige ihnen Wege und Möglichkeiten der Lösung für ihr Tun oder Nicht-Tun. Gib ihnen Menschen an die Seite, die ihnen helfen, die richtigen Entscheidungen für sich, und die durch ihre Handlungen Betroffenen zu treffen.
+
+Lass mich insbesondere beten für jene Täter / - innen, die durch ihre besondere gesellschaftliche Stellung, ihre damit verbundenen Aufgaben, ihre dadurch entstandene Verantwortung anderen gegenüber, für die, welche in deiner Nachfolge stehen, sich durch dich berufen fühlten und fühlen, sofern sie durch ihr Handlungen der eigenen Teilnahme oder der Duldung dessen, schwere und schwerste Schuld, in unterschiedlichster Form auf sich geladen haben.
+
+Steh ihnen mit deiner Liebe, Gnade und Barmherzigkeit, auf ihrem weiteren Lebensweg bei, so schwer dieses Kreuz auch für sie werden wird oder ist.
+
+Bitte nimm die durch ihre Taten betroffenen Opfer, in welcher Form auch immer sie durch die Täter / - innen und ihre Taten traumatisiert wurden, unter deinen ganz besonderen Schutz, deine ganz besondere Fürsorge und Liebe.
+
+Bitte nimm ebenfalls jene, die sich am Rande unserer Gesellschaft, als Obdachlose, Heimatlose, Suchende und Umherirrende, halt- und hoffnungslos durch unsere Welt bewegen, liebevoll unter deine Obhut.
+
+Lass die Zahl der von all diesen Ereignissen betroffenen Mitmenschen abnehmen. Lass sie zurückkehren zu dir, sofern sie dich auf ihrem Lebensweg, verloren haben. Zu der ihnen vertrauten Normalität, zu ihren eigenen Lebensentwürfen, ihren Wünschen und Vorstellungen, ihren Hoffnungen, ihrem Vertrauen und Glauben in dich.
+
+Sehnsuchtsvoll bitte ich um eine weltweite Eindämmung aller Konflikte, der durch uns verursachten Katastrophen, Krisen und Kriege auf deiner Erde.
+
+Mache mich, mach uns, dankbar für jeden Tag den wir gesund miteinander verbringen dürfen.
+
+Lass uns nie vergessen, dass unser Leben, ein zerbrechliches Geschenk deiner Liebe und Gnade ist. Wir sind sterbliche Wesen, müssen immer wieder neu lernen unsere Grenzen zu akzeptieren, deine Grenzen zu respektieren, dir jeden Moment unseres Lebens immer wieder neu zu vertrauen.
+
+Du allein bist ewig, Ursprung und Ziel von allem, immer liebend.
+
+Gemeinsam im Vertrauen auf Deine unendliche Barmherzigkeit, deine Liebe, deine Unterstützung für uns, werden wir den an uns gestellten Herausforderungen, mit Achtung und Liebe voreinander, unserem Leben miteinander, als deine geliebten Kinder, verbunden mit dem Respekt vor deiner Schöpfung, begegnen können.
+
+Vater, Herr und Bruder aller Menschen, deine Gegenwart vertreibt in uns jede Furcht, sie schenkt uns Zuversicht, öffnet uns füreinander, macht uns aufmerksam, achtsam und mitfühlend.
+
+Dein Herz ist gütig und demütig, eine erfrischende Quelle des Friedens, der Liebe und deiner unendlichen Barmherzigkeit.
+
+Maria, Mutter unseres Herrn, alle heiligen Frauen und Männer, Nothelfer und Schutzpatrone unseres Landes, bittet für mich und für uns alle ! Amen.
+
+Vater, in der Einheit mit deinem Sohn Jehoschua
+und dem Heiligen Geist,
+ich lege mein,
+unser Leben,
+in eure,
+in deine Hände.
+
+Aber, nicht mein Wille, nicht unser Wille,
+sondern dein, euer Wille, geschehe.`
+},
+
+fastentag: {
+title: "Gebet am Fastentag",
+body: `Maria, unsere Mutter bittet uns …
+Mittwochs und Freitags streng zu fasten
+und jeden Tag den Rosenkranz zu beten.
+
+Vater, du Schöpfer der ganzen Welt, mein Schöpfer!
+Ich danke dir, das du diese Welt, mit allem was sie ausmacht, für uns erschaffen hast.
+
+Danke, das du den Boden unserer Erde in ganz unterschiedlicher Weise fruchtbar machst, damit er in vielfältiger Form, Nahrung für uns alle hervorbringen kann.
+
+Danke, für unserer Lebensmittel, die wir aus den Früchten der Erde gewinnen dürfen.
+
+Danke, das du meinen Körper so gebildet hast, das er diese Nahrung aufnehmen und verwerten kann. Das sie mich mit allen wichtigen Nährstoffen für mein Leben versorgt, so das mein Körper wachsen kann. Hierdurch ist es mir möglich deinem Willen zu folgen, dir zu dienen.
+
+Danke, für alle Menschen, die oftmals mühevoll durch ihre tägliche Arbeit, neue Möglichkeiten des Lebens für uns alle auf deiner Erde schaffen.
+
+Danke, das du denen, die nichts oder nur sehr wenig zu essen, zu trinken haben, Hilfe und Unterstützung durch andere zukommen läßt.
+
+Vater, erlaube mir heute mit deiner Unterstützung, zu fasten. Damit verachte ich deine uns geschenkten Gaben nicht. Nein, ich möchte sie neu, auf eine andere Weise für mich, entdecken. Erlaube mir zu fasten, weil dein Sohn, seine Jünger, deine Propheten, gefastet haben.
+
+Unsere Mutter Maria hat uns um das Fasten gebeten:
+„Liebe Kinder! Ich bitte euch heute mit dem Fasten zu beginnen. Nehmt diese Übung von Herzen gerne auf euch! Liebe Kinder, fastet und betet mit dem Herzen!"
+
+Bitte gib mir durch das Fasten die Fähigkeit, deine Worte mit meinem Herzen besser zu hören, besser danach zu leben, handeln zu können.
+
+Lehre mich, mich immer mehr dir zu zuwenden, vor allem dann, wenn mich so viele Dinge in meinem Leben versuchen, von dir abzulenken.
+
+Durch dieses Fasten, diese andere Form meines Gebetes, bitte ich dich, das alle die Hunger und Durst haben, Unterstützung und Hilfe durch ihre Mitmenschen erfahren dürfen.
+
+Durch dieses Fasten, diese andere Form meines Gebetes, bitte ich dich für den Frieden in der Welt. Unsere Kriege, unsere Konflikte, entstehen oft weil wir zu sehr an weltlichen Dingen hängen, bereit sind, uns um unseres eigenen erhofften Vorteils willen, dafür gegenseitig zu töten, einander in jedweder Form zu missbrauchen.
+
+Durch dieses Fasten, diese andere Form meines Gebetes, bitte ich dich für jene, deren Sorge um ihre materiellen Besitztümer, sie so verändert, das sie keinen anderen Wert mehr kennen, als ihren eigenen persönlichen Vorteil.
+
+Hilf ihnen, hilf mir, wieder zu uns selbst zu kommen. Dich wieder als unseren Mittelpunkt zu sehen, zu spüren.
+
+Durch dieses Fasten, diese andere Form meines Gebetes, bitte ich dich jene, die in ihren eigenen, oft ungelösten und kräftezehrenden Konflikten leben, weil sie nur noch sehen, was sie sehen wollen, was sie haben, haben wollen, für andere und deren Nöte und Probleme blind geworden sind.
+
+Bitte öffne mir durch dieses Fasten, die Augen für all das, was du mir schenkst, für alles was ich durch dich, habe und besitze. Verzeihe mir das die Blindheit meine Augen, meine Seele erfasst hat.
+
+Das ich für die Güter, die ich durch dich habe, nicht mehr dankbar bin. Das alles so selbstverständlich für mich geworden ist.
+
+Verzeihe mir, das ich den Wert materieller Güter so oft und immer wieder falsch einschätze, sie deswegen nur in meinem Sinne verwende, damit nicht mehr in deinem Sinne einsetzen kann, oder will.
+
+Hilf mir durch dieses Fasten, dich als meinen Schöpfer, meine Brüder und Schwestern als deine Kinder, besser verstehen, besser zu sehen und wahrzunehmen.
+
+Durch das Fasten möge die Sehnsucht, die Liebe zu dir, zu meinen Nächsten, immer mehr in mir wachsen.
+
+Freudig und dankbar denke ich an die Worte deines Sohnes:
+„Selig sind die, die arm sind vor Gott, denn ihnen gehört das Himmelreich.”
+
+Mach mich arm vor dir. Gib mir die Gnade, durch dieses Fasten erfahren zu dürfen, wie sehr ich dich brauche.
+
+Vater, lass mich durch dieses Fasten, meine Mitmenschen besser verstehen, vor allem die, die selber hungern und dürsten, weil sie nicht genügend Nahrungsmittel besitzen. Die nicht genug Möglichkeiten zum eigenen Leben, zum eigenen Überleben haben, die keine Perspektiven für sich, ihre Familien und Kinder, sehen oder besitzen.
+
+Hilf mir, das ich sehen und spüren lerne, mit meinem Herzen, mit meinem Verstand, was von meinem Besitz unnötig ist.
+
+Worauf ich verzichten könnte, zugunsten derer, die an Mangel leiden.
+
+Gib mir die Gnade, mir immer wieder bewusst zu sein, das ich auf dieser Welt ein Pilger, ein Gast auf dem Weg zu dir bin. Im Augenblick meines Überganges in die andere Welt, in deine Welt, kann ich außer meiner gelebten Liebe für meinen Nächsten, außer meiner guten Taten für andere, nichts mitnehmen.
+
+Das Bewusstsein möge in mir wachsen, das nichts mir gehört, das alle irdischen Güter nur von dir kommen, das ich sie treu verwalten soll, bis du Rechenschaft darüber von mir verlangst. Dieses Fasten gebe mir die Gnade der Demut, eine immer größer werdende Bereitschaft, deinen Willen zu erfüllen.
+
+Reinige mich von meiner Selbstsucht und meinem Hochmut!
+
+Reinige mich von all meinen schlechten Gewohnheiten, beruhige meine vielfältigen Leidenschaften. Gib das ich mit deiner Hilfe ein guter Mensch werden kann. Lass die Tiefen meiner Seele sich vor deiner Gnade und Liebe auftun, sich von ihr erfüllen. Reinige mich, ergreife mich, erfülle mich ganz!
+
+Mutter Maria, hilf mir, das ich den Verlockungen und Versprechnungen der äusseren und inneren Welt, die nicht nährend für mich sind, allen Ansätzen von Gier, Hass und Neid, immer mehr widerstehen kann, so das ich deinem Sohne immer ähnlicher werden darf, von Tag zu Tag ihm treuer diene, sein Wort suche und erfüllen lerne.
+
+Mutter Maria, du warst in deinem Herzen frei, du hast nur eine einzigen Wunsch gekannt, den Willen des Vaters zu erfüllen.
+
+Erbitte für mich die Gnade des fröhlichen Fastens, so das mein Herz den ganzen Tag, mit dir ein Dankeslied singen möchte.
+
+Erbitte für mich die Gnade der Standhaftigkeit bei deinem Sohn, so das mein Entschluss zum Fasten fest sei und bleibe.
+
+Alle Schwierigkeiten welche mir durch das Fasten begegnen werden, den Hunger den ich vielleicht empfinden werde, möchte ich dir und deinem Sohn opfern, sowie dem Wohle der ganzen Menschheit.
+
+Maria, Mutter Gottes, bitte für mich!
+
+Durch deine Fürsprache und durch deinen Schutz, halte fern von mir alles nicht nährende, sowie jede Versuchung der äusseren und inneren Welt. Lehre mich fasten, lehre mich beten, so das ich von Tag zu Tag, dir und deinem Sohn Jehoschua, immer ähnlicher werden darf. Amen.
+
+† Danke Jehoschua †`
+},
+
+vergebung: {
+title: "Gebet um Vergebung",
+body: `Jehoschua, Sohn des Vaters …
+Mir ist bewußt, dass Du mich sehr liebst und mein Glück möchtest.
+
+Im Bewusstsein meiner eigenen Unzulänglichkeit und Schwäche bekenne ich Dir meine Sünden.
+
+Deine große Gnade, deine unendliche Barmherzigkeit, hat meine Sünden, durch deinen Tod am Kreuz, von mir genommen.
+
+Meine Sünden zugedeckt mit deinem Blut. Meine große, meine übergroße Schuld, die ich durch eigene Schwäche und Unbeständigkeit auf mich geladen habe, hast du für immer getilgt.
+
+Jehoschua, ich danke dir von ganzem Herzen, das Du mir meine Schwachheit, meine Unbeständigkeit, immer wieder neu vergibst. Demütig nehme ich Deine barmherzige Vergebung an, durch die ich mir selbst an vielen Stellen vergeben kann.
+
+Bitte schenke mir immer wieder deine Gnade, für diesen Schritt der Selbstannahme und Vergebung.
+
+Jehoschua, ich danke dir von ganzem Herzen, das dein kostbares Blut mich gereinigt, meine Wunden geheilt, meine sündhaften Bindungen, meine Verstrickungen zerschnitten, die Last meiner Sünden von mir genommen hat.
+
+Alles durch deine allumfassende Barmherzigkeit, deine unendliche Liebe und deine unermessliche Gnade mir gegenüber.
+
+Im Vertrauen auf diese Gnaden, die mir den Zugang zu dir öffnen, bin ich erfüllt von Dankbarkeit und Hingabe.
+
+Wie Du mir verziehen hast, möchte ich allen verzeihen, die mir Leid zugefügt, mich verwundet, mich abgelehnt, mich verabscheut, enttäuscht oder schlecht behandelt haben.
+
+Dies kann ich jedoch nicht aus eigener Kraft. Ich brauche deine Unterstützung, deine Hilfe, deine Liebe, deine Barmherzigkeit, um wirklich aufrichtigen Herzens allen anderen vergeben zu können. Ohne Dich bin ich hilflos, ist mein Wunsch zum Scheitern verurteilt.
+
+So bitte ich Dich, Jehoschua, gewähre mir die Gnade des Vergebens, des Verzeihens, bedingungslos und ohne jedwede Einschränkung.
+
+Lass mich diese Entscheidung immer wieder neu treffen können, allen von ganzem Herzen, aufrichtig, ehrlich und vorbehaltlos zu vergeben.
+
+†
+
+Ich vergebe aufrichtigen Herzens meinen Eltern, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens meinen Großeltern, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens meinen Geschwistern, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen.
+
+†
+
+Ich vergebe aufrichtigen Herzens allen mir bekannten und unbekannten Familienmitgliedern, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens all meinen Vorfahren, auf mütterlicher und väterlicher Seite, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens allen Priestern, Ordensschwestern und Mitarbeitern von Religionsgemeinschaften, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens all denen, die durch ihre berufliche Tätigkeit Einfluss auf mein Leben hatten, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens meinen Arbeitgebern, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens meinen Lehrern und allen, die für meine Aus- und Fortbildung zuständig waren, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens allen anderen Menschen, die mir in unterschiedlichster Weise, an unterschiedlichsten Orten, bei unterschiedlichsten Gelegenheiten, unter unterschiedlichsten Bedingungen begegnet sind, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Ich vergebe aufrichtigen Herzens allen meinen Freunden, meinen Bekannten, meinen Wegbegleitern, wenn ihr Verhalten mir gegenüber nicht wertschätzend, fördernd oder heilsam gewesen ist, selbst wenn dies mein heutiges Leben weiterhin beeinflusst …
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Jehoschua, ich bitte Dich aufrichtigen Herzens, ganz besonders um die Gnade der Vergebung für den oder die Menschen …
+• die mich tief in meinem Leben verletzt oder gekränkt haben,
+• für die Menschen, welche ich für meine schlimmsten Feinde hielt oder halte,
+• für diejenigen, denen zu vergeben, mir am schwersten fällt,
+• für die, zu denen ich gesagt habe: „Ich werde dir / euch, niemals vergeben können, solange ich lebe“.
+
+Ich entbinde sie von aller Schuld mir gegenüber. Ich segne sie von ganzem Herzen und schließe Frieden mit ihnen. Mögen ihre Seelen, sofern sie bereits verstorben sind, Frieden gefunden haben bei dir.
+
+†
+
+Ich möchte ihnen gerne verzeihen, verstehen lernen, das sie durch ihre erlebten Abhängigkeiten von Menschen, von Situationen, durch ihre eigenen Lebensbedingungen, ihre eigenen Lebenserfahrungen, durch an sich selbst erlebte Verletzungen, erlebte Enttäuschungen, mich verwundet, verletzt haben, bewusst oder unbewusst, gewollt oder ungewollt.
+
+Ich möchte ihnen gerne verzeihen, verstehen lernen, das sie in unserer gemeinsamen Lebenssituation, unserer gemeinsam verbrachten Zeit, nicht die Rolle wahrgenommen haben, wahrnehmen konnten, die ihrer Verantwortung und Aufgabe mir gegenüber gerecht geworden wäre.
+
+Ich möchte ihnen in Demut, mit aufrichtigen Herzen und deiner Hilfe vergeben, wenn dies alles in mir Verletzungen und Leid verursacht hat.
+
+Wenn dies in meinen Leben als Kind, als Heranwachsender, als Erwachsener, mich daran gehindert, es erschwert oder unmöglich gemacht hat, mich so zu entwickeln, wie es für ein freies, selbstbestimmtes und erwachsenes Leben notwendig und wichtig gewesen wäre.
+
+Dies gilt ebenso denen, die ich hier nicht namentlich erwähnt oder vergessen habe, bewußt oder unbewußt.
+
+Ich vergebe ihnen, wo sie mir ihre menschliche Liebe, ihre Wärme, ihr Mitgefühl und ihre Barmherzigkeit nicht zeigen konnten, weil sie diese vielleicht an sich selbst nie erfahren durften.
+
+Ich entbinde sie von aller Schuld mir gegenüber, sofern dies alles in unserem gemeinsamen Leben vorgekommen ist, Einfluss auf mein Leben und meine Entwicklung genommen hat, oder noch nimmt.
+
+†
+
+Ich bitte Dich, Jehoschua, das Du alle segnest, die mir begegnet sind, oder mir in diesem Leben begegnen werden.
+
+Befreie sie aus allen sie bindenden Fesseln, ihrer eigenen, oder der fremden Abhängigkeit und Unfreiheit. Befreie mich selbst aus allen mich bindenden Fesseln, der eigenen, oder der fremden Abhängigkeit und Unfreiheit.
+
+Jehoschua, Du vergabst all Deinen Feinden, lehre mich allen Menschen vergeben und verzeihen zu können, an jedem Ort und zu jeder Zeit.
+
+Erfülle mich dazu mit Deiner unerschöpflichen Gnade, deiner Liebe, deiner Langmut, deiner Barmherzigkeit.
+
+†
+
+Vor allem bitte ich dich, geliebter Jehoschua aus tiefstem Herzen, das alle, denen ich ähnliches oder schlimmeres, bewusst oder unbewusst, willentlich, in böser Absicht, aus Gedankenlosigkeit, aus Hass, Missgunst, Neid, oder anderen niedrigen oder sündhaften Beweggründen angetan habe, mir so vergeben können, wie ich ihnen mit deiner Hilfe und Gnade vergeben möchte.
+
+Verleih mir und ihnen, alle Kraft, Liebe und Barmherzigkeit, uns in Würde und gegenseitiger Achtung, jederzeit und überall vergebend begegnen zu können, wo immer du uns in diesem oder im jenseitigem Leben zusammen führen wirst.`
+},
+
+dankes: {
+title: "Gebet des Dankes für das Empfangene",
+body: `Jehoschua, Sohn des Vaters …
+mir ist bewußt, dass Du mich sehr liebst und mein Glück möchtest. Deine Gnadengaben erfüllen mich mit großer Dankbarkeit, Freude und dem Wunsch der Hingabe an dich.
+
+So wie Du mich berührt und mit Dank erfüllt hast, möchte ich allen danken, die mich in meinem Leben begleitet und unterstützt haben.
+
+Dies kann ich nicht aus eigener Kraft. Ich brauche dich dazu, deine Hilfe, deine Liebe, deine Barmherzigkeit, dein uneingeschränktes Ja, um wirklich aufrichtigen Herzens allen, ohne jede Einschränkung, jederzeit und überall danken zu können.
+
+So bitte ich Dich, Jehoschua, gewähre mir die Gnade des Dankes, des (be-) danken - können, bedingungslos, ohne jede Einschränkung. Lass mich diese Entscheidung immer wieder neu treffen, von ganzem Herzen aufrichtig, ehrlich und vorbehaltlos, für alles Empfangene allen zu danken.
+
+†
+
+Ich danke aufrichtigen Herzens meinen Eltern …
+Ich danke euch von Herzen für alles, was ihr in unserer gemeinsam verbrachten Zeit für mich getan habt. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Liebe und Zuwendung, euren eigenen Verzicht …
+
+Ich danke euch für die Geduld, die Strenge, das Nein zu manchem, das Ja zu vielem, leben lernen zu dürfen an eurer Hand, mit eurem Schutz im Hintergrund, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens meinen Großeltern ...
+Ich danke euch von Herzen für alles, was ihr in unserer gemeinsam verbrachten Zeit für mich getan habt. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Liebe und Zuwendung, euren eigenen Verzicht …
+
+Ich danke euch für die Geduld, die Strenge, das Nein zu manchem, das Ja zu vielem, leben lernen zu dürfen an eurer Hand, mit eurem Schutz im Hintergrund, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens meinen Geschwistern ...
+Ich danke euch von Herzen für alles, was ihr in unserer gemeinsam verbrachten Zeit für mich getan habt und immer noch tut. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Liebe und Zuwendung, euren eigenen Verzicht …
+
+Ich danke euch für eure Geduld mit mir, für die Kritik an mir, für das Hinterfragen meiner Worte, das Annehmen meiner Gedanken, das Nein zu manchem, das Ja zu vielem, für eure Liebe, euer Dasein, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens meiner Frau …
+Ich danke dir von ganzem Herzen für alles, was du in unserer gemeinsam verbrachten Zeit für mich getan hast und immer noch tust. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Liebe und Zuwendung, deinem eigenen Verzicht …
+
+Ich danke dir für deine Geduld mit mir, für deine Kritik an mir, für das Hinterfragen meiner Worte, das Annehmen meiner Gedanken, das Nein zu manchem, das Ja zu vielem, für deine Liebe, dein Dasein, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens meinen Kindern …
+Ich danke euch von ganzem Herzen für alles, was ihr in unserer gemeinsam verbrachten Zeit für mich getan habt und immer noch tut. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Liebe und Zuwendung, euren eigenen Verzicht …
+
+Ich danke euch für eure Geduld mit mir, für eure Kritik an mir, das Hinterfragen meiner Worte, das Annehmen meiner Gedanken, das Nein zu manchem, das Ja zu vielem, für eure Liebe, euer Dasein, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens den Priestern, den Ordensschwestern, den Mitarbeitern / -innen unterschiedlicher Religionsgemeinschaften,
+Ich danke ihnen von Herzen für alles, was sie in unserer gemeinsamen verbrachten Zeit, für mich getan haben und immer noch tun. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Zuwendung …
+
+Ich danke ihnen für die Geduld, die Strenge, das Nein zu manchem, ihre Kritik an mir, das Hinterfragen meiner Worte, das Annehmen meiner Gedanken, das Ja zu vielem, lernen zu dürfen an ihrer Hand, mit ihrem Schutz im Hintergrund, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens all denen, die im Rahmen ihrer berufliche Tätigkeit, mich begleitet haben ...
+Ich danke ihnen von Herzen für alles, was sie in unserer gemeinsamen verbrachten Zeit, für mich getan haben. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit ...
+
+Ich danke ihnen für die Geduld, die Strenge, das Nein zu manchem, die Kritik an mir, das Hinterfragen meiner Worte, das Annehmen meiner Gedanken, das Ja zu vielem, lernen zu dürfen an ihrer Hand, mit ihrem Schutz im Hintergrund, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens allen anderen Menschen, die in unterschiedlichster Weise, an unterschiedlichsten Orten, bei unterschiedlichsten Gelegenheiten, unter unterschiedlichsten Bedingungen mir begegnet sind ..
+Ich danke ihnen von Herzen für alles, was sie in unserer gemeinsamen verbrachten Zeit, für mich getan haben und immer noch tun. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Liebe und Zuwendung, ihren eigenen Verzicht …
+
+Ich danke ihnen für die Geduld, die Strenge, das Nein zu manchem, die Kritik an mir, das Hinterfragen meiner Worte, das Annehmen meiner Gedanken, das Ja zu vielem, lernen zu dürfen an ihrer Hand, mit ihrem Schutz im Hintergrund, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich danke aufrichtigen Herzens meinen Freunden, meinen Bekannten, meinen Wegbegleitern ..
+Ich danke ihnen von Herzen für alles, was sie in unserer gemeinsamen verbrachten Zeit, für mich getan haben und immer noch tun. Für all die kleinen und großen Hilfestellungen, die erfüllten Wünsche, die Aufmerksamkeit, die Liebe und Zuwendung, ihren eigenen Verzicht …
+
+Ich danke ihnen für die Geduld, die Strenge, das Nein zu manchem, ihrer Kritik an mir, das Hinterfragen meiner Worte, das Annehmen meiner Gedanken, das Ja zu vielem, lernen zu dürfen an ihrer Hand, mit ihrem Schutz im Hintergrund, danke für so vieles, auch für das ungesagte ..
+
+†
+
+Ich bitte Dich, Jehoschua, das Du alle segnest, die mir begegnet sind, oder mir in diesem Leben begegnen werden. Lehre mich allen Menschen danken zu können, an jedem Ort, zu jeder Zeit.
+
+Erfülle mich dazu mit Deiner unerschöpflichen Gnade, deiner Liebe, deiner Langmut, deiner Barmherzigkeit.
+
+Verleih mir und ihnen, alle Kraft, Liebe und Barmherzigkeit, uns in Würde und gegenseitiger Achtung, jederzeit und überall dankend begegnen zu können, wo immer du uns in diesem, oder im jenseitigem Leben zusammen führen wirst.`
+}
+
+};
+
+let fontSize = 1.2;
+
+function openPrayer(key){
+  const p = prayers[key];
+  document.getElementById('menu').classList.add('hidden');
+  const reader = document.getElementById('reader');
+  reader.classList.add('active');
+  document.getElementById('reader-title').textContent = p.title;
+
+  const body = document.getElementById('reader-body');
+  body.innerHTML = p.body.replace(/†/g,'<div class="cross">✝</div>') +
+    (key !== 'fastentag' ?
+      '<div class="blessing">' + BLESSING + '<span class="note">' + BLESSING_NOTE + '</span></div>'
+      : '');
+
+  applyFont();
+  body.scrollTop = 0;
+}
+
+function showMenu(){
+  document.getElementById('reader').classList.remove('active');
+  document.getElementById('menu').classList.remove('hidden');
+}
+
+function changeFont(delta){
+  fontSize = Math.min(1.6, Math.max(0.8, fontSize + delta*0.1));
+  applyFont();
+}
+
+function applyFont(){
+  document.getElementById('reader-body').style.fontSize = fontSize + 'rem';
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> openPrayer(btn.dataset.target));
+});
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

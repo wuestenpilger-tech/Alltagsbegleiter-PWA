@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Nordic Walking Logbuch (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE7D9;
+    --paper-2:#E1D9C6;
+    --card:#F4EFE4;
+    --ink:#24211B;
+    --ink-soft:#5B564C;
+    --pine:#1E2A44;
+    --pine-light:#2C3B5C;
+    --moss:#D8AE58;
+    --amber:#B8862E;
+    --border:#D9D0BC;
+    --red:#8C3B3B;
+    --rest:#7A7360;
+    --font-display:'Fraunces', serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+  button, input, select, textarea{touch-action:manipulation;font-family:inherit;}
+  .app{max-width:760px;margin:0 auto;min-height:100vh;padding-bottom:56px;}
+
+  .hero{
+    background:radial-gradient(130% 100% at 50% -20%, var(--pine-light) 0%, var(--pine) 65%, #1F3A22 100%);
+    color:var(--paper);padding:48px 40px 38px;text-align:center;
+  }
+  .eyebrow{margin:0 0 8px;letter-spacing:.16em;text-transform:uppercase;font-size:16px;color:#C9AF7A;font-weight:600;}
+  h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:46px;}
+
+  h2{font-family:var(--font-display);font-size:27px;font-weight:700;margin:36px 26px 14px;}
+
+  .form-card{
+    background:var(--card);border:1px solid var(--border);border-radius:22px;
+    margin:26px 26px 0;padding:24px;
+  }
+  .form-row{display:flex;gap:14px;margin-bottom:17px;}
+  .form-field{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .form-field label{font-size:17px;color:var(--ink-soft);}
+  .form-field input, .form-field select, .form-field textarea{
+    padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);
+    background:#fff;color:var(--ink);font-size:20px;width:100%;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus{outline:none;border-color:var(--pine);}
+  textarea{resize:vertical;min-height:72px;}
+
+  .route-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .chip{
+    padding:7px 16px;border-radius:999px;border:1.5px solid var(--border);
+    background:var(--card);color:var(--ink-soft);font-size:17px;cursor:pointer;
+  }
+  .chip:active{border-color:var(--pine);color:var(--pine);}
+
+  .weather-select{display:flex;gap:8px;flex-wrap:wrap;}
+  .weather-btn{
+    flex:1;min-width:76px;padding:11px 6px;border-radius:13px;border:1.5px solid var(--border);
+    background:var(--card);cursor:pointer;text-align:center;font-size:27px;line-height:1;
+  }
+  .weather-btn .w-label{display:block;font-size:13px;color:var(--ink-soft);margin-top:6px;}
+  .weather-btn.active{border-color:var(--pine);background:#E9F1E8;}
+  .weather-btn.auto{border-color:var(--amber);}
+
+  .weather-status-row{display:flex;align-items:center;justify-content:space-between;margin-top:9px;}
+  .weather-status{font-size:16px;color:var(--ink-soft);font-style:italic;}
+  .weather-refresh{
+    background:none;border:1.5px solid var(--border);border-radius:10px;color:var(--pine);
+    font-size:16px;padding:6px 13px;cursor:pointer;white-space:nowrap;
+  }
+  .weather-refresh:active{background:#E9F1E8;}
+
+  .backfill-row{margin:20px 26px 0;}
+  .backfill-btn{
+    width:100%;padding:14px;border-radius:13px;border:1.5px dashed var(--pine-light);
+    background:var(--card);color:var(--pine);font-size:18px;font-weight:600;cursor:pointer;
+  }
+  .backfill-status{text-align:center;font-size:16px;color:var(--ink-soft);margin-top:9px;min-height:20px;}
+
+  .rpe-row{display:flex;gap:6px;}
+  .rpe-btn{
+    flex:1;padding:13px 0;border-radius:10px;border:1.5px solid var(--border);
+    background:var(--card);color:var(--ink-soft);font-family:var(--font-mono);font-size:17px;cursor:pointer;
+  }
+  .rpe-btn.active{background:var(--pine);border-color:var(--pine);color:#fff;}
+
+  .type-select{display:flex;gap:11px;}
+  .type-btn{
+    flex:1;padding:13px 14px;border-radius:14px;border:1.5px solid var(--border);
+    background:var(--card);color:var(--ink-soft);font-size:19px;cursor:pointer;text-align:center;
+  }
+  .type-btn.active{background:var(--pine);border-color:var(--pine);color:#fff;}
+
+  .pace-hint{font-size:17px;color:var(--ink-soft);font-family:var(--font-mono);min-height:21px;margin-top:3px;}
+
+  .save-btn{
+    width:100%;margin-top:8px;background:var(--pine);color:#fff;border:none;border-radius:15px;
+    padding:19px;font-family:var(--font-display);font-weight:700;font-size:23px;cursor:pointer;
+  }
+  .save-btn:active{background:#14203A;}
+  .save-status{text-align:center;font-size:17px;color:var(--ink-soft);margin-top:11px;min-height:21px;}
+  .rest-btn{
+    width:100%;margin-top:11px;background:none;color:var(--rest);border:1.5px dashed var(--rest);
+    border-radius:15px;padding:16px;font-family:var(--font-display);font-weight:700;font-size:21px;cursor:pointer;
+  }
+  .rest-btn:active{background:rgba(92,107,134,0.1);}
+  .entry-rest{background:rgba(92,107,134,0.08);border-color:rgba(92,107,134,0.4);}
+
+  /* Statistik */
+  .stats-grid{display:flex;gap:11px;margin:0 26px;}
+  .stat-card{
+    flex:1;background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:17px 11px;text-align:center;
+  }
+  .stat-value{font-size:27px;font-family:var(--font-mono);color:var(--pine);}
+  .stat-label{font-size:15px;color:var(--ink-soft);margin-top:4px;line-height:1.3;}
+
+  /* Verlauf */
+  .history-list{display:flex;flex-direction:column;gap:11px;margin:0 26px;}
+  .entry{
+    background:var(--card);border:1px solid var(--border);border-radius:17px;padding:17px 20px;
+  }
+  .entry-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .entry-date{font-family:var(--font-mono);font-size:17px;color:var(--ink-soft);}
+  .entry-route{font-weight:600;font-size:21px;}
+  .entry-mid{display:flex;gap:19px;margin-top:9px;font-size:18px;color:var(--ink);flex-wrap:wrap;}
+  .entry-mid span{white-space:nowrap;}
+  .entry-notes{font-size:17px;color:var(--ink-soft);font-style:italic;margin-top:9px;}
+  .entry-actions{display:flex;gap:16px;margin-top:6px;}
+  .entry-del{
+    background:none;border:none;color:var(--red);font-size:16px;text-decoration:underline;
+    cursor:pointer;padding:6px 0 0;
+  }
+  .entry-edit{
+    background:none;border:none;color:var(--pine);font-size:16px;text-decoration:underline;
+    cursor:pointer;padding:6px 0 0;
+  }
+  .form-card.editing{border-color:var(--amber);border-width:2px;}
+  .edit-banner{
+    background:#F7ECD9;border:1.5px solid var(--amber);border-radius:12px;
+    padding:11px 15px;font-size:16px;color:#7A5A1E;margin-bottom:17px;display:none;
+  }
+  .history-empty{font-size:18px;color:var(--ink-soft);text-align:center;padding:22px;}
+  .backup-banner{
+    background:#F7ECD9;border:1.5px solid var(--amber);border-radius:12px;
+    padding:11px 15px;font-size:16px;color:#7A5A1E;margin:0 26px 17px;
+  }
+
+  .backup-row{display:flex;gap:11px;margin:22px 26px 0;}
+  .backup-btn{
+    flex:1;padding:14px;border-radius:13px;border:1.5px solid var(--border);
+    background:var(--card);color:var(--ink-soft);font-size:18px;font-weight:600;cursor:pointer;
+  }
+  .backup-status{text-align:center;font-size:16px;color:var(--ink-soft);margin-top:11px;min-height:20px;}
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+</head>
+<body>
+<div class="app">
+
+  <header class="hero">
+    <p class="eyebrow">Ohne Uhr unterwegs</p>
+    <h1>Nordic Walking Logbuch</h1>
+  </header>
+
+  <h2 id="formHeading">Neue Runde eintragen</h2>
+  <div class="form-card" id="formCard">
+    <div class="edit-banner" id="editBanner">✏️ Eintrag vom <span id="editBannerDate"></span> wird bearbeitet.</div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Datum <button type="button" id="todayBtn" style="border:none;background:none;color:var(--pine);font-size:15px;text-decoration:underline;cursor:pointer;padding:0;margin-left:9px;">Heute</button></label>
+        <input type="date" id="inDate">
+      </div>
+      <div class="form-field">
+        <label>Uhrzeit</label>
+        <input type="time" id="inTime">
+      </div>
+    </div>
+    <div class="pace-hint" id="backfillHint" style="margin-top:-4px;">📅 Auch rückwirkend nutzbar — einfach ein vergangenes Datum wählen, um ein Training nachzutragen.</div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Trainingsart</label>
+        <div class="type-select" id="typeSelect">
+          <button type="button" class="type-btn active" data-type="outdoor">🌲 Nordic Walking</button>
+          <button type="button" class="type-btn" data-type="indoor">🏃 Laufband</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field" style="flex:1.4;">
+        <label>Runde / Route</label>
+        <input type="text" id="inRoute" placeholder="z.B. Waldrunde">
+        <div class="route-chips" id="routeChips"></div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Strecke (km)</label>
+        <input type="number" id="inKm" step="0.1" min="0" inputmode="decimal" placeholder="4.5">
+      </div>
+      <div class="form-field">
+        <label>Dauer (Minuten)</label>
+        <input type="number" id="inDur" step="1" min="0" inputmode="numeric" placeholder="55">
+      </div>
+    </div>
+    <div class="pace-hint" id="paceHint"></div>
+
+    <div id="outdoorFields">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Wetter</label>
+          <div class="weather-select" id="weatherSelect">
+            <button class="weather-btn" data-w="Sonnig">☀️<span class="w-label">Sonnig</span></button>
+            <button class="weather-btn" data-w="Bewölkt">⛅<span class="w-label">Bewölkt</span></button>
+            <button class="weather-btn" data-w="Bedeckt">☁️<span class="w-label">Bedeckt</span></button>
+            <button class="weather-btn" data-w="Regen">🌧️<span class="w-label">Regen</span></button>
+            <button class="weather-btn" data-w="Wind">💨<span class="w-label">Wind</span></button>
+            <button class="weather-btn" data-w="Schnee">❄️<span class="w-label">Schnee</span></button>
+          </div>
+          <div class="weather-status-row">
+            <span class="weather-status" id="weatherStatus"></span>
+            <button type="button" class="weather-refresh" id="weatherRefreshBtn">🔄 Wetter laden</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Temperatur (°C)</label>
+          <input type="number" id="inTemp" step="1" inputmode="numeric" placeholder="wird automatisch geladen">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Ø Herzfrequenz Training (bpm, optional)</label>
+        <input type="number" id="inHr" step="1" min="0" inputmode="numeric" placeholder="z.B. 118">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Gefühlte Anstrengung (1 = sehr leicht, 10 = maximal)</label>
+        <div class="rpe-row" id="rpeRow"></div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Notizen (optional)</label>
+        <textarea id="inNotes" placeholder="z.B. Stöcke vergessen, Knie gut, neue Streckenvariante…"></textarea>
+      </div>
+    </div>
+
+    <button class="save-btn" id="saveBtn">Runde speichern</button>
+    <button class="rest-btn" id="restBtn" type="button">🌙 Ruhetag für dieses Datum eintragen</button>
+    <button class="rest-btn" id="cancelEditBtn" type="button" style="display:none;border-color:var(--ink-soft);color:var(--ink-soft);">✕ Bearbeitung abbrechen (ohne zu speichern)</button>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+
+  <h2>Überblick</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="statWeekCount">0</div><div class="stat-label">Runden<br>7 Tage</div></div>
+    <div class="stat-card"><div class="stat-value" id="statWeekKm">0</div><div class="stat-label">km<br>7 Tage</div></div>
+    <div class="stat-card"><div class="stat-value" id="statMonthCount">0</div><div class="stat-label">Runden<br>30 Tage</div></div>
+    <div class="stat-card"><div class="stat-value" id="statMonthKm">0</div><div class="stat-label">km<br>30 Tage</div></div>
+  </div>
+  <div class="stats-grid" style="margin-top:8px;">
+    <div class="stat-card"><div class="stat-value" id="statTotalCount">0</div><div class="stat-label">Runden<br>insgesamt</div></div>
+    <div class="stat-card"><div class="stat-value" id="statTotalKm">0</div><div class="stat-label">km<br>insgesamt</div></div>
+  </div>
+  <div class="stats-grid" style="margin-top:8px;">
+    <div class="stat-card"><div class="stat-value" id="statRestWeek" style="color:var(--rest);">0</div><div class="stat-label">Ruhetage<br>7 Tage</div></div>
+    <div class="stat-card"><div class="stat-value" id="statRestMonth" style="color:var(--rest);">0</div><div class="stat-label">Ruhetage<br>30 Tage</div></div>
+  </div>
+
+  <h2>Herzfrequenz-Tendenz</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="statHrLast">–</div><div class="stat-label">Ø HF<br>letztes Training</div></div>
+    <div class="stat-card"><div class="stat-value" id="statHrMean">–</div><div class="stat-label">Ø HF<br>Mittelwert gesamt</div></div>
+    <div class="stat-card"><div class="stat-value" id="statHrTrend">–</div><div class="stat-label">Tendenz</div></div>
+  </div>
+  <div class="backfill-status" id="hrTrendNote" style="margin:6px 18px 0;"></div>
+
+  <h2>Verlauf</h2>
+  <div class="history-list" id="historyList"></div>
+
+  <div class="backup-banner" id="backupBanner" style="display:none;"></div>
+
+  <div class="backup-row">
+    <button class="backup-btn" id="exportBtn">Daten sichern</button>
+    <button class="backup-btn" id="importBtn">Wiederherstellen</button>
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none;">
+  </div>
+  <div class="backup-status" id="backupStatus"></div>
+
+  <div class="backfill-row">
+    <button class="backfill-btn" id="backfillBtn">🌤️ Wetter bei alten Einträgen nachtragen</button>
+  </div>
+  <div class="backfill-status" id="backfillStatus"></div>
+
+  <h2>Bericht drucken</h2>
+  <div class="form-card">
+    <div class="form-row">
+      <div class="form-field">
+        <label>Von</label>
+        <input type="date" id="printFrom">
+      </div>
+      <div class="form-field">
+        <label>Bis</label>
+        <input type="date" id="printTo">
+      </div>
+    </div>
+    <button class="save-btn" id="printBtn" type="button">🖨️ Bericht drucken</button>
+    <div class="save-status" id="printStatus"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+
+  const LOG_KEY = "nordicwalking_log";
+  let editingId = null;
+  let editingIsRest = false;
+
+  /* ---------- Backup-Erinnerung ---------- */
+  const BACKUP_TS_KEY = "nordicwalking_last_backup";
+  const BACKUP_REMINDER_DAYS = 30;
+
+  function markBackupDone(){
+    try{ localStorage.setItem(BACKUP_TS_KEY, new Date().toISOString()); }catch(e){}
+    renderBackupReminder();
+  }
+  function daysSinceBackup(){
+    let raw;
+    try{ raw = localStorage.getItem(BACKUP_TS_KEY); }catch(e){ raw = null; }
+    if (!raw) return null;
+    const then = new Date(raw);
+    if (isNaN(then.getTime())) return null;
+    return Math.floor((Date.now() - then.getTime()) / 86400000);
+  }
+  function renderBackupReminder(){
+    const el = document.getElementById("backupBanner");
+    if (!el) return;
+    const days = daysSinceBackup();
+    if (days === null){
+      el.style.display = "block";
+      el.innerHTML = "⚠️ <b>Noch keine Sicherung erstellt.</b> Bitte regelmäßig „Daten sichern“ nutzen, damit deine Runden nicht verloren gehen.";
+    } else if (days >= BACKUP_REMINDER_DAYS){
+      el.style.display = "block";
+      el.innerHTML = "⚠️ <b>Letzte Sicherung vor " + days + " Tagen.</b> Zeit für ein neues Backup.";
+    } else {
+      el.style.display = "none";
+    }
+  }
+
+  function loadLog(){
+    try{
+      const raw = localStorage.getItem(LOG_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function saveLog(log){
+    try{ localStorage.setItem(LOG_KEY, JSON.stringify(log)); return true; }catch(e){ return false; }
+  }
+
+  /* ---------- Wetter automatisch (Open-Meteo, kein API-Key nötig) ---------- */
+  const COORDS_KEY = "nordicwalking_coords";
+  const SOLINGEN_COORDS = { lat: 51.1652, lon: 7.0843 }; // Solingen, Stadtmitte (Fallback)
+
+  function getCoords(){
+    return new Promise((resolve) => {
+      try{
+        const cached = localStorage.getItem(COORDS_KEY);
+        if (cached){ resolve(JSON.parse(cached)); return; }
+      }catch(e){}
+      if (!navigator.geolocation){ resolve(SOLINGEN_COORDS); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const c = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          try{ localStorage.setItem(COORDS_KEY, JSON.stringify(c)); }catch(e){}
+          resolve(c);
+        },
+        () => resolve(SOLINGEN_COORDS),
+        { timeout: 4000 }
+      );
+    });
+  }
+
+  /* WMO-Wettercode + Windgeschwindigkeit -> Kategorie der App */
+  function classifyWeather(code, windKmh){
+    if ([71,73,75,77,85,86].includes(code)) return "Schnee";
+    if ([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)) return "Regen";
+    if (windKmh !== null && windKmh >= 35) return "Wind";
+    if ([0,1].includes(code)) return "Sonnig";
+    if (code === 2) return "Bewölkt";
+    if ([3,45,48].includes(code)) return "Bedeckt";
+    return null;
+  }
+
+  function nearestHourIndex(times, dateStr, timeStr){
+    const target = new Date(dateStr + "T" + (timeStr || "12:00") + ":00");
+    let best = 0, bestDiff = Infinity;
+    times.forEach((t, i) => {
+      const diff = Math.abs(new Date(t) - target);
+      if (diff < bestDiff){ bestDiff = diff; best = i; }
+    });
+    return best;
+  }
+
+  /* Holt Wetter (Temperatur, Kategorie) fuer ein Datum/Uhrzeit. Nutzt die
+     Forecast-API mit past_days fuer alles bis 92 Tage zurueck (und Vorhersage),
+     die Archiv-API fuer aeltere Daten. Gibt null zurueck, wenn nicht ermittelbar. */
+  async function fetchWeatherFor(dateStr, timeStr){
+    if (!dateStr) return null;
+    const coords = await getCoords();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const target = new Date(dateStr + "T00:00:00");
+    const diffDays = Math.round((today - target) / 86400000);
+
+    let url;
+    if (diffDays <= 92){
+      const pastDays = Math.min(Math.max(diffDays, 0), 92) || 1;
+      url = "https://api.open-meteo.com/v1/forecast?latitude=" + coords.lat + "&longitude=" + coords.lon +
+            "&hourly=temperature_2m,weathercode,windspeed_10m&past_days=" + pastDays +
+            "&forecast_days=2&timezone=auto";
+    } else {
+      url = "https://archive-api.open-meteo.com/v1/archive?latitude=" + coords.lat + "&longitude=" + coords.lon +
+            "&start_date=" + dateStr + "&end_date=" + dateStr +
+            "&hourly=temperature_2m,weathercode,windspeed_10m&timezone=auto";
+    }
+
+    try{
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const h = data.hourly;
+      if (!h || !h.time || !h.time.length) return null;
+      const idx = nearestHourIndex(h.time, dateStr, timeStr);
+      const temp = h.temperature_2m ? h.temperature_2m[idx] : null;
+      const code = h.weathercode ? h.weathercode[idx] : null;
+      const wind = h.windspeed_10m ? h.windspeed_10m[idx] : null;
+      const category = classifyWeather(code, wind);
+      if (temp === null && category === null) return null;
+      return { temp: (temp !== null && temp !== undefined) ? Math.round(temp) : null, category: category };
+    }catch(e){ return null; }
+  }
+
+  /* ---------- Formular-Setup ---------- */
+  const now = new Date();
+  document.getElementById("inDate").value = now.toISOString().slice(0,10);
+  document.getElementById("inTime").value = String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
+
+  /* ---------- Trainingsart: Nordic Walking (outdoor) oder Laufband (indoor) ---------- */
+  let trainingType = "outdoor";
+  const outdoorFieldsEl = document.getElementById("outdoorFields");
+  const inRouteEl = document.getElementById("inRoute");
+
+  function applyTypeUI(){
+    document.querySelectorAll(".type-btn").forEach(b => b.classList.toggle("active", b.dataset.type === trainingType));
+    const isIndoor = trainingType === "indoor";
+    outdoorFieldsEl.style.display = isIndoor ? "none" : "block";
+    inRouteEl.placeholder = isIndoor ? "z.B. Laufband, Stufe 3" : "z.B. Waldrunde";
+  }
+
+  document.querySelectorAll(".type-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      trainingType = btn.dataset.type;
+      applyTypeUI();
+      if (trainingType === "outdoor") autoFetchWeather(false);
+    });
+  });
+
+  let selectedWeather = null;
+  let weatherManuallySet = false;
+  document.querySelectorAll(".weather-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const already = btn.classList.contains("active");
+      document.querySelectorAll(".weather-btn").forEach(b => { b.classList.remove("active"); b.classList.remove("auto"); });
+      if (!already){ btn.classList.add("active"); selectedWeather = btn.dataset.w; }
+      else selectedWeather = null;
+      weatherManuallySet = true;
+    });
+  });
+
+  const inTempEl = document.getElementById("inTemp");
+  inTempEl.addEventListener("input", () => { weatherManuallySet = true; });
+
+  function setWeatherFromAuto(category, temp){
+    document.querySelectorAll(".weather-btn").forEach(b => { b.classList.remove("active"); b.classList.remove("auto"); });
+    if (category){
+      const btn = document.querySelector('.weather-btn[data-w="' + category + '"]');
+      if (btn){ btn.classList.add("active"); btn.classList.add("auto"); }
+      selectedWeather = category;
+    }
+    if (temp !== null && temp !== undefined){
+      inTempEl.value = temp;
+    }
+  }
+
+  async function autoFetchWeather(force){
+    if (trainingType === "indoor") return;
+    if (weatherManuallySet && !force) return;
+    const status = document.getElementById("weatherStatus");
+    status.textContent = "Wetter wird geladen…";
+    const dateStr = document.getElementById("inDate").value;
+    const timeStr = document.getElementById("inTime").value;
+    const result = await fetchWeatherFor(dateStr, timeStr);
+    if (result && (result.category || result.temp !== null)){
+      setWeatherFromAuto(result.category, result.temp);
+      weatherManuallySet = false;
+      status.textContent = "Automatisch geladen (bearbeitbar).";
+    } else {
+      status.textContent = "Wetter konnte nicht geladen werden — bitte manuell wählen.";
+    }
+  }
+
+  document.getElementById("weatherRefreshBtn").addEventListener("click", () => autoFetchWeather(true));
+  document.getElementById("inDate").addEventListener("change", () => { weatherManuallySet = false; autoFetchWeather(false); });
+  document.getElementById("inTime").addEventListener("change", () => { weatherManuallySet = false; autoFetchWeather(false); });
+
+  document.getElementById("todayBtn").addEventListener("click", () => {
+    const n = new Date();
+    document.getElementById("inDate").value = n.toISOString().slice(0,10);
+    document.getElementById("inTime").value = String(n.getHours()).padStart(2,"0") + ":" + String(n.getMinutes()).padStart(2,"0");
+    weatherManuallySet = false;
+    autoFetchWeather(false);
+  });
+
+  applyTypeUI();
+
+  /* Beim Öffnen der App direkt das aktuelle Wetter fuer "jetzt" laden */
+  autoFetchWeather(false);
+
+  let selectedRpe = null;
+  const rpeRow = document.getElementById("rpeRow");
+  for (let i=1;i<=10;i++){
+    const b = document.createElement("button");
+    b.className = "rpe-btn";
+    b.textContent = i;
+    b.addEventListener("click", () => {
+      const already = b.classList.contains("active");
+      rpeRow.querySelectorAll(".rpe-btn").forEach(x => x.classList.remove("active"));
+      if (!already){ b.classList.add("active"); selectedRpe = i; }
+      else selectedRpe = null;
+    });
+    rpeRow.appendChild(b);
+  }
+
+  /* Pace live berechnen */
+  function updatePace(){
+    const km = parseFloat(document.getElementById("inKm").value);
+    const dur = parseFloat(document.getElementById("inDur").value);
+    const hint = document.getElementById("paceHint");
+    if (km > 0 && dur > 0){
+      const paceMin = dur / km;
+      const m = Math.floor(paceMin);
+      const s = Math.round((paceMin - m) * 60);
+      const speed = (km / (dur/60)).toFixed(1);
+      hint.textContent = "Pace: " + m + ":" + String(s).padStart(2,"0") + " min/km  ·  " + speed + " km/h";
+    } else {
+      hint.textContent = "";
+    }
+  }
+  document.getElementById("inKm").addEventListener("input", updatePace);
+  document.getElementById("inDur").addEventListener("input", updatePace);
+
+  /* Routen-Schnellauswahl aus bisherigen Eintraegen */
+  function renderRouteChips(){
+    const log = loadLog();
+    const counts = {};
+    log.forEach(e => {
+      if (e.route){
+        const key = e.route.trim();
+        if (!counts[key]) counts[key] = { n:0, km:e.km };
+        counts[key].n++;
+        if (e.km) counts[key].km = e.km; // letzte bekannte Streckenlaenge merken
+      }
+    });
+    const top = Object.entries(counts).sort((a,b)=>b[1].n-a[1].n).slice(0,4);
+    const wrap = document.getElementById("routeChips");
+    wrap.innerHTML = "";
+    top.forEach(([name, info]) => {
+      const c = document.createElement("button");
+      c.className = "chip";
+      c.textContent = name;
+      c.addEventListener("click", () => {
+        document.getElementById("inRoute").value = name;
+        if (info.km) document.getElementById("inKm").value = info.km;
+        updatePace();
+      });
+      wrap.appendChild(c);
+    });
+  }
+
+  /* ---------- Bearbeiten bestehender Einträge ---------- */
+  function resetFormToNew(){
+    const now = new Date();
+    document.getElementById("inDate").value = now.toISOString().slice(0,10);
+    document.getElementById("inTime").value = String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
+    trainingType = "outdoor";
+    applyTypeUI();
+    document.getElementById("inRoute").value = "";
+    document.getElementById("inKm").value = "";
+    document.getElementById("inDur").value = "";
+    document.getElementById("inHr").value = "";
+    document.getElementById("inTemp").value = "";
+    document.getElementById("inNotes").value = "";
+    selectedWeather = null;
+    weatherManuallySet = false;
+    document.querySelectorAll(".weather-btn").forEach(b => { b.classList.remove("active"); b.classList.remove("auto"); });
+    selectedRpe = null;
+    rpeRow.querySelectorAll(".rpe-btn").forEach(x => x.classList.remove("active"));
+    updatePace();
+    autoFetchWeather(false);
+  }
+
+  function startEdit(id){
+    const log = loadLog();
+    const entry = log.find(e => e.id === id);
+    if (!entry) return;
+    editingId = id;
+    editingIsRest = !!entry.rest;
+
+    document.getElementById("inDate").value = entry.date;
+    document.getElementById("inNotes").value = entry.notes || "";
+
+    if (editingIsRest){
+      // Ruhetag: nur Datum + Notiz sind relevant, über den Ruhetag-Button aktualisieren
+      document.getElementById("restBtn").textContent = "🌙 Ruhetag aktualisieren";
+      document.getElementById("saveBtn").style.display = "none";
+    } else {
+      document.getElementById("inTime").value = entry.time || "";
+      trainingType = entry.type === "indoor" ? "indoor" : "outdoor";
+      applyTypeUI();
+      document.getElementById("inRoute").value = entry.route || "";
+      document.getElementById("inKm").value = entry.km !== null && entry.km !== undefined ? entry.km : "";
+      document.getElementById("inDur").value = entry.minutes !== null && entry.minutes !== undefined ? entry.minutes : "";
+      document.getElementById("inHr").value = entry.hr !== null && entry.hr !== undefined ? entry.hr : "";
+      document.getElementById("inTemp").value = entry.temp !== null && entry.temp !== undefined ? entry.temp : "";
+      selectedWeather = entry.weather || null;
+      weatherManuallySet = true;
+      document.querySelectorAll(".weather-btn").forEach(b => {
+        b.classList.remove("auto");
+        b.classList.toggle("active", b.dataset.w === entry.weather);
+      });
+      selectedRpe = entry.rpe || null;
+      rpeRow.querySelectorAll(".rpe-btn").forEach((x, i) => x.classList.toggle("active", (i+1) === entry.rpe));
+      updatePace();
+      document.getElementById("saveBtn").textContent = "Änderung speichern";
+      document.getElementById("saveBtn").style.display = "block";
+      document.getElementById("restBtn").style.display = "none";
+    }
+
+    document.getElementById("cancelEditBtn").style.display = "block";
+    document.getElementById("formCard").classList.add("editing");
+    document.getElementById("formHeading").textContent = "Eintrag bearbeiten";
+    document.getElementById("editBanner").style.display = "block";
+    document.getElementById("editBannerDate").textContent = entry.date.split("-").reverse().join(".");
+    document.getElementById("saveStatus").textContent = "";
+    document.getElementById("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function cancelEdit(){
+    editingId = null;
+    editingIsRest = false;
+    document.getElementById("saveBtn").textContent = "Runde speichern";
+    document.getElementById("saveBtn").style.display = "block";
+    document.getElementById("restBtn").textContent = "🌙 Ruhetag für dieses Datum eintragen";
+    document.getElementById("restBtn").style.display = "block";
+    document.getElementById("cancelEditBtn").style.display = "none";
+    document.getElementById("formCard").classList.remove("editing");
+    document.getElementById("formHeading").textContent = "Neue Runde eintragen";
+    document.getElementById("editBanner").style.display = "none";
+    document.getElementById("saveStatus").textContent = "";
+    resetFormToNew();
+  }
+
+  document.getElementById("cancelEditBtn").addEventListener("click", cancelEdit);
+
+  /* ---------- Speichern ---------- */
+  document.getElementById("saveBtn").addEventListener("click", () => {
+    const status = document.getElementById("saveStatus");
+    const date = document.getElementById("inDate").value;
+    const km = parseFloat(document.getElementById("inKm").value);
+    if (!date){ status.textContent = "Bitte ein Datum angeben."; return; }
+    if (!(km > 0)){ status.textContent = "Bitte eine Streckenlänge angeben."; return; }
+
+    const entry = {
+      date: date,
+      time: document.getElementById("inTime").value || null,
+      type: trainingType,
+      route: document.getElementById("inRoute").value.trim() || null,
+      km: km,
+      minutes: parseFloat(document.getElementById("inDur").value) || null,
+      hr: document.getElementById("inHr").value !== "" ? parseFloat(document.getElementById("inHr").value) : null,
+      weather: trainingType === "indoor" ? null : selectedWeather,
+      temp: trainingType === "indoor" ? null : (document.getElementById("inTemp").value !== "" ? parseFloat(document.getElementById("inTemp").value) : null),
+      rpe: selectedRpe,
+      notes: document.getElementById("inNotes").value.trim() || null,
+      id: (editingId && !editingIsRest) ? editingId : Date.now()
+    };
+
+    const log = loadLog();
+    if (editingId && !editingIsRest){
+      const idx = log.findIndex(e => e.id === editingId);
+      if (idx !== -1) log[idx] = entry; else log.push(entry);
+    } else {
+      log.push(entry);
+    }
+    const wasEditing = !!(editingId && !editingIsRest);
+    if (saveLog(log)){
+      status.textContent = wasEditing ? "Änderung gespeichert." : "Runde gespeichert.";
+      if (wasEditing){
+        cancelEdit();
+      } else {
+        document.getElementById("inNotes").value = "";
+        document.getElementById("inHr").value = "";
+      }
+      renderAll();
+    } else {
+      status.textContent = "Speichern fehlgeschlagen.";
+    }
+  });
+
+  document.getElementById("restBtn").addEventListener("click", () => {
+    const status = document.getElementById("saveStatus");
+    const date = document.getElementById("inDate").value;
+    if (!date){ status.textContent = "Bitte ein Datum angeben."; return; }
+    const log = loadLog();
+    const isEditingThisRest = editingId && editingIsRest;
+
+    if (!isEditingThisRest && log.some(e => e.date === date && !e.rest)){
+      status.textContent = "Für dieses Datum gibt es bereits eine Trainingsrunde.";
+      return;
+    }
+    if (log.some(e => e.date === date && e.rest && e.id !== editingId)){
+      status.textContent = "Für dieses Datum ist bereits ein Ruhetag eingetragen.";
+      return;
+    }
+    const entry = {
+      date: date,
+      rest: true,
+      notes: document.getElementById("inNotes").value.trim() || null,
+      id: isEditingThisRest ? editingId : Date.now()
+    };
+    if (isEditingThisRest){
+      const idx = log.findIndex(e => e.id === editingId);
+      if (idx !== -1) log[idx] = entry; else log.push(entry);
+    } else {
+      log.push(entry);
+    }
+    if (saveLog(log)){
+      status.textContent = isEditingThisRest
+        ? "Ruhetag aktualisiert für " + date.split("-").reverse().join(".") + "."
+        : "Ruhetag eingetragen für " + date.split("-").reverse().join(".") + ".";
+      if (isEditingThisRest){
+        cancelEdit();
+      } else {
+        document.getElementById("inNotes").value = "";
+      }
+      renderAll();
+    } else {
+      status.textContent = "Speichern fehlgeschlagen.";
+    }
+  });
+
+  /* ---------- Statistik & Verlauf ---------- */
+  const WEATHER_ICONS = { "Sonnig":"☀️", "Bewölkt":"⛅", "Bedeckt":"☁️", "Regen":"🌧️", "Wind":"💨", "Schnee":"❄️" };
+
+  function fmtPace(e){
+    if (!(e.km > 0) || !(e.minutes > 0)) return null;
+    const paceMin = e.minutes / e.km;
+    const m = Math.floor(paceMin);
+    const s = Math.round((paceMin - m) * 60);
+    return m + ":" + String(s).padStart(2,"0") + " min/km";
+  }
+
+  function renderStats(){
+    const log = loadLog();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dayMs = 24*60*60*1000;
+    let wC=0, wKm=0, mC=0, mKm=0, tKm=0, tCount=0, restW=0, restM=0;
+    log.forEach(e => {
+      const d = new Date(e.date + "T00:00:00");
+      const diff = (today - d)/dayMs;
+      if (e.rest){
+        if (diff < 7) restW++;
+        if (diff < 30) restM++;
+        return;
+      }
+      if (diff < 7){ wC++; wKm += e.km||0; }
+      if (diff < 30){ mC++; mKm += e.km||0; }
+      tKm += e.km||0;
+      tCount++;
+    });
+    document.getElementById("statWeekCount").textContent = wC;
+    document.getElementById("statWeekKm").textContent = wKm.toFixed(1);
+    document.getElementById("statMonthCount").textContent = mC;
+    document.getElementById("statMonthKm").textContent = mKm.toFixed(1);
+    document.getElementById("statTotalCount").textContent = tCount;
+    document.getElementById("statTotalKm").textContent = tKm.toFixed(1);
+    document.getElementById("statRestWeek").textContent = restW;
+    document.getElementById("statRestMonth").textContent = restM;
+  }
+
+  /* ---------- Herzfrequenz-Tendenz ----------
+     HR_TREND_THRESHOLD: Ab welcher prozentualen Abweichung zwischen dem
+     Schnitt der letzten Trainings und dem Schnitt der davorliegenden
+     Trainings von einer echten Tendenz gesprochen wird (statt normaler
+     Tagesschwankung). 5% ist für die Trainingsherzfrequenz ein sinnvoller,
+     eher vorsichtiger Wert – größere Sprünge (20–25%) treten bei stabiler
+     Gesundheit kaum allein durch Fitnessveränderung auf, sondern eher durch
+     Hitze, Erschöpfung, Krankheit o.ä. Bei Bedarf hier anpassen.
+     HR_TREND_WINDOW: Wie viele der letzten Trainings als "aktueller Block"
+     gegen die davor liegenden Trainings verglichen werden. */
+  const HR_TREND_THRESHOLD = 5;
+  const HR_TREND_WINDOW = 5;
+
+  function renderHrStats(){
+    const log = loadLog()
+      .filter(e => !e.rest && e.hr !== null && e.hr !== undefined && e.hr > 0)
+      .slice()
+      .sort((a,b) => (a.date+(a.time||"")).localeCompare(b.date+(b.time||"")));
+
+    const elLast = document.getElementById("statHrLast");
+    const elMean = document.getElementById("statHrMean");
+    const elTrend = document.getElementById("statHrTrend");
+    const elNote = document.getElementById("hrTrendNote");
+
+    if (log.length === 0){
+      elLast.textContent = "–";
+      elMean.textContent = "–";
+      elTrend.textContent = "–";
+      elTrend.style.color = "";
+      elNote.textContent = "Noch keine Herzfrequenz-Daten erfasst.";
+      return;
+    }
+
+    const last = log[log.length - 1];
+    elLast.textContent = Math.round(last.hr);
+
+    const overallMean = log.reduce((s,e) => s + e.hr, 0) / log.length;
+    elMean.textContent = overallMean.toFixed(0);
+
+    if (log.length < 4){
+      elTrend.textContent = "–";
+      elTrend.style.color = "";
+      elNote.textContent = "Für eine Tendenz werden mindestens 4 Trainings mit Herzfrequenz benötigt (bisher " + log.length + ").";
+      return;
+    }
+
+    const windowSize = Math.min(HR_TREND_WINDOW, Math.floor(log.length / 2));
+    const recent = log.slice(-windowSize);
+    const older = log.slice(0, log.length - windowSize);
+    const recentAvg = recent.reduce((s,e) => s + e.hr, 0) / recent.length;
+    const olderAvg = older.reduce((s,e) => s + e.hr, 0) / older.length;
+    const diffPercent = ((recentAvg - olderAvg) / olderAvg) * 100;
+
+    if (diffPercent <= -HR_TREND_THRESHOLD){
+      elTrend.textContent = "↓ " + Math.abs(diffPercent).toFixed(0) + "%";
+      elTrend.style.color = "var(--pine)";
+      elNote.textContent = "Die Herzfrequenz der letzten " + windowSize + " Trainings liegt im Schnitt " +
+        Math.abs(diffPercent).toFixed(0) + "% unter den davorliegenden Werten (Ø " + recentAvg.toFixed(0) +
+        " vs. " + olderAvg.toFixed(0) + " bpm) — spricht für eine verbesserte Ausdauer.";
+    } else if (diffPercent >= HR_TREND_THRESHOLD){
+      elTrend.textContent = "↑ " + diffPercent.toFixed(0) + "%";
+      elTrend.style.color = "var(--red)";
+      elNote.textContent = "Die Herzfrequenz der letzten " + windowSize + " Trainings liegt im Schnitt " +
+        diffPercent.toFixed(0) + "% über den davorliegenden Werten (Ø " + recentAvg.toFixed(0) +
+        " vs. " + olderAvg.toFixed(0) + " bpm) — kann auf Hitze, Ermüdung oder nachlassende Ausdauer hindeuten.";
+    } else {
+      elTrend.textContent = "→ stabil";
+      elTrend.style.color = "var(--amber)";
+      elNote.textContent = "Die Herzfrequenz bewegt sich im Rahmen der üblichen Schwankung (± " +
+        HR_TREND_THRESHOLD + "%) — keine klare Tendenz erkennbar.";
+    }
+  }
+
+  function renderHistory(){
+    const log = loadLog().slice().sort((a,b) => (b.date+(b.time||"")).localeCompare(a.date+(a.time||"")));
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+    if (log.length === 0){
+      list.innerHTML = '<div class="history-empty">Noch keine Runden eingetragen.</div>';
+      return;
+    }
+    log.slice(0,30).forEach(e => {
+      const div = document.createElement("div");
+      const dateStr = e.date.split("-").reverse().join(".") + (e.time ? " · " + e.time : "");
+      if (e.rest){
+        div.className = "entry entry-rest";
+        div.innerHTML =
+          '<div class="entry-top"><span class="entry-route" style="color:var(--rest);">🌙 Ruhetag</span>' +
+          '<span class="entry-date">' + dateStr + '</span></div>' +
+          (e.notes ? '<div class="entry-notes">' + e.notes.replace(/</g,"&lt;") + '</div>' : "") +
+          '<div class="entry-actions"><button class="entry-edit" data-id="' + e.id + '">Eintrag bearbeiten</button>' +
+          '<button class="entry-del" data-id="' + e.id + '">Eintrag löschen</button></div>';
+        list.appendChild(div);
+        return;
+      }
+      div.className = "entry";
+      const pace = fmtPace(e);
+      const isIndoor = e.type === "indoor";
+      const typeIcon = isIndoor ? "🏃 " : "🌲 ";
+      const parts = [];
+      parts.push("<span>" + e.km.toFixed(1).replace(".",",") + " km</span>");
+      if (e.minutes) parts.push("<span>" + Math.round(e.minutes) + " min</span>");
+      if (pace) parts.push("<span>" + pace + "</span>");
+      if (e.weather) parts.push("<span>" + (WEATHER_ICONS[e.weather]||"") + " " + e.weather + "</span>");
+      if (e.temp !== null && e.temp !== undefined) parts.push("<span>" + e.temp + " °C</span>");
+      if (e.hr) parts.push("<span>♥ " + Math.round(e.hr) + " bpm</span>");
+      if (e.rpe) parts.push("<span>Anstrengung " + e.rpe + "/10</span>");
+      div.innerHTML =
+        '<div class="entry-top"><span class="entry-route">' + typeIcon + (e.route || (isIndoor ? "Laufband" : "Runde")) + '</span>' +
+        '<span class="entry-date">' + dateStr + '</span></div>' +
+        '<div class="entry-mid">' + parts.join("") + '</div>' +
+        (e.notes ? '<div class="entry-notes">' + e.notes.replace(/</g,"&lt;") + '</div>' : "") +
+        '<div class="entry-actions"><button class="entry-edit" data-id="' + e.id + '">Eintrag bearbeiten</button>' +
+        '<button class="entry-del" data-id="' + e.id + '">Eintrag löschen</button></div>';
+      list.appendChild(div);
+    });
+    list.querySelectorAll(".entry-del").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!confirm("Diesen Eintrag wirklich löschen?")) return;
+        const id = parseInt(btn.dataset.id, 10);
+        if (id === editingId) cancelEdit();
+        const log2 = loadLog().filter(x => x.id !== id);
+        saveLog(log2);
+        renderAll();
+      });
+    });
+    list.querySelectorAll(".entry-edit").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = parseInt(btn.dataset.id, 10);
+        startEdit(id);
+      });
+    });
+  }
+
+  function renderAll(){
+    renderStats();
+    renderHrStats();
+    renderHistory();
+    renderRouteChips();
+    renderBackupReminder();
+  }
+  renderAll();
+
+  /* ---------- Export / Import ---------- */
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const status = document.getElementById("backupStatus");
+    try{
+      const log = loadLog();
+      const blob = new Blob([JSON.stringify({ app:"nordicwalking", exported:new Date().toISOString(), entries: log }, null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "nordicwalking_sicherung_" + new Date().toISOString().slice(0,10) + ".json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      status.textContent = "Sicherung erstellt (" + log.length + " Runden).";
+      markBackupDone();
+    }catch(e){ status.textContent = "Sicherung fehlgeschlagen."; }
+  });
+
+  document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+  document.getElementById("importFile").addEventListener("change", async (ev) => {
+    const status = document.getElementById("backupStatus");
+    const file = ev.target.files && ev.target.files[0];
+    ev.target.value = "";
+    if (!file) return;
+    try{
+      const parsed = JSON.parse(await file.text());
+      if (!parsed || parsed.app !== "nordicwalking" || !Array.isArray(parsed.entries)){
+        status.textContent = "Datei nicht erkannt — bitte eine Logbuch-Sicherung wählen.";
+        return;
+      }
+      const current = loadLog();
+      const byId = {};
+      current.concat(parsed.entries).forEach(e => { byId[e.id] = e; });
+      const merged = Object.values(byId);
+      saveLog(merged);
+      status.textContent = merged.length + " Runden im Logbuch (zusammengeführt).";
+      renderAll();
+    }catch(e){ status.textContent = "Wiederherstellung fehlgeschlagen."; }
+  });
+
+  /* ---------- Wetter bei bestehenden Einträgen nachtragen ---------- */
+  document.getElementById("backfillBtn").addEventListener("click", async () => {
+    const status = document.getElementById("backfillStatus");
+    const log = loadLog();
+    const missing = log.filter(e => !e.rest && e.type !== "indoor" && (!e.weather || e.temp === null || e.temp === undefined));
+    if (missing.length === 0){
+      status.textContent = "Alle Einträge haben bereits Wetterdaten.";
+      return;
+    }
+    let done = 0, updated = 0;
+    for (const entry of missing){
+      status.textContent = "Lade Wetter … (" + (done+1) + "/" + missing.length + ")";
+      const result = await fetchWeatherFor(entry.date, entry.time || "12:00");
+      if (result){
+        if (!entry.weather && result.category) entry.weather = result.category;
+        if ((entry.temp === null || entry.temp === undefined) && result.temp !== null) entry.temp = result.temp;
+        updated++;
+      }
+      done++;
+    }
+    saveLog(log);
+    renderAll();
+    status.textContent = updated + " von " + missing.length + " Einträgen ergänzt.";
+  });
+
+  /* ---------- Bericht drucken (frei wählbarer Zeitraum) ---------- */
+  function escHtml(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  (function setupPrintDefaults(){
+    const toEl = document.getElementById("printTo");
+    const fromEl = document.getElementById("printFrom");
+    const t = new Date();
+    const f = new Date(); f.setDate(f.getDate() - 29);
+    toEl.value = t.toISOString().slice(0,10);
+    fromEl.value = f.toISOString().slice(0,10);
+  })();
+
+  function printReport(){
+    const status = document.getElementById("printStatus");
+    const from = document.getElementById("printFrom").value;
+    const to = document.getElementById("printTo").value;
+    if (!from || !to){ status.textContent = "Bitte Von- und Bis-Datum wählen."; return; }
+    if (from > to){ status.textContent = "Das Von-Datum muss vor dem Bis-Datum liegen."; return; }
+
+    const log = loadLog()
+      .filter(e => e.date >= from && e.date <= to)
+      .slice()
+      .sort((a,b) => (a.date+(a.time||"")).localeCompare(b.date+(b.time||"")));
+
+    if (log.length === 0){
+      status.textContent = "Keine Einträge im gewählten Zeitraum.";
+      return;
+    }
+
+    let totalKm = 0, totalMin = 0, count = 0, restCount = 0, hrSum = 0, hrCount = 0, indoorCount = 0;
+    const rows = log.map(e => {
+      const dateLabel = e.date.split("-").reverse().join(".");
+      if (e.rest){
+        restCount++;
+        return `<tr><td>${dateLabel}</td><td colspan="7" style="color:#5C6B86;">🌙 Ruhetag${e.notes ? " — " + escHtml(e.notes) : ""}</td></tr>`;
+      }
+      count++;
+      totalKm += e.km || 0;
+      totalMin += e.minutes || 0;
+      if (e.hr){ hrSum += e.hr; hrCount++; }
+      const pace = fmtPace(e);
+      const isIndoor = e.type === "indoor";
+      if (isIndoor) indoorCount++;
+      const artCell = isIndoor ? "🏃 Laufband" : "🌲 Nordic Walking";
+      const weatherCell = e.weather
+        ? escHtml((WEATHER_ICONS[e.weather]||"") + " " + e.weather + (e.temp !== null && e.temp !== undefined ? " · " + e.temp + "°C" : ""))
+        : "–";
+      const hrCell = (e.hr ? Math.round(e.hr) + " bpm" : "–") + (e.rpe ? " · Anstr. " + e.rpe + "/10" : "");
+      let row = `<tr>` +
+        `<td>${dateLabel}${e.time ? " " + e.time : ""}</td>` +
+        `<td>${artCell}</td>` +
+        `<td>${escHtml(e.route || (isIndoor ? "Laufband" : "Runde"))}</td>` +
+        `<td>${e.km ? e.km.toFixed(1).replace(".",",") + " km" : "–"}</td>` +
+        `<td>${e.minutes ? Math.round(e.minutes) + " min" : "–"}</td>` +
+        `<td>${pace || "–"}</td>` +
+        `<td>${weatherCell}</td>` +
+        `<td>${hrCell}</td>` +
+      `</tr>`;
+      if (e.notes) row += `<tr><td></td><td colspan="7" style="font-style:italic;color:#5E6E58;">${escHtml(e.notes)}</td></tr>`;
+      return row;
+    }).join("");
+
+    const avgHr = hrCount ? Math.round(hrSum / hrCount) : null;
+    const fromLabel = from.split("-").reverse().join(".");
+    const toLabel = to.split("-").reverse().join(".");
+
+    const html = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+<title>Nordic Walking Logbuch — Bericht ${fromLabel} bis ${toLabel}</title>
+<style>
+  body{font-family:Georgia, 'Times New Roman', serif; color:#22301F; margin:32px;}
+  h1{font-size:20px;margin:0 0 4px;}
+  .meta{font-size:12px;color:#5E6E58;margin-bottom:18px;}
+  table{width:100%;border-collapse:collapse;font-size:11.5px;}
+  th, td{border-bottom:1px solid #CBD8C8;padding:6px 8px;text-align:left;vertical-align:top;}
+  th{background:#EEF3EE;}
+  .summary{margin-top:18px;font-size:12.5px;color:#5E6E58;}
+  @page{ margin:14mm; }
+</style>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body>
+  <h1>Nordic Walking — Trainingsbericht</h1>
+  <div class="meta">Zeitraum: ${fromLabel} – ${toLabel} · erstellt am ${new Date().toLocaleDateString("de-DE")}</div>
+  <table>
+    <thead><tr><th>Datum</th><th>Art</th><th>Route</th><th>Strecke</th><th>Dauer</th><th>Pace</th><th>Wetter</th><th>Herzfrequenz</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="summary">
+    ${count} Trainingsrunde${count === 1 ? "" : "n"} (${count - indoorCount}× Nordic Walking · ${indoorCount}× Laufband) · ${totalKm.toFixed(1).replace(".",",")} km gesamt · ${Math.round(totalMin)} Min. gesamt
+    ${restCount ? " · " + restCount + " Ruhetag" + (restCount === 1 ? "" : "e") : ""}
+    ${avgHr ? " · Ø Herzfrequenz " + avgHr + " bpm" : ""}
+  </div>
+
+</body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win){ status.textContent = "Popup wurde blockiert — bitte Pop-ups für diese Seite erlauben."; return; }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    status.textContent = "Bericht wird geöffnet …";
+    setTimeout(() => { win.focus(); win.print(); }, 250);
+  }
+
+  document.getElementById("printBtn").addEventListener("click", printReport);
+
+})();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verschlüsselte Sicherung</title><script src="shared-store.js"></script><style>
+:root{
+ --parch:#eee3cb;--parch2:#e5d4b1;--paper:#f8f1e2;--ink:#30271d;--muted:#6c5f50;
+ --wine:#67202d;--wine2:#46131d;--gold:#b58a3d;--gold2:#d4b36c;--sage:#617058;
+ --wood:#5d3d2a;--night:#172033;--line:#d6c39c;--cream:#fffaf0;--blue:#3f5c68;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--parch);color:var(--ink);font-family:Georgia,'Times New Roman',serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+header{position:relative;background:linear-gradient(135deg,var(--night),#263a56);color:#fff8e8;padding:36px 22px;text-align:center}
+.back{position:absolute;left:18px;top:18px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff20}
+header h1{font-size:40px;margin:0 0 6px}header p{margin:0;color:#dce3e8}
+main{max-width:800px;margin:auto;padding:24px 18px 60px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
+input{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--cream);font:inherit;margin-bottom:10px}
+button{border:0;border-radius:999px;padding:12px 17px;background:var(--night);color:#fff;font-weight:700;cursor:pointer;margin:4px}
+.secondary{background:var(--parch2);color:var(--wine2)}.danger{background:#8f3030}.note{background:var(--cream);border-left:4px solid var(--gold);padding:13px;border-radius:10px;line-height:1.5}.status{margin-top:12px;padding:12px;border-radius:10px;display:none}.ok{display:block;background:#e4ecd9;color:#405735}.warn{display:block;background:#f2dfd5;color:#7a312d}
+input[type=file]{display:none}
+</style><script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body><header><a class="back" href="komfortzentrum.html">←</a><h1>🔐 Verschlüsselte Sicherung</h1><p>Alle Daten mit einem persönlichen Passwort schützen</p></header>
+<main>
+<section class="card"><h2>Export</h2><input id="exportPassword" type="password" placeholder="Passwort festlegen"><button id="exportBtn">Verschlüsselte Sicherung erstellen</button></section>
+<section class="card"><h2>Import</h2><input id="importPassword" type="password" placeholder="Passwort der Sicherung"><button id="chooseBtn">Sicherungsdatei auswählen</button><button class="danger" id="replaceBtn">Auswählen & vollständig ersetzen</button><input id="file" type="file" accept=".dkbackup,.json,application/json"></section>
+<section class="card"><div class="note">Beim normalen Import werden vorhandene Schlüssel beibehalten und Werte aus der Sicherung ergänzt bzw. überschrieben. Vor jedem Import wird automatisch eine unverschlüsselte Vorsicherung heruntergeladen.</div><div id="status" class="status"></div></section>
+</main>
+<script>
+const enc=new TextEncoder(),dec=new TextDecoder();let mode='merge';
+function snapshot(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k)o[k]=localStorage.getItem(k)}return o}
+function bytesToB64(bytes){let s='';bytes.forEach(b=>s+=String.fromCharCode(b));return btoa(s)}
+function b64ToBytes(s){const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+async function derive(password,salt){const key=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},key,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+function download(obj,name){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function show(msg,ok=true){const s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'warn')}
+document.getElementById('exportBtn').onclick=async()=>{try{const p=document.getElementById('exportPassword').value;if(p.length<6)throw new Error('Bitte mindestens 6 Zeichen verwenden.');const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await derive(p,salt);const raw=enc.encode(JSON.stringify({format:'digitales-kloster-backup',schema:10,exportedAt:new Date().toISOString(),data:snapshot()}));const cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,raw));download({format:'digitales-kloster-encrypted',version:1,kdf:'PBKDF2-SHA256',iterations:250000,salt:bytesToB64(salt),iv:bytesToB64(iv),ciphertext:bytesToB64(cipher)},'Digitales_Kloster_verschluesselt_'+new Date().toISOString().slice(0,10)+'.dkbackup');show('Verschlüsselte Sicherung wurde erstellt.')}catch(e){show(e.message,false)}};
+document.getElementById('chooseBtn').onclick=()=>{mode='merge';document.getElementById('file').click()};
+document.getElementById('replaceBtn').onclick=()=>{mode='replace';document.getElementById('file').click()};
+document.getElementById('file').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{download({format:'vorsicherung',at:new Date().toISOString(),data:snapshot()},'Digitales_Kloster_VORSICHERUNG_'+new Date().toISOString().slice(0,10)+'.json');const obj=JSON.parse(await f.text()),p=document.getElementById('importPassword').value;if(!p)throw new Error('Passwort fehlt.');const salt=b64ToBytes(obj.salt),iv=b64ToBytes(obj.iv),cipher=b64ToBytes(obj.ciphertext),key=await derive(p,salt);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher),payload=JSON.parse(dec.decode(plain)),data=payload.data||{};if(mode==='replace')localStorage.clear();Object.entries(data).forEach(([k,v])=>localStorage.setItem(k,String(v)));show('Sicherung erfolgreich wiederhergestellt. Bitte die App neu öffnen.')}catch(err){show('Import fehlgeschlagen: '+err.message,false)}finally{e.target.value=''}});
+</script><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

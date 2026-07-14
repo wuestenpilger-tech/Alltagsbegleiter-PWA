@@ -1,0 +1,56 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#46131d"><title>Synchronisation · Alltagsbegleiter 22</title>
+<script src="shared-store.js"></script><script src="alltagsbegleiter-sync.js"></script>
+<style>
+:root{--parch:#eee3cb;--paper:#f8f1e2;--cream:#fffaf0;--wine:#67202d;--wine2:#46131d;--gold:#d4b36c;--sage:#617058;--night:#172033;--ink:#30271d;--muted:#6c5f50;--line:#d6c39c}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--parch),#dfcba5);font-family:Georgia,serif;color:var(--ink)}
+header{position:relative;background:linear-gradient(135deg,var(--night),var(--wine2));color:white;padding:34px 20px;text-align:center}
+.back{position:absolute;left:16px;top:16px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff18;color:white;text-decoration:none}
+main{max-width:950px;margin:auto;padding:20px 16px 60px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px}.card h2{margin-top:0;color:var(--wine2)}
+button,.btn{border:0;border-radius:999px;padding:12px 16px;background:var(--wine);color:white;font-weight:700;cursor:pointer;margin:4px}.secondary{background:var(--gold);color:var(--wine2)}.danger{background:#8f3030}.safe{background:var(--sage)}
+input[type=file]{display:none}.note{background:var(--cream);border-left:4px solid var(--gold);border-radius:11px;padding:12px;line-height:1.5}.status{margin-top:12px;padding:12px;border-radius:11px;background:var(--cream);display:none}.status.show{display:block}.backup{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:10px;margin:7px 0}.small{font-size:12px;color:var(--muted)}code{font-size:11px;word-break:break-all}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style><script src="alltagsbegleiter-view.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body>
+<header><a class="back" href="index.html">←</a><h1>🔄 Synchronisation</h1><p>Alle Daten in einer einzigen Datei zwischen Tablet und Handy übertragen</p></header>
+<main><div class="grid">
+<section class="card"><h2>📤 Gesamtexport</h2><p>Exportiert alle Eingaben, Einstellungen, Verläufe und Erledigt-Status in eine Datei.</p><button id="exportAll">Gesamten Alltagsbegleiter exportieren</button><button class="secondary" id="localNow">Lokale Sicherung anlegen</button></section>
+<section class="card"><h2>📥 Gesamtimport</h2><p>Vor jedem Import wird automatisch eine lokale Vorsicherung angelegt.</p><button id="mergeBtn">Datei auswählen & zusammenführen</button><button class="danger" id="replaceBtn">Datei auswählen & vollständig ersetzen</button><input id="file" type="file" accept=".abg,.json,application/json"></section>
+<section class="card"><h2>📱 Dieses Gerät</h2><div class="note"><b>Gerätekennung:</b><br><code id="deviceId"></code><br><br><b>Letzter Import:</b><br><span id="lastImport">Noch kein Import protokolliert.</span></div></section>
+<section class="card"><h2>🕒 Lokale Rücksicherungen</h2><div id="backups"></div></section>
+<section class="card" style="grid-column:1/-1"><h2>So wechselst du das Gerät</h2><div class="note">
+<b>Tablet → Handy:</b> Auf dem Tablet exportieren, Datei an das Handy senden, dort „zusammenführen“ oder „ersetzen“.<br><br>
+<b>Handy → Tablet:</b> Auf dem Handy exportieren und auf dem Tablet importieren.<br><br>
+„Zusammenführen“ behält Daten beider Geräte und vereinigt Listen. „Vollständig ersetzen“ macht das Zielgerät zum exakten Stand der Importdatei.
+</div><div id="status" class="status"></div></section>
+</div></main>
+<script>
+const S=AlltagsbegleiterSync;let importMode='merge';
+deviceId.textContent=S.deviceId;
+function show(msg){status.textContent=msg;status.classList.add('show')}
+function renderMeta(){const m=S.meta();lastImport.textContent=m.importedAt?new Date(m.importedAt).toLocaleString('de-DE')+' · '+(m.mode==='replace'?'ersetzt':'zusammengeführt'):'Noch kein Import protokolliert.'}
+function renderBackups(){const a=S.backups();backups.innerHTML=a.length?'':'<p class="small">Noch keine lokalen Rücksicherungen.</p>';a.forEach(x=>{const d=document.createElement('div');d.className='backup';const dt=x.payload.exportedAt?new Date(x.payload.exportedAt).toLocaleString('de-DE'):x.key;d.innerHTML='<div><b>'+dt+'</b><div class="small">'+(x.payload.reason||'Sicherung')+'</div></div><button class="safe" data-key="'+x.key+'">Wiederherstellen</button>';backups.appendChild(d)})}
+exportAll.onclick=async()=>{try{const p=S.snapshot('geraetewechsel');await S.download(p,'Alltagsbegleiter_Gesamtdaten_'+new Date().toISOString().slice(0,10)+'.abg');show('Gesamtexport wurde gespeichert.')}catch(err){show('Export fehlgeschlagen: '+err.message)}};
+localNow.onclick=()=>{S.localBackup('manuell');renderBackups();show('Lokale Sicherung wurde angelegt.')};
+async function processImportText(text){try{const p=JSON.parse(text);S.applyPayload(p,importMode);show('Import erfolgreich. Die Seite wird neu geladen.');setTimeout(()=>location.reload(),900)}catch(err){show('Import fehlgeschlagen: '+err.message)}}
+function chooseImport(mode){importMode=mode;if(window.AndroidApp&&typeof window.AndroidApp.openTextFile==='function'){window.AndroidApp.openTextFile()}else{file.click()}}
+mergeBtn.onclick=()=>chooseImport('merge');replaceBtn.onclick=()=>chooseImport('replace');
+window.__alltagsbegleiterReceiveFile=(encodedName,encodedContent)=>{try{const bytes=Uint8Array.from(atob(encodedContent),c=>c.charCodeAt(0));processImportText(new TextDecoder('utf-8').decode(bytes))}catch(err){show('Import fehlgeschlagen: '+err.message)}};
+file.onchange=async e=>{const f=e.target.files[0];if(!f)return;await processImportText(await f.text());e.target.value=''};
+document.addEventListener('click',e=>{const key=e.target.dataset.key;if(!key)return;if(confirm('Diese lokale Sicherung vollständig wiederherstellen?')){try{S.restoreLocal(key);location.reload()}catch(err){show(err.message)}}});
+renderMeta();renderBackups();
+</script><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

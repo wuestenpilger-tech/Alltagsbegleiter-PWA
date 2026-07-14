@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Stundenbuch · Laudes · Vesper · Komplet (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=EB+Garamond:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F4EEE1;
+    --surface: #FBF7EC;
+    --surface-2: #EAE0CB;
+    --ink: #2B241C;
+    --ink-dim: #6B6152;
+    --gold: #9C7A2E;
+    --gold-bright: #B8935B;
+    --rubric: #6E1F2B;
+    --line: #DDD1B2;
+    --blue: #5C6B7A;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:'EB Garamond', Georgia, serif; -webkit-font-smoothing:antialiased; }
+  body{ min-height:100vh; background-image: radial-gradient(circle at 15% 0%, rgba(184,147,91,0.08), transparent 40%), radial-gradient(circle at 85% 100%, rgba(110,31,43,0.06), transparent 45%); }
+  .wrap{ max-width:780px; margin:0 auto; padding:40px 34px 80px; }
+
+  header{ text-align:center; margin-bottom:10px; }
+  h1{ font-family:'Cormorant Garamond', serif; font-weight:700; font-size:42px; margin:0 0 4px; }
+  .sub{ color:var(--ink-dim); font-size:17px; margin-bottom:28px; }
+
+  .tabs{ display:flex; gap:10px; margin-bottom:24px; }
+  .tab{
+    flex:1; text-align:center; padding:15px 8px;
+    background:var(--surface); border:1px solid var(--line); border-radius:5px;
+    color:var(--ink-dim); font-size:17px; letter-spacing:0.5px; cursor:pointer;
+  }
+  .tab.active{ background:var(--surface-2); color:var(--gold-bright); border-color:var(--gold); }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:5px;
+    padding:22px 26px; margin-bottom:16px; position:relative; overflow:hidden;
+  }
+  .card::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--gold); }
+  .card.rubric::before{ background:var(--rubric); }
+  .card.blue::before{ background:var(--blue); }
+
+  .label{ font-size:13px; letter-spacing:1.4px; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px; }
+  .title2{ font-family:'Cormorant Garamond', serif; font-weight:600; font-size:27px; margin:0 0 10px; color:var(--ink); }
+  .text{ font-size:18px; line-height:1.7; white-space:pre-line; }
+  .rubric-text{ color:var(--rubric); font-style:italic; font-size:16px; margin-bottom:10px; }
+  .linkbtn{
+    display:inline-block; margin-top:12px;
+    background:transparent; border:1px solid var(--gold); color:var(--gold-bright);
+    text-decoration:none; font-size:16px; padding:11px 18px; border-radius:4px;
+  }
+  .linkbtn:active{ background:rgba(184,147,91,0.15); }
+  .season-note{ font-size:14px; color:var(--ink-dim); margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+
+  .daily-box{
+    background: var(--surface-2); border:1px dashed var(--gold); border-radius:5px;
+    padding:18px 20px; margin-bottom:20px; text-align:center;
+  }
+  .daily-box .datestr{ font-size:16px; color:var(--ink-dim); margin-bottom:10px; }
+
+  .track-check{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    font-size:16px; color:var(--ink-dim); margin-top:20px;
+  }
+  .track-check input{ width:19px; height:19px; accent-color:#6F8A5C; }
+
+  .footer-note{
+    margin-top:28px; font-size:14px; color:var(--ink-dim); line-height:1.7;
+    border-top:1px solid var(--line); padding-top:16px;
+  }
+
+  .backupBtns{ display:flex; gap:12px; margin-top:18px; }
+  .backupBtns button{
+    flex:1; padding:13px 10px; border-radius:5px;
+    border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-dim); font-family:inherit; font-size:15px; cursor:pointer;
+  }
+  .back-to-menu{
+    position:fixed;top:18px;left:18px;z-index:80;
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(184,147,91,0.16);color:var(--rubric);
+    text-decoration:none;font-size:20px;
+    transition:transform .15s ease;
+    box-shadow:0 2px 8px rgba(43,36,28,0.10);
+  }
+  .back-to-menu:active{transform:scale(0.93);}
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+<a class="back-to-menu" href="andachtsschrank.html" aria-label="Zurück zum Andachtsschrank" title="Zurück zum Andachtsschrank">←</a>
+<div class="wrap">
+
+  <header>
+    <h1>Stundenbuch</h1>
+    <div class="sub">Laudes · Vesper · Komplet</div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-hour="laudes">Laudes</div>
+    <div class="tab" data-hour="vesper">Vesper</div>
+    <div class="tab" data-hour="komplet">Komplet</div>
+  </div>
+
+  <div class="daily-box">
+    <div class="datestr" id="dateStr">—</div>
+    <a class="linkbtn" id="dailyLink" href="#" target="_blank" rel="noopener">Heutige Psalmen, Lesung &amp; Tagesgebet öffnen ↗</a>
+  </div>
+
+  <div id="content"></div>
+
+  <div class="footer-note" id="footerNote"></div>
+
+  <div class="backupBtns">
+    <button id="exportBtn" type="button">⇩ Verlauf sichern</button>
+    <button id="importBtn" type="button">⇧ Verlauf laden</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none;">
+  </div>
+
+</div>
+
+<script>
+// ---------- Osterdatum & Kirchenjahreszeit (für die marianische Schluss-Antiphon der Komplet) ----------
+function easterSunday(year){
+  const a = year % 19, b = Math.floor(year/100), c = year % 100;
+  const d = Math.floor(b/4), e = b % 4;
+  const f = Math.floor((b+8)/25), g = Math.floor((b-f+1)/3);
+  const h = (19*a + b - d - g + 15) % 30;
+  const i = Math.floor(c/4), k = c % 4;
+  const l = (32 + 2*e + 2*i - h - k) % 7;
+  const m = Math.floor((a + 11*h + 22*l) / 451);
+  const month = Math.floor((h + l - 7*m + 114) / 31);
+  const day = ((h + l - 7*m + 114) % 31) + 1;
+  return new Date(year, month-1, day);
+}
+function addDays(d, n){ const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+function sundayOnOrBefore(d){ const r = new Date(d); while(r.getDay()!==0) r.setDate(r.getDate()-1); return r; }
+function advent1(year){ return addDays(sundayOnOrBefore(new Date(year,11,25)), -21); }
+
+function seasonFor(date){
+  const y = date.getFullYear();
+  const easter = easterSunday(y);
+  const ashWed = addDays(easter, -46);
+  const holySat = addDays(easter, -1);
+  const pentecost = addDays(easter, 49);
+  if(date >= ashWed && date <= holySat) return 'lent';
+  if(date >= easter && date <= pentecost) return 'easter';
+  const adv1This = advent1(y);
+  if(date >= adv1This) return 'advent';
+  const adv1Prev = advent1(y-1);
+  const feb2This = new Date(y,1,2,23,59,59);
+  if(date >= adv1Prev && date <= feb2This) return 'advent';
+  return 'ordinary';
+}
+
+const ANTIPHONS = {
+  advent: {
+    name: "Alma Redemptoris Mater · Erhabene Mutter des Erlösers",
+    text: "Erhabene Mutter des Erlösers, du allzeit offene Pforte des Himmels und Stern des Meeres, komm, hilf deinem Volke, das sich müht, vom Falle aufzustehen. Du hast geboren, der Natur zum Staunen, deinen heiligen Schöpfer. Unversehrte Jungfrau, die du aus Gabriels Munde nahmst das selige Ave, o erbarme dich der Sünder.",
+    when: "Advents- und Weihnachtszeit"
+  },
+  lent: {
+    name: "Ave Regina Caelorum · Sei gegrüßt, o Himmelskönigin",
+    text: "Ave, du Himmelskönigin, ave, der Engel Herrscherin, Wurzel, der das Heil entsprossen, Tür, die uns das Licht erschlossen: Freu dich, Jungfrau voll der Ehre, über allen Seligen Hehre, sei gegrüßt, des Himmels Krone, bitt für uns bei deinem Sohne.",
+    when: "Fastenzeit"
+  },
+  easter: {
+    name: "Regina Caeli · Freu dich, du Himmelskönigin",
+    text: "Freu dich, du Himmelskönigin, Halleluja! Den du zu tragen würdig warst, Halleluja, er ist auferstanden, wie er gesagt hat, Halleluja. Bitt Gott für uns, Halleluja.",
+    when: "Osterzeit"
+  },
+  ordinary: {
+    name: "Salve Regina · Sei gegrüßt, o Königin",
+    text: "Sei gegrüßt, o Königin, Mutter der Barmherzigkeit, unser Leben, unsre Wonne und unsre Hoffnung, sei gegrüßt! Zu dir rufen wir verbannte Kinder Evas, zu dir seufzen wir trauernd und weinend in diesem Tal der Tränen. Wohlan denn, unsre Fürsprecherin, wende deine barmherzigen Augen uns zu und nach diesem Elende zeige uns Jesus, die gebenedeite Frucht deines Leibes. O gütige, o milde, o süße Jungfrau Maria!",
+    when: "Zeit im Jahreskreis"
+  }
+};
+
+const VATERUNSER = "Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unseren Schuldigern. Und führe uns nicht in Versuchung, sondern erlöse uns von dem Bösen. Amen.";
+const EHRE_SEI = "Ehre sei dem Vater und dem Sohn und dem Heiligen Geist, wie im Anfang, so auch jetzt und alle Zeit und in Ewigkeit. Amen.";
+
+function eroeffnung(season){
+  const halleluja = (season==='lent') ? "" : " Halleluja.";
+  return `℣ O Gott, komm mir zu Hilfe.\n℟ Herr, eile, mir zu helfen.\n${EHRE_SEI}${halleluja}`;
+}
+
+function bibleserverUrl(ref){ return `https://www.bibleserver.com/EU/${encodeURIComponent(ref)}`; }
+function stundenbuchUrl(type, date){
+  return `https://stundenbuch.katholisch.de/stundenbuch.php?type=${type}&date=${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`;
+}
+
+let currentHour = 'laudes';
+
+function render(){
+  const now = new Date();
+  const season = seasonFor(now);
+  const ant = ANTIPHONS[season];
+
+  document.getElementById('dateStr').textContent = now.toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('dailyLink').href = stundenbuchUrl(currentHour, now);
+
+  const c = document.getElementById('content');
+  c.innerHTML = '';
+
+  // Eröffnung
+  c.appendChild(cardEl('rubric', 'Eröffnung', eroeffnung(season)));
+
+  if(currentHour === 'laudes'){
+    c.appendChild(cardEl('', 'Canticum · Benedictus (Lobgesang des Zacharias)',
+      'Der Lobgesang des Zacharias — Lukas 1,68–79. Wird an dieser Stelle gebetet oder gesungen; Text siehe Link.',
+      bibleserverUrl('Lukas1,68-79'), 'Benedictus öffnen ↗'));
+    c.appendChild(cardEl('', 'Abschluss dieses Canticums', EHRE_SEI));
+    c.appendChild(cardEl('', 'Vaterunser', VATERUNSER));
+  }
+
+  if(currentHour === 'vesper'){
+    c.appendChild(cardEl('', 'Canticum · Magnificat (Lobgesang Marias)',
+      'Der Lobgesang Marias — Lukas 1,46–55. Wird an dieser Stelle gebetet oder gesungen; Text siehe Link.',
+      bibleserverUrl('Lukas1,46-55'), 'Magnificat öffnen ↗'));
+    c.appendChild(cardEl('', 'Abschluss dieses Canticums', EHRE_SEI));
+    c.appendChild(cardEl('', 'Vaterunser', VATERUNSER));
+  }
+
+  if(currentHour === 'komplet'){
+    c.appendChild(cardEl('rubric', 'Gewissenserforschung',
+      'Kurze Stille. Rückblick auf den Tag — wo war ich lieblos, wo war ich dankbar? Danach nach Wahl ein kurzes Schuldbekenntnis oder einfach: „Herr, erbarme dich meiner.“'));
+    c.appendChild(cardEl('', 'Responsorium',
+      '℣ In deine Hände, Herr, lege ich meinen Geist.\n℟ Du befreist mich, Herr, du treuer Gott.'));
+    c.appendChild(cardEl('', 'Canticum · Nunc dimittis (Lobgesang des Simeon)',
+      'Der Lobgesang des Simeon — Lukas 2,29–32. Wird an dieser Stelle gebetet oder gesungen; Text siehe Link.',
+      bibleserverUrl('Lukas2,29-32'), 'Nunc dimittis öffnen ↗'));
+    c.appendChild(cardEl('', 'Abschluss dieses Canticums', EHRE_SEI));
+    c.appendChild(cardEl('', 'Vaterunser', VATERUNSER));
+
+    const antCard = cardEl('blue', 'Marianische Schlussantiphon', ant.text);
+    antCard.querySelector('.title2').textContent = ant.name;
+    const note = document.createElement('div');
+    note.className = 'season-note';
+    note.textContent = `Zeit: ${ant.when} (automatisch nach Kirchenjahr berechnet)`;
+    antCard.appendChild(note);
+    c.appendChild(antCard);
+  }
+
+  // Tagesbezogene Häkchen
+  const trackKey = `stundenbuch:${isoDate(now)}:${currentHour}`;
+  const checkWrap = document.createElement('div');
+  checkWrap.className = 'track-check';
+  const checked = localStorage.getItem(trackKey) === '1';
+  checkWrap.innerHTML = `<label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" ${checked?'checked':''}> heute gebetet</label>`;
+  checkWrap.querySelector('input').addEventListener('change', e=>{
+    localStorage.setItem(trackKey, e.target.checked ? '1' : '0');
+  });
+  c.appendChild(checkWrap);
+
+  document.getElementById('footerNote').textContent =
+    'Die veränderlichen Teile (Psalmen, Lesung, Tagesgebet) findest du über den Link oben — sie richten sich nach dem Vierwochenpsalter und dem Kirchenjahr und werden hier nicht dargestellt, um mit dem offiziellen Stundenbuch übereinzustimmen. Die marianische Schlussantiphon wird automatisch nach der aktuellen Kirchenjahreszeit gewählt.';
+}
+
+function cardEl(cls, title, text, url, linkLabel){
+  const div = document.createElement('div');
+  div.className = 'card' + (cls ? ' '+cls : '');
+  div.innerHTML = `
+    <div class="title2">${title}</div>
+    <div class="text">${text}</div>
+    ${url ? `<a class="linkbtn" href="${url}" target="_blank" rel="noopener">${linkLabel}</a>` : ''}
+  `;
+  return div;
+}
+function isoDate(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+// ---------- Export / Import (Gebetszeiten-Verlauf) ----------
+function collectTrackData(){
+  const data = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('stundenbuch:')){
+      data[k] = localStorage.getItem(k);
+    }
+  }
+  return data;
+}
+
+function exportTrackData(){
+  const payload = {
+    app: 'stundenbuch',
+    exportedAt: new Date().toISOString(),
+    entries: collectTrackData()
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `stundenbuch-verlauf_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importTrackData(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const entries = data && data.entries ? data.entries : null;
+      if(entries && typeof entries === 'object'){
+        Object.keys(entries).forEach(k=>{
+          if(k.startsWith('stundenbuch:')) localStorage.setItem(k, entries[k]);
+        });
+        render();
+        alert('Verlauf wurde geladen.');
+      } else {
+        alert('Datei enthält keinen gültigen Verlauf.');
+      }
+    } catch(e){
+      alert('Datei konnte nicht gelesen werden.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('exportBtn').addEventListener('click', exportTrackData);
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file) importTrackData(file);
+  e.target.value = '';
+});
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentHour = tab.dataset.hour;
+    render();
+  });
+});
+
+render();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

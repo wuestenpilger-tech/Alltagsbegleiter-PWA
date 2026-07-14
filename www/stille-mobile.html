@@ -1,0 +1,32 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Moment der Stille</title><style>
+:root{--night:#17131a;--wine:#46131d;--gold:#d4b36c;--cream:#f8ecd1}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 28%,#5f2a22 0,#24151a 36%,#111015 100%);color:var(--cream);font-family:Georgia,'Times New Roman',serif;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{text-align:center;max-width:520px;width:100%}.back{position:fixed;left:14px;top:14px;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff14;color:white;text-decoration:none}
+.candle{font-size:92px;filter:drop-shadow(0 0 18px #f2b64f);animation:flicker 2.4s infinite}.quote{font-size:21px;line-height:1.55;margin:20px 0;color:#f4e4c2}.time{font-size:58px;margin:12px 0}.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.controls button{border:1px solid #ffffff30;border-radius:999px;padding:11px 15px;background:#ffffff12;color:white;font:inherit}.controls button.active{background:var(--gold);color:#3a1d1d}.start{margin-top:14px;border:0;border-radius:999px;padding:13px 20px;background:var(--gold);color:#3a1d1d;font-weight:700;font-size:17px}
+@keyframes flicker{0%,100%{transform:scale(1)}50%{transform:scale(1.03) translateY(-1px)}}
+</style><script src="alltagsbegleiter-sync.js"></script><link rel="stylesheet" href="motorola-g55-mobile.css"><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body><a class="back" href="index.html">←</a><div class="wrap">
+<div class="candle">🕯️</div><div class="quote">„In der Stille wächst Klarheit.“</div><div class="time" id="time">05:00</div>
+<div class="controls"><button data-min="1">1 Min.</button><button data-min="3">3 Min.</button><button data-min="5" class="active">5 Min.</button><button data-min="10">10 Min.</button><button data-min="20">20 Min.</button></div>
+<button class="start" id="start">Stille beginnen</button></div>
+<script>
+let minutes=5,remaining=300,timer=null;const t=document.getElementById('time'),start=document.getElementById('start');
+function draw(){const m=Math.floor(remaining/60),s=remaining%60;t.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+document.querySelectorAll('[data-min]').forEach(b=>b.onclick=()=>{if(timer)return;document.querySelectorAll('[data-min]').forEach(x=>x.classList.remove('active'));b.classList.add('active');minutes=Number(b.dataset.min);remaining=minutes*60;draw()});
+start.onclick=()=>{if(timer){clearInterval(timer);timer=null;start.textContent='Fortsetzen';return}start.textContent='Pause';timer=setInterval(()=>{remaining--;draw();if(remaining<=0){clearInterval(timer);timer=null;start.textContent='Beendet';try{new Audio('data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAAAAgICAgICAgICAgICAgIA=').play()}catch(e){}}},1000)};
+draw();
+</script><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

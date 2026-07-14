@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="../shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Matutin &middot; Dienstag &middot; Kleines Offizium der Seligen Jungfrau Maria</title>
+<style>
+  :root{
+    --paper:#f4ecd8;
+    --paper-deep:#ead9b8;
+    --maroon-deep:#5c1a24;
+    --maroon:#7a2432;
+    --gold:#a9822f;
+    --gold-light:#c9a54d;
+    --ink:#3a2c1e;
+    --ink-soft:#5a4a38;
+    --rule:#c9b489;
+    --font-scale:1;
+  }
+  *{box-sizing:border-box;}
+  html{ font-size:calc(16px * var(--font-scale)); }
+
+  .font-fab{
+    position:fixed; bottom:16px; right:16px; z-index:75;
+    display:flex; gap:6px; align-items:center;
+    background:var(--paper-deep); border:1px solid var(--rule); border-radius:26px;
+    padding:6px 8px; box-shadow:0 4px 14px rgba(0,0,0,0.22);
+  }
+  .font-fab button{
+    font-family:inherit; border:none; background:#fff8ea; color:var(--maroon-deep);
+    border-radius:18px; width:36px; height:36px; font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .font-fab button:active{ background:var(--gold-light); }
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(169,130,47,0.06), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(92,26,36,0.05), transparent 55%);
+    color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:760px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    padding-bottom:40px;
+  }
+
+  /* ---------- Home screen ---------- */
+  .home{
+    padding:38px 26px 20px 26px;
+    text-align:center;
+  }
+  .cross-mark{
+    width:34px;
+    height:52px;
+    margin:0 auto 22px auto;
+    position:relative;
+  }
+  .cross-mark::before,.cross-mark::after{
+    content:"";
+    position:absolute;
+    background:var(--gold);
+  }
+  .cross-mark::before{
+    left:50%; top:0;
+    width:5px; height:52px;
+    transform:translateX(-50%);
+    border-radius:2px;
+  }
+  .cross-mark::after{
+    top:14px; left:2px;
+    width:30px; height:5px;
+    border-radius:2px;
+  }
+  .home h1{
+    font-size:1.5rem;
+    letter-spacing:.02em;
+    color:var(--maroon-deep);
+    margin:0 0 6px 0;
+    line-height:1.3;
+  }
+  .home .subtitle{
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--ink-soft);
+    margin:0 0 28px 0;
+  }
+
+  .leitspruch{
+    background:var(--paper-deep);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:22px 24px 20px 24px;
+    margin:0 0 30px 0;
+    text-align:center;
+    position:relative;
+  }
+  .leitspruch::before{
+    content:"„";
+    position:absolute;
+    top:-6px; left:14px;
+    font-size:2.6rem;
+    color:var(--gold);
+    font-family:Georgia,serif;
+    line-height:1;
+  }
+  .leitspruch p{
+    font-style:italic;
+    font-size:1.02rem;
+    line-height:1.75;
+    color:var(--maroon-deep);
+    margin:0 0 12px 0;
+  }
+  .leitspruch .attrib{
+    font-style:normal;
+    font-size:.86rem;
+    font-weight:700;
+    color:var(--ink);
+    letter-spacing:.02em;
+  }
+  .leitspruch .attrib-sub{
+    font-style:italic;
+    font-size:.78rem;
+    color:var(--ink-soft);
+    display:block;
+    margin-top:2px;
+  }
+
+  .day-list{
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+    text-align:left;
+  }
+  .day-btn{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    width:100%;
+    background:#fffdf7;
+    border:1px solid var(--rule);
+    border-left:5px solid var(--gold);
+    border-radius:8px;
+    padding:15px 18px;
+    font-family:inherit;
+    font-size:1.06rem;
+    color:var(--ink);
+    cursor:pointer;
+    text-align:left;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .day-btn:hover{ background:var(--paper-deep); }
+  .day-btn:active{ transform:scale(0.99); }
+  .day-btn .arrow{
+    color:var(--maroon);
+    font-size:1.1rem;
+  }
+  .day-btn.disabled{
+    opacity:.5;
+    cursor:default;
+    border-left-color:var(--rule);
+  }
+  .day-btn.disabled:hover{ background:#fffdf7; }
+  .day-btn .name{ font-weight:600; }
+  .day-btn .tag{
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:.68rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+  }
+
+  .home-note{
+    margin-top:26px;
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:.76rem;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+
+  /* ---------- Reader screen ---------- */
+  .reader{ display:none; }
+  .reader.active{ display:block; }
+  .home.hidden{ display:none; }
+
+  header.top{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--maroon-deep);
+    color:#f6ecd9;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    box-shadow:0 2px 10px rgba(58,44,30,.18);
+  }
+  header.top button.back{
+    background:none;
+    border:1px solid rgba(246,236,217,.4);
+    color:#f6ecd9;
+    border-radius:7px;
+    padding:6px 12px;
+    font-family:inherit;
+    font-size:.92rem;
+    cursor:pointer;
+  }
+  header.top button.back:hover{ background:rgba(246,236,217,.12); }
+  header.top .title{
+    font-size:1.02rem;
+    letter-spacing:.02em;
+  }
+
+  .content{
+    padding:26px 24px 60px 24px;
+  }
+  .content h2{
+    font-size:1.32rem;
+    color:var(--maroon-deep);
+    text-align:center;
+    margin:0 0 4px 0;
+  }
+  .content .day-sub{
+    text-align:center;
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:.74rem;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--gold);
+    margin:0 0 26px 0;
+  }
+  .rubric{
+    font-style:italic;
+    font-size:.92rem;
+    color:var(--ink-soft);
+    text-align:center;
+    margin:18px 0 14px 0;
+  }
+  .section-title{
+    font-size:1.08rem;
+    color:var(--maroon);
+    margin:30px 0 8px 0;
+    padding-top:14px;
+    border-top:1px solid var(--rule);
+  }
+  .section-title:first-of-type{ border-top:none; margin-top:10px; }
+  .sub-title{
+    font-size:.98rem;
+    font-weight:700;
+    color:var(--ink);
+    margin:20px 0 6px 0;
+  }
+  .content p{
+    line-height:1.72;
+    margin:0 0 12px 0;
+    font-size:1rem;
+  }
+  .content p.versicle{
+    margin:0 0 6px 0;
+  }
+  .content p.antiphon{
+    color:var(--maroon-deep);
+    font-weight:600;
+  }
+  .divider{
+    text-align:center;
+    color:var(--gold);
+    margin:26px 0;
+    letter-spacing:.5em;
+    font-size:.8rem;
+  }
+  .content sup.mark{ color:var(--gold); }
+
+  a.back{ text-decoration:none; display:inline-block; }
+
+</style>
+<script src="../alltagsbegleiter-sync.js"></script><script src="../native-alarm.js"></script><link rel="stylesheet" href="../alltagsbegleiter-stability.css">
+</head>
+<body>
+<div class="font-fab" aria-label="Schriftgröße">
+  <button onclick="changeFont(-1)" aria-label="Schrift verkleinern">A&minus;</button>
+  <button onclick="changeFont(1)" aria-label="Schrift vergrößern">A+</button>
+</div>
+<div class="app">
+
+  <header class="top">
+    <a class="back" href="index.html">&larr; Stundengebet Kartäuser</a>
+    <span class="title">Matutin &middot; Dienstag</span>
+  </header>
+
+  <div class="content">
+
+<p class="rubric">vor dem Offizium</p>
+<p>&Ouml;ffne, Herr, meinen Mund, Deinen heiligen Namen zu preisen, und l&auml;utere mein Herz von allen nichtigen, verkehrten und fremden Gedanken! Erleuchte meinen Verstand und entz&uuml;nde mein Gem&uuml;t, auf dass ich w&uuml;rdig, aufmerksam und andächtig dieses Offizium zu verrichten verm&auml;g und vor dem Angesicht Deiner g&ouml;ttlichen Majest&auml;t erh&ouml;rt zu werden verdiene. Darum bitten wir durch Jesus Christus, deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit.</p>
+<p class="versicle">&#8477;. Amen.</p>
+<p>Herr, in Vereinigung mit jener g&ouml;ttlichen Absicht, mit der Du selbst auf Erden Gott Lob erwiesen hast, will ich Dir diese Hore (oder: diese Horen) verrichten.</p>
+<p class="versicle">&#8477;. Amen.</p>
+<p class="rubric">anschlie&szlig;end das Vater unser</p>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser t&auml;gliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und f&uuml;hre (lass) uns nicht in (der) Versuchung, sondern erl&ouml;se uns von dem B&ouml;sen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<p class="sub-title">Ave Maria</p>
+<p>Gegr&uuml;&szlig;et seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte f&uuml;r uns S&uuml;nder jetzt und in der Stunde unseres Todes. Amen.</p>
+
+<p class="sub-title">Glaubensbekenntnis</p>
+<p>Ich glaube an Gott, den Vater, den Allm&auml;chtigen, den Sch&ouml;pfer des Himmels und der Erde, und an Jesus Christus, seinen eingeborenen Sohn, unseren Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allm&auml;chtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten.</p>
+<p>Ich glaube an den Heiligen Geist, die heilig machende Gnade, meine Gemeinschaft und Freundschaft mit Gott, meinem Vater, sowie meine Teilhabe an seinem Leben.</p>
+<p>An die heilende Kraft der Gemeinschaft aller Gl&auml;ubigen, an die Unterst&uuml;tzung und Begleitung heiliger Menschen im Leben und &uuml;ber deren Tod hinaus, die Vergebung meiner S&uuml;nden, die Auferstehung von den Toten und das Ewige Leben. Amen.</p>
+
+<p class="section-title">Matutin / fr&uuml;hes Nachtgebet &ndash; Dienstag</p>
+
+<p class="rubric">Stilles Gebet &ndash; dreimal das AVE Maria, anschlie&szlig;end</p>
+<p>&dagger; Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+<p class="versicle">Herr, &ouml;ffne meine Lippen, &dagger; damit mein Mund dein Lob verk&uuml;nde.</p>
+<p class="versicle">O Gott, komm mir zu Hilfe! Herr, eile mir zu helfen.</p>
+<p class="versicle">Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen. Alleluja.</p>
+<p class="rubric">In der 40-t&auml;gigen Fastenzeit bis zum Karsamstag aber wird anstelle des Alleluja das &hellip; Lob sei Dir, Herr, K&ouml;nig der ewigen Herrlichkeit gebetet.</p>
+
+<p class="sub-title">Confiteor (Schuldbekenntnis)</p>
+<p>Ich bekenne Gott, dem Allm&auml;chtigen, und allen Br&uuml;dern und Schwestern, dass ich Gutes unterlassen und B&ouml;ses getan habe &ndash; ich habe ges&uuml;ndigt in Gedanken, Worten und Werken durch meine Schuld, durch meine Schuld, durch meine gro&szlig;e Schuld. Darum bitte ich die selige Jungfrau Maria, alle Engel und Heiligen und euch, Br&uuml;der und Schwestern, f&uuml;r mich zu beten bei Gott, unserm Herrn.</p>
+<p>&dagger; Der allm&auml;chtige Gott erbarme sich meiner, er lasse mir die S&uuml;nden nach und f&uuml;hre mich zum ewigen Leben. Amen.</p>
+<p class="rubric">Hier &dagger; nehmen wir Veniam (Kuss des Kreuzes / Medaille des Rosenkranzes).</p>
+<p>Gegr&uuml;&szlig;et seist du, Maria, voll der Gnade, &dagger; der Herr ist mit dir.</p>
+
+<p class="sub-title">aus Psalm 95 (Neues Leben Bibel)</p>
+<p>Kommt, lasst uns dem Herrn zujubeln! Lasst uns den Fels unseres Heils preisen! Lasst uns mit Dank vor ihn hintreten! Lasst uns Loblieder auf ihn anstimmen.</p>
+<p class="antiphon">Gegr&uuml;&szlig;et seist du, Maria, voll der Gnade, der Herr ist mit dir.</p>
+<p>Denn der Herr ist ein gro&szlig;er Gott, der gro&szlig;e K&ouml;nig &uuml;ber alle G&ouml;tter. Ihm geh&ouml;ren die Tiefen der Erde, und die h&ouml;chsten Berge sind sein.</p>
+<p class="antiphon">Der Herr ist mit dir.</p>
+<p>Das Meer geh&ouml;rt ihm, denn er hat es erschaffen. Seine H&auml;nde haben das trockene Land geformt. Kommt, lasst uns anbeten und uns vor ihm verbeugen. Lasst uns niederknien vor dem Herrn, unserem Sch&ouml;pfer. Denn er ist unser Gott und wir sind das Volk, das er besch&uuml;tzt, die Schafe, die er beh&uuml;tet.</p>
+<p class="antiphon">Gegr&uuml;&szlig;et seist du, Maria, voll der Gnade, der Herr ist mit dir.</p>
+<p>Wenn ihr doch heute auf seine Stimme h&ouml;ren w&uuml;rdet! Der Herr spricht: &bdquo;Verschlie&szlig;t eure Herzen nicht, wie Israel es bei Meriba tat, wie sie es bei Massa in der W&uuml;ste machten. Dort haben eure Vorfahren meine Geduld auf die Probe gestellt, sie haben meinen Zorn herausgefordert, obwohl sie meine Taten gesehen haben.&ldquo; Der Herr ist mit dir.</p>
+<p>Vierzig Jahre lang war ich zornig auf sie und sprach: &bdquo;Sie sind ein Volk, dessen Herz sich von mir abkehrt, und sie weigern sich zu tun, was ich ihnen sage.&ldquo; Deshalb schwor ich in meinem Zorn: &bdquo;Niemals werden sie meine Ruhe finden!&ldquo;</p>
+<p class="antiphon">Gegr&uuml;&szlig;et seist du, Maria, voll der Gnade, der Herr ist mit dir.</p>
+<p class="versicle">Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p class="antiphon">Der Herr ist mit dir. Gegr&uuml;&szlig;et seist du, Maria, voll der Gnade, der Herr ist mit dir.</p>
+
+<p class="sub-title">Hymnus</p>
+<p>Der Hymnus vom Mysterium der Kirche klingt zu Christi Ruhm. Als Sohn die Jungfrau ihn gebar der Gottes Wort im Anfang war. Der Herr vor allen Frauen dich von Ewigkeit erw&auml;hlte sich; MARIA, w&uuml;rdig du allein, zu tragen Ihn im heiligen Schrein.</p>
+<p>Was Seherblick in grauer Zeit vorausgeschaut, erf&uuml;llt sich heute. Empfangen und geboren ist von einer Jungfrau JESUS Christ. F&uuml;r ein Geheimnis fassungslos erlesen ward MARIENS Scho&szlig;, aus dem hervor der Sch&ouml;pfer trat, der alles schuf nach ewigem Rat.</p>
+<p>Lob Dir, o Herr, auf h&ouml;chstem Thron und Deinem eingeborenen Sohn mit samt dem Geist der Heiligkeit jetzt und in alle Ewigkeit. Amen.</p>
+
+<p class="sub-title">Antiphon (Hohelied 2,6)</p>
+<p class="antiphon">Seine Linke * ruht unter meinem Haupt, und seine Rechte umf&auml;ngt mich.</p>
+
+<p class="sub-title">aus Psalm 96 (Neues Leben Bibel)</p>
+<p>Singt dem Herrn ein neues Lied! Die ganze Erde singe dem Herrn! Singt dem Herrn und lobt seinen Namen. Verk&uuml;ndet t&auml;glich, dass er uns rettet. Erz&auml;hlt den V&ouml;lkern von seinen Taten und sagt allen, welche Wunder er tut!</p>
+<p>Denn der Herr ist gro&szlig; und sehr zu loben! Mehr als allen anderen G&ouml;ttern stehen ihm Lob und Ehre zu. Die G&ouml;tter anderer V&ouml;lker sind nur G&ouml;tzen, der Herr aber hat den Himmel gemacht! Ehre und Herrlichkeit umgeben ihn, St&auml;rke und Sch&ouml;nheit erf&uuml;llen sein Heiligtum.</p>
+<p>Ihr V&ouml;lker der Welt, verneigt euch vor dem Herrn, erkennt, dass der Herr herrlich und stark ist. Gebt dem Herrn die Ehre, die ihm zusteht! Bringt eure Opfer dar und kommt und betet ihn an. Betet den Herrn in seiner heiligen Herrlichkeit an. Die ganze Erde soll vor ihm erbeben.</p>
+<p>Erz&auml;hlt allen V&ouml;lkern, dass der Herr allein K&ouml;nig ist. Die Erde ist fest gegr&uuml;ndet und kann nicht einst&uuml;rzen. Er wird alle V&ouml;lker gerecht richten. Der Himmel freue sich und die Erde juble! Das Meer und alles, was darin ist, soll seinen Ruhm verk&uuml;nden! Die Felder und alles, was darauf w&auml;chst, und auch die B&auml;ume des Waldes sollen sich freuen vor dem Herrn! Denn der Herr kommt! Er kommt, um die Erde zu richten. Er wird die Welt richten mit Gerechtigkeit und alle V&ouml;lker nach seiner Wahrheit.</p>
+<p class="versicle">Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p class="antiphon">Seine Linke * ruht unter meinem Haupt, und seine Rechte umf&auml;ngt mich.</p>
+
+<p class="sub-title">aus Psalm 97 (Neues Leben Bibel)</p>
+<p>Der Herr ist K&ouml;nig! Dar&uuml;ber freue sich die ganze Erde! Auch die vielen Inseln sollen dar&uuml;ber fr&ouml;hlich sein. Wolken und Dunkelheit h&uuml;llen ihn ein. Gerechtigkeit und Recht sind die S&auml;ulen seines Throns.</p>
+<p>Feuer geht vor ihm her und verzehrt seine Gegner. Seine Blitze erhellen die Welt, die ganze Welt sieht es und erbebt. Die Berge schmelzen wie Wachs vor dem Herrn, dem Herrn der Welt. Der Himmel verk&uuml;ndet seine Gerechtigkeit, und alle V&ouml;lker sehen seine Herrlichkeit.</p>
+<p>Sch&auml;men m&uuml;ssen sich die G&ouml;tzenanbeter, die mit ihren nutzlosen G&ouml;ttern angeben, denn alle G&ouml;tter m&uuml;ssen sich ihm unterwerfen! Jerusalem hat es geh&ouml;rt und freut sich, und alle St&auml;dte Judas sind fr&ouml;hlich &uuml;ber deine Gerechtigkeit, Herr! Herr, denn du stehst &uuml;ber der ganzen Welt und bist &uuml;ber alle G&ouml;tter erhaben.</p>
+<p>Ihr, die ihr den Herrn liebt, hasst das B&ouml;se! Er bewahrt das Leben der Gottesf&uuml;rchtigen und befreit sie aus der Gewalt der Gottlosen. Wer zu Gott geh&ouml;rt, den umgibt Licht, und Freude erwartet den, der aufrichtig ist. Alle Gottesf&uuml;rchtigen sollen sich im Herrn freuen und seinen heiligen Namen loben!</p>
+<p class="versicle">Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p class="antiphon">Seine Linke * ruht unter meinem Haupt, und seine Rechte umf&auml;ngt mich.</p>
+
+<p class="sub-title">aus Psalm 98 (Neues Leben Bibel)</p>
+<p>Singt dem Herrn ein neues Lied, denn er hat Wunder getan. Durch seine Macht und Heiligkeit hat er einen gro&szlig;en Sieg errungen. Der Herr hat seinen Sieg verk&uuml;ndet und seine Gerechtigkeit hat er allen V&ouml;lkern gezeigt! Er hat seine Versprechen nicht vergessen, Israel zu lieben und ihm treu zu sein. Die ganze Welt war Zeuge der Rettung, die unser Gott vollbracht hat.</p>
+<p>Jubelt dem Herrn zu, ihr Bewohner der Erde, seid fr&ouml;hlich und lobt ihn laut! Lobt den Herrn mit der Harfe, mit der Harfe und mit sch&ouml;nen Liedern, mit Trompeten und H&ouml;rnern. Spielt dem Herrn, eurem K&ouml;nig, eine fr&ouml;hliche Melodie.</p>
+<p>Das Meer und alles, was darin ist, soll ihn preisen! Die Erde und alles, was auf ihr lebt, juble ihm zu. Die Fl&uuml;sse sollen vor Freude in die H&auml;nde klatschen! Die Berge sollen fr&ouml;hliche Lieder singen vor dem Herrn. Denn der Herr kommt, die Erde zu richten. Er wird die Welt richten mit Gerechtigkeit und alle V&ouml;lker nach seiner Wahrheit.</p>
+<p class="versicle">Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p class="antiphon">Seine Linke * ruht unter meinem Haupt, und seine Rechte umf&auml;ngt mich.</p>
+
+<p class="versicle">Versikel &ndash; Jungfrauen f&uuml;hrt man zum K&ouml;nig. Nach ihr wird ihr Gefolge zu Dir gebracht.</p>
+
+
+<p class="section-title">Lesungen</p>
+<p class="sub-title">1. Lesung (Lk 1,26b-33)</p>
+<p>Der Engel Gabriel ward von Gott gesandt in eine Stadt in Galil&auml;a, mit Namen Nazareth, zu einer Jungfrau, die verlobt war mit einem Manne mit Namen Joseph vom Hause Davids, und der Name der Jungfrau war MARIA. Und der Engel trat zu ihr hinein und sprach: &laquo;Gegr&uuml;&szlig;t seist du, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen.&raquo; Da sie dies h&ouml;rte, erschrak sie &uuml;ber seine Rede, und bedachte bei sich, was dies f&uuml;r ein Gru&szlig; sei. Und der Engel sprach zu ihr: &laquo;F&uuml;rchte dich nicht, MARIA, denn du hast Gnade gefunden bei Gott. Siehe, du wirst empfangen im Scho&szlig;e und einen Sohn geb&auml;ren, und du sollst seinen Namen JESUS hei&szlig;en. Dieser wird gro&szlig; sein und der Sohn des Allerh&ouml;chsten genannt werden; Gott, der Herr, wird ihm den Thron seines Vaters David geben, und er wird herrschen &uuml;ber das Haus Jakob in Ewigkeit, und seines Reiches wird kein Ende sein.</p>
+<p class="versicle">1. Versikel &ndash; Du aber, Herr, erbarme Dich unser! Dank sei Gott.</p>
+<p class="sub-title">1. Antwortgesang</p>
+<p>Ich sah sie, sch&ouml;n wie eine Taube, die empor schwebt &uuml;ber Wasserb&auml;chen; unsch&auml;tzbarer Wohlgeruch lag reich auf ihren Gew&auml;ndern, * Und wie Fr&uuml;hlingslicht umgaben sie Rosenbl&uuml;ten und Lilien des Tales.</p>
+<p class="sub-title">1. Vers</p>
+<p>Die T&ouml;chter von Sion erblickten sie, sie priesen die Seligste, und die K&ouml;niginnen lobten sie. * Und wie Fr&uuml;hlingslicht umgaben sie Rosenbl&uuml;ten und Lilien des Tales.</p>
+
+<p class="sub-title">2. Lesung (Lk 1,34-38b)</p>
+<p>MARIA aber sprach zu dem Engel: &laquo;Wie wird dies geschehen, da ich einen Mann nicht erkenne?&raquo; Der Engel antwortete und sprach zu ihr: &laquo;Der Heilige Geist wird auf dich herabkommen, und die Kraft des Allerh&ouml;chsten wird dich &uuml;berschatten; darum wird auch das Heilige, welches aus dir geboren werden soll, Sohn Gottes genannt werden. Und siehe, Elisabeth, deine Verwandte, auch sie hat einen Sohn empfangen in ihrem Alter, und dies ist der sechste Monat f&uuml;r sie, die unfruchtbar hei&szlig;t, denn bei Gott ist kein Ding unm&ouml;glich.&raquo; MARIA aber sprach: &laquo;Siehe, ich bin die Magd des Herrn, mir geschehe nach deinem Worte.&raquo;</p>
+<p class="versicle">2. Versikel &ndash; Du aber, Herr, erbarme Dich unser! Dank sei Gott.</p>
+<p class="sub-title">2. Antwortgesang</p>
+<p>Wer ist sie, die da in der Steppe heraufsteigt in S&auml;ulen von Rauch, umw&ouml;lkt von Myrrhe und Weihrauch * und von allen Wohlger&uuml;chen des Salbenh&auml;ndlers?</p>
+<p class="sub-title">2. Vers</p>
+<p>Milch und Honig ist unter deiner Zunge; der Duft deiner Kleider ist wie der Duft des Weihrauchs. * und von allen Wohlger&uuml;chen des Salbenh&auml;ndlers?</p>
+
+<p class="sub-title">3. Lesung (Lk 1,39-45)</p>
+<p>MARIA machte sich in jenen Tagen auf und ging eilends auf das Gebirge nach einer Stadt des Stammes Juda. Und sie kam in das Haus des Zacharias und gr&uuml;&szlig;te Elisabeth. Und es begab sich, sobald Elisabeth den Gru&szlig; MARIAS h&ouml;rte, h&uuml;pfte das Kind freudig in ihrem Leibe auf, und Elisabeth ward erf&uuml;llt von dem Heiligen Geiste. Und sie rief mit lauter Stimme und sprach: &laquo;Gebenedeit bist du unter den Frauen, und gebenedeit ist die Frucht deines Leibes. Und woher geschieht mir dies, dass die Mutter meines Herrn zu mir kommt? Denn siehe, sobald die Stimme deines Gru&szlig;es an mein Ohr gelangte, h&uuml;pfte das Kind freudig in meinem Scho&szlig;e. Und selig, die du geglaubt hast, dass in Erf&uuml;llung gehen wird, was dir von dem Herrn gesagt ward.&raquo;</p>
+<p class="versicle">3. Versikel &ndash; Du aber, Herr, erbarme Dich unser! Dank sei Gott.</p>
+<p class="sub-title">3. Antwortgesang</p>
+<p>Von nun an werden mich seligpreisen alle Geschlechter, * Denn Gro&szlig;es tat an mir der Herr, der m&auml;chtig ist und heilig ist sein Name.</p>
+<p class="sub-title">3. Vers</p>
+<p>Hochpreist meine Seele den Herrn, und mein Geist frohlockt in Gott meinem Heiland. * Denn Gro&szlig;es tat an mir der Herr, der m&auml;chtig ist, &dagger; Und heilig ist sein Name.</p>
+<p class="versicle">Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+
+
+<p class="sub-title">Hymnus der heiligen Ambrosius und Augustinus</p>
+<p>Dich, den Gott, loben wir. * Dich, den Herrn, preisen wir. Dich, den ewigen Vater, * verehrt der ganze Erdkreis. Dir rufen alle Engel zu, * die Himmel und alle M&auml;chte. Dir rufen die Cherubim und Seraphim * mit nie versagender Stimme zu: * Heilig, * Heilig, * Heilig * Ist der Herr, Gott Sabaoth. Voll sind Himmel und Erde * von der Majest&auml;t Deiner Herrlichkeit.&ldquo;</p>
+<p>Dich lobt der glorreiche * Chor der Apostel. Dich der Propheten * lobw&uuml;rdige Zahl. Dich der M&auml;rtyrer * wei&szlig; gekleidetes Heer. Dich bekennt auf dem Erdenrund * die heilige Kirche. Den Vater * unermesslicher Majest&auml;t. Deinen zu verehrenden wahren * und einzigen Sohn. Auch den heiligen Geist * den Beistand. Du K&ouml;nig der Herrlichkeit, * Christus. Du bist des Vaters * ewiger Sohn.</p>
+<p>Da Du die Menschennatur annehmen wolltest, um sie zu befreien, * scheutest Du nicht der Jungfrau Scho&szlig;. Als Du den Stachel des Todes besiegtest, * hast Du den Gl&auml;ubigen das Himmelreich erschlossen. Du sitzest zur Rechten Gottes, * in der Herrlichkeit des Vaters. An Dich glauben wir * als k&uuml;nftigen Richter. Dich also bitten wir, steh Deinen Dienern bei, * die Du mit dem kostbaren Blut erl&ouml;st hast!</p>
+<p class="rubric">F&uuml;rbitten aus den Psalmtexten &ndash; entweder nach Kart&auml;userart</p>
+<p>Mach uns mit Deinen Heiligen * das Geschenk der ewigen Herrlichkeit zuteil!</p>
+<p class="rubric">oder nach r&ouml;mischer Weise</p>
+<p>Lass uns in der ewigen Herrlichkeit * zu Deinen Heiligen gez&auml;hlt werden!</p>
+<p>Rette Dein Volk, Herr, * und segne dein Erbe! Und leite sie * und erh&ouml;he sie bis in Ewigkeit! Durch alle Tage * preisen wir Dich. Und wir loben Deinen Namen in Ewigkeit * und von Ewigkeit zu Ewigkeit. Bewahre uns gn&auml;dig, Herr, * an diesem Tag ohne S&uuml;nde! Erbarme Dich unser, Herr, * erbarme Dich unser! Deine Barmherzigkeit komme &uuml;ber uns, Herr, * so wie wir auf Dich gehofft haben. Auf Dich, Herr, habe ich meine Hoffnung gesetzt; * ich werde nicht zuschanden in Ewigkeit.</p>
+<p class="versicle">Versikel &ndash; Gott will ihr helfen vor seinem Angesicht. Gott ist in ihrer Mitte, sie wird nicht wanken.</p>
+
+<p class="section-title">Oration</p>
+<p class="rubric">Lasset uns beten</p>
+<p>Gie&szlig;e, wir bitten Dich, o Herr, Deine Gnade in unsere Herzen ein; durch die Botschaft des Engels haben wir Christi, Deines Sohnes, Fleischwerdung erkannt; lass uns auf die F&uuml;rbitte der seligen Jungfrau MARIA durch sein Leiden und Kreuz zur Herrlichkeit der Auferstehung gelangen. Durch unseren Herrn JESUS Christus, Deinen Sohn, der mit Dir lebt und regiert in der Einheit des Heiligen Geistes, Gott von Ewigkeit zu Ewigkeit. Amen.</p>
+<p class="versicle">Versikel &ndash; Herr, erh&ouml;re mein Gebet. Und lass mein Rufen zu dir kommen. Lasset uns preisen den Herrn. Dank sei Gott.</p>
+
+
+<div class="divider">&#10022; &#10022; &#10022;</div>
+<p class="rubric">Im Anschluss folgt die Laudes</p>
+<p class="sub-title">nach dem Offizium</p>
+<p>Der hochheiligen und ungeteilten Dreifaltigkeit, der Menschheit unseres gekreuzigten Herrn Jesus Christus, der fruchtbaren Unversehrtheit der allerseligsten und glorreichsten Jungfrau Maria und der Gesamtheit aller Heiligen sei ewig Lob, Ehre, Kraft und Ruhm von aller Kreatur, und uns sei Nachlass aller S&uuml;nden durch alle Ewigkeit.</p>
+<p class="versicle">&#8477;. Amen.</p>
+<p class="versicle">&#8483;. Selig der Scho&szlig; der Jungfrau Maria, der den Sohn des ewigen Vaters getragen.</p>
+<p class="versicle">&#8477;. Und selig die Brust, die Christus, den Herrn, gen&auml;hrt hat.</p>
+<p class="versicle">&#8477;. Amen.</p>
+<p class="rubric">anschlie&szlig;end das Vater unser</p>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser t&auml;gliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und f&uuml;hre (lass) uns nicht in (der) Versuchung, sondern erl&ouml;se uns von dem B&ouml;sen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+<p class="sub-title">Ave Maria</p>
+<p>Gegr&uuml;&szlig;et seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte f&uuml;r uns S&uuml;nder jetzt und in der Stunde unseres Todes. Amen.</p>
+
+  </div>
+
+</div>
+
+<script>
+  function changeFont(dir){
+    let scale = parseFloat(localStorage.getItem('kartaeuser_font_scale') || '1');
+    scale = Math.min(1.5, Math.max(0.8, scale + dir*0.1));
+    document.documentElement.style.setProperty('--font-scale', scale);
+    localStorage.setItem('kartaeuser_font_scale', scale);
+  }
+  (function(){
+    const saved = localStorage.getItem('kartaeuser_font_scale');
+    if(saved){ document.documentElement.style.setProperty('--font-scale', saved); }
+  })();
+</script>
+<script src="../android-file-bridge.js"></script>
+<script src="../alltagsbegleiter-stability.js"></script>
+</body>
+</html>

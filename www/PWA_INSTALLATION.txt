@@ -1,0 +1,14 @@
+ALLTAGSBEGLEITER – PWA VERSION 14
+
+Diese Dateien müssen über HTTPS bereitgestellt werden, zum Beispiel mit GitHub Pages.
+Eine lokale file://-Adresse kann von Chrome nicht als PWA installiert werden.
+
+GitHub Pages:
+1. Neues öffentliches Repository anlegen, z. B. Alltagsbegleiter-PWA.
+2. Den gesamten INHALT dieses Ordners in das Hauptverzeichnis hochladen.
+3. Einstellungen > Pages öffnen.
+4. Quelle: Deploy from a branch; Branch: main; Ordner: /(root).
+5. Die angezeigte HTTPS-Adresse in Chrome öffnen.
+6. In Chrome: Drei Punkte > Streamen, speichern und teilen > Seite als App installieren.
+
+Die App ist danach als eigenes Fenster startbar und funktioniert nach dem ersten vollständigen Laden auch offline.

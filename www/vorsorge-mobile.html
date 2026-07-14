@@ -1,0 +1,33 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Vorsorge · Mobile 2.0</title><script src="shared-store.js"></script>
+<style>
+:root{--parch:#eee3cb;--paper:#f8f1e2;--cream:#fffaf0;--wine:#67202d;--wine2:#46131d;--ink:#30271d;--muted:#6c5f50;--line:#d6c39c;--rose:#9b4b4b}
+*{box-sizing:border-box}body{margin:0;background:var(--parch);font-family:Georgia,'Times New Roman',serif;color:var(--ink)}
+header{position:relative;background:linear-gradient(135deg,var(--rose),var(--wine2));color:white;padding:28px 18px;text-align:center}.back{position:absolute;left:14px;top:14px;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff20;color:white;text-decoration:none}
+main{padding:14px;max-width:700px;margin:auto}.list{display:grid;gap:10px}.item{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:14px;display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:var(--ink)}.item b{color:var(--wine2)}.item span{font-size:12px;color:var(--muted)}
+</style><script src="alltagsbegleiter-sync.js"></script><link rel="stylesheet" href="motorola-g55-mobile.css"><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body>
+<header><a class="back" href="index.html">←</a><h1>Vorsorge</h1><p>Schnelle Zugriffe für unterwegs</p></header>
+<main><div class="list">
+<a class="item" href="medikamente.html"><b>💊 Medikamente</b><span>Plan öffnen</span></a>
+<a class="item" href="blutdruck-app-tablet.html"><b>🫀 Blutdruck</b><span>eintragen</span></a>
+<a class="item" href="gewicht-tablet.html"><b>⚖️ Gewicht</b><span>eintragen</span></a>
+<a class="item" href="apnoe-tracker-tablet.html"><b>🌙 Apnoe</b><span>öffnen</span></a>
+<a class="item" href="arzttermine.html"><b>📅 Arzttermine</b><span>anzeigen</span></a>
+<a class="item" href="laborwerte.html"><b>🧪 Laborwerte</b><span>anzeigen</span></a>
+<a class="item" href="impfungen.html"><b>💉 Impfungen</b><span>anzeigen</span></a>
+<a class="item" href="notfallpass.html"><b>🆘 Notfallpass</b><span>wichtige Angaben</span></a>
+</div></main><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Andachten (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=EB+Garamond:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EEE1;
+    --paper-deep:#EAE0CB;
+    --ink:#2B241C;
+    --ink-soft:#6B6152;
+    --maroon:#6E1F2B;
+    --maroon-deep:#4A141C;
+    --gold:#B8935B;
+    --rule:#DDD1B2;
+    --font-display:'Cormorant Garamond', serif;
+    --font-body:'EB Garamond', serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-tap-highlight-color:transparent;
+  }
+  body{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- Menu screen ---------- */
+  #menu{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:8vh 6vw 6vh;
+    text-align:center;
+  }
+  #menu h1{
+    font-size:2.7rem;
+    letter-spacing:0.04em;
+    margin:0 0 0.25em;
+    color:var(--maroon-deep);
+    font-weight:400;
+  }
+  #menu .sub{
+    font-size:1.25rem;
+    color:var(--ink-soft);
+    margin:0 0 2.6em;
+    font-style:italic;
+  }
+  .nav-list{
+    list-style:none;
+    margin:0;padding:0;
+    width:100%;
+    max-width:760px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .nav-btn{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    width:100%;
+    padding:28px 32px;
+    background:var(--paper-deep);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:1.45rem;
+    text-align:left;
+    cursor:pointer;
+    position:relative;
+  }
+  .nav-btn:active{
+    background:var(--maroon);
+    color:var(--paper);
+    border-color:var(--maroon);
+  }
+  .nav-num{
+    font-size:1.15rem;
+    color:var(--gold);
+    font-variant-numeric:tabular-nums;
+    min-width:1.5em;
+  }
+  .nav-btn:active .nav-num{color:var(--paper);}
+  .nav-name{flex:1;}
+  .nav-name small{
+    display:block;
+    font-size:0.98rem;
+    color:var(--ink-soft);
+    font-style:italic;
+    margin-top:4px;
+  }
+  .nav-btn:active .nav-name small{color:var(--paper);}
+
+  /* ---------- Reader screen ---------- */
+  #reader{
+    display:none;
+    flex-direction:column;
+    height:100vh;
+  }
+  #reader.active{display:flex;}
+  #menu.hidden{display:none;}
+
+  #reader-bar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:22px 30px;
+    background:var(--maroon-deep);
+    color:var(--paper);
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  #back-btn{
+    background:none;
+    border:1px solid rgba(244,238,225,0.5);
+    color:var(--paper);
+    font-family:inherit;
+    font-size:1.25rem;
+    padding:12px 24px;
+    border-radius:5px;
+  }
+  #back-btn:active{background:rgba(244,238,225,0.15);}
+  #reader-title{
+    font-size:1.55rem;
+    letter-spacing:0.02em;
+    flex:1;
+    text-align:center;
+    padding-right:100px; /* balance back button visually */
+  }
+
+  #reader-body{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:44px 6vw 90px;
+    max-width:840px;
+    margin:0 auto;
+    width:100%;
+  }
+  #reader-body h2{
+    font-size:1.65rem;
+    color:var(--maroon-deep);
+    border-bottom:1px solid var(--rule);
+    padding-bottom:10px;
+    margin:1.5em 0 0.7em;
+    font-weight:400;
+  }
+  #reader-body h2:first-child{margin-top:0;}
+  #reader-body h3{
+    font-size:1.35rem;
+    color:var(--maroon);
+    margin:1.4em 0 0.5em;
+    font-weight:400;
+  }
+  #reader-body p{
+    margin:0 0 1.15em;
+    line-height:1.75;
+    font-size:1.32rem;
+  }
+  #reader-body p.rubric{
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:1.18rem;
+  }
+  #reader-body p.response{
+    padding-left:1.3em;
+  }
+  #reader-body hr{
+    border:none;
+    border-top:1px solid var(--rule);
+    margin:2em 0;
+  }
+  #reader-body table{
+    width:100%;
+    border-collapse:collapse;
+    margin:1em 0 1.7em;
+    font-size:1.22rem;
+  }
+  #reader-body td{
+    vertical-align:top;
+    padding:6px 14px 6px 0;
+    line-height:1.6;
+  }
+  #reader-body td.lat{
+    font-style:italic;
+    color:var(--ink-soft);
+    width:50%;
+  }
+
+  @media (min-width:900px){
+    #reader-body{padding-left:0;padding-right:0;}
+  }
+  .back-to-menu{
+    position:fixed;top:18px;right:18px;z-index:80;
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(184,147,91,0.16);color:var(--maroon);
+    text-decoration:none;font-size:20px;
+    transition:transform .15s ease;
+    box-shadow:0 2px 8px rgba(43,36,28,0.10);
+  }
+  .back-to-menu:active{transform:scale(0.93);}
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+
+<a class="back-to-menu" href="andachtsschrank.html" aria-label="Zurück zum Andachtsschrank" title="Zurück zum Andachtsschrank">←</a>
+
+<div id="menu">
+  <h1>Andachten</h1>
+  <p class="sub">Morgenlob &middot; Eucharistie &middot; Rosenkranz &middot; Todesstunde</p>
+  <ul class="nav-list">
+    <li><button class="nav-btn" data-target="angelus">
+      <span class="nav-num">0</span>
+      <span class="nav-name">Angelus<small>Der Engel des Herrn</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="laudes">
+      <span class="nav-num">I</span>
+      <span class="nav-name">Laudes<small>Morgenlob</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="eucharistie">
+      <span class="nav-num">II</span>
+      <span class="nav-name">Eucharistie<small>Die Feier der heiligen Messe</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="rosenkranz">
+      <span class="nav-num">III</span>
+      <span class="nav-name">Rosenkranzgebet<small>Das tägliche Rosenkranzgebet</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="todesstunde">
+      <span class="nav-num">IV</span>
+      <span class="nav-name">Todesstunde<small>Todesstunde Jehoschuas</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="komplet">
+      <span class="nav-num">V</span>
+      <span class="nav-name">Komplet<small>Nachtgebet</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="vesper">
+      <span class="nav-num">VI</span>
+      <span class="nav-name">Vesper<small>Abendlob</small></span>
+    </button></li>
+    <li><button class="nav-btn" data-target="barmherzigkeitsrosenkranz">
+      <span class="nav-num">VII</span>
+      <span class="nav-name">Barmherzigkeitsrosenkranz<small>Der Rosenkranz zur Göttlichen Barmherzigkeit</small></span>
+    </button></li>
+  </ul>
+</div>
+
+<div id="reader">
+  <div id="reader-bar">
+    <button id="back-btn">&larr; Zurück</button>
+    <div id="reader-title"></div>
+  </div>
+  <div id="reader-body"></div>
+</div>
+
+<script>
+const TITLES = {
+  angelus: "Angelus",
+  laudes: "Laudes",
+  eucharistie: "Eucharistie",
+  rosenkranz: "Rosenkranzgebet",
+  todesstunde: "Todesstunde",
+  komplet: "Komplet",
+  vesper: "Vesper",
+  barmherzigkeitsrosenkranz: "Barmherzigkeitsrosenkranz"
+};
+
+const CONTENT = {};
+
+// ============================================================
+// ANGELUS
+// ============================================================
+CONTENT.angelus = `
+<h2>Angelus — der Engel des Herrn</h2>
+<p class="rubric">Morgens, mittags und abends wird (beim Geläut der Glocken) das Angelus Gebet gesprochen. Es erinnert an die Verkündigung des Engels Gabriel an Maria und an die Geheimnisse der Menschwerdung Gottes.</p>
+<p>Der Engel des Herrn, brachte Maria die Botschaft, und sie empfing vom Heiligen Geist ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Maria sprach, siehe ich bin die Magd des Herrn, mir geschehe nach deinem Wort ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Und das Wort ist Fleisch geworden, und hat unter uns gewohnt ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Bitte für uns heilige Gottesmutter, auf das wir würdig werden der Verheißungen Jehoschuas.</p>
+<p>Lasset uns beten; Allmächtiger Gott, gieße Deine Gnade in unsere Herzen ein. Durch die Botschaft des Engels haben wir die Menschwerdung Jehoschuas, Deines Sohnes erkannt. Lass uns durch sein Leiden und Kreuz zur Herrlichkeit der Auferstehung gelangen. Darum bitten wir dich, durch Jehoschua, unsern Herrn. Amen.</p>
+
+<h3>In der Osterzeit — Regina caeli</h3>
+<p class="rubric">In der Osterzeit betet die Kirche anstelle des Angelus das „Regina caeli".</p>
+<p>Freu dich, du Himmelskönigin, Halleluja! Den du zu tragen würdig warst, Halleluja, er ist auferstanden, wie er gesagt, Halleluja. Bitte Gott für uns, Halleluja.</p>
+<p>Freu dich und frohlocke, Jungfrau Maria, Halleluja, denn der Herr ist wahrhaft auferstanden, Halleluja.</p>
+<p>Lasset uns beten. Allmächtiger Gott, durch die Auferstehung deines Sohnes, unseres Herrn Jehoschua, hast du die Welt mit Jubel erfüllt. Lass uns durch seine jungfräuliche Mutter Maria zur unvergänglichen Osterfreude gelangen. Darum bitten wir dich durch Jehoschua, unseren Herrn. Amen.</p>
+`;
+
+// ============================================================
+// LAUDES
+// ============================================================
+CONTENT.laudes = `
+<h2>Vor dem Offizium</h2>
+<p>Öffne, Herr, meinen Mund, Deinen heiligen Namen zu preisen, und läutere mein Herz von allen nichtigen, verkehrten und fremden Gedanken! Erleuchte meinen Verstand und entzünde mein Gemüt, auf dass ich würdig, aufmerksam und andächtig dieses Offizium zu verrichten vermag und vor dem Angesicht Deiner göttlichen Majestät erhört zu werden verdiene. Darum bitten wir durch Jesus Christus, deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit.</p>
+<p class="response">℟. Amen.</p>
+<p>Herr, in Vereinigung mit jener göttlichen Absicht, mit der Du selbst auf Erden Gott Lob erwiesen hast, will ich Dir diese Hore (oder: diese Horen) verrichten.</p>
+<p class="response">℟. Amen.</p>
+
+<h3>anschließend das Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Ave Maria</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+
+<h3>Das Apostolische Glaubensbekenntnis</h3>
+<p>Ich glaube an Gott, den Vater, den Allmächtigen, den Schöpfer des Himmels und der Erde, und an Jesus Christus, seinen eingeborenen Sohn, unseren Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allmächtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten.</p>
+<p>Ich glaube an den Heiligen Geist, die heilig machende Gnade, meine Gemeinschaft und Freundschaft mit Gott, meinem Vater, sowie meine Teilhabe an seinem Leben.</p>
+<p>An die heilende Kraft der Gemeinschaft aller Gläubigen, an die Unterstützung und Begleitung heiliger Menschen im Leben und über deren Tod hinaus, die Vergebung meiner Sünden, die Auferstehung von den Toten und das Ewige Leben. Amen.</p>
+
+<h2>Laudes (Morgenlob)</h2>
+<p class="rubric">Stilles Gebet – dreimal das AVE Maria, anschließend</p>
+<p>† Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+<p>Herr, öffne meine Lippen, † damit mein Mund dein Lob verkünde.</p>
+<p>O Gott, komm mir zu Hilfe! Herr, eile mir zu helfen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen. Alleluja.</p>
+<p class="rubric">In der 40-tägigen Fastenzeit bis zum Karsamstag wird anstelle des Alleluja das „Lob sei Dir, Herr, König der ewigen Herrlichkeit" gebetet.</p>
+
+<h3>Confiteor (Schuldbekenntnis)</h3>
+<p>Ich bekenne Gott, dem Allmächtigen, und allen Brüdern und Schwestern, dass ich Gutes unterlassen und Böses getan habe – ich habe gesündigt in Gedanken, Worten und Werken durch meine Schuld, durch meine Schuld, durch meine große Schuld.</p>
+<p>Darum bitte ich die selige Jungfrau Maria, alle Engel und Heiligen und euch, Brüder und Schwestern, für mich zu beten bei Gott, unserm Herrn.</p>
+<p>† Der allmächtige Gott erbarme sich meiner, er lasse mir die Sünden nach und führe mich zum ewigen Leben. Amen.</p>
+
+<h3>Hymnus</h3>
+<p>Du bist in Wahrheit gnadenvoll,<br>
+dein Lob nicht mehr verstummen soll;<br>
+denn du, Maria, hast geschenkt<br>
+uns Jehoschua, der die Welten lenkt.</p>
+<p>Den Hirten ward die Botschaft kund,<br>
+sie priesen Gott mit lautem Mund;<br>
+nach Bethlehem sie eilten fort<br>
+und fanden froh den Heiland dort.</p>
+<p>Auch aus dem Morgenlande fern<br>
+die Weisen folgten seinem Stern;<br>
+als Erstlinge der Völkerschar<br>
+sie brachten ihre Gaben dar.</p>
+<p>Aus allen Völkern zu dir fleht,<br>
+o Jungfrau Mutter, das Gebet;<br>
+Erwirke uns Nachlass unsrer Schuld,<br>
+den Frieden und die Gotteshuld!</p>
+<p>Lob Dir, o Herr, auf höchstem Thron<br>
+und Deinem eingeborenen Sohn,<br>
+mit samt dem Geist der Heiligkeit,<br>
+jetzt und in alle Ewigkeit. Amen.</p>
+
+<h3>Antiphon (Hohelied 1,14)</h3>
+<p>Siehe, du * bist schön, meine Freundin, siehe, du bist schön; deine Augen sind wie die von Tauben.</p>
+
+<h3>aus Psalm 93 (Neues Leben Bibel)</h3>
+<p>Der Herr ist König! Er ist in Herrlichkeit gekleidet. Ja, der Herr ist in Herrlichkeit gekleidet und mit Stärke umgürtet. Die Erde ist fest gegründet, nichts kann sie erschüttern.</p>
+<p>Dein Thron steht seit ewigen Zeiten und du selbst bist von Anbeginn an.</p>
+<p>Herr, die mächtigen Meere toben. Die mächtigen Ozeane donnern und brausen, die mächtigen Wogen schlagen ans Ufer.</p>
+<p>Doch mächtiger noch als das Wüten des Meeres, mächtiger als die Wellen am Ufer ist der Herr in der Höhe!</p>
+<p>Dein Wort ist sehr zuverlässig. Herr, dein Haus ist ein heiliges Haus für alle Zeit.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hohelied 1,14): Siehe, du * bist schön, meine Freundin, siehe, du bist schön; deine Augen sind wie die von Tauben.</p>
+
+<h3>aus Psalm 99 (Neues Leben Bibel)</h3>
+<p>Jubelt dem Herrn zu, ihr Bewohner der Erde! Betet ihn voll Freude an. Kommt zu ihm und lobt ihn mit Liedern.</p>
+<p>Erkennt, dass der Herr Gott ist! Er hat uns erschaffen und wir gehören ihm. Wir sind sein Volk, die Schafe seiner Weide.</p>
+<p>Geht durch die Tempeltore mit Dank, tretet ein in seine Vorhöfe mit Lobgesang. Dankt ihm und lobt seinen Namen.</p>
+<p>Denn der Herr ist gut. Seine Gnade hört niemals auf, und seine Treue gilt für immer.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hohelied 1,14): Siehe, du * bist schön, meine Freundin, siehe, du bist schön; deine Augen sind wie die von Tauben.</p>
+
+<h3>aus Psalm 63 (Neues Leben Bibel)</h3>
+<p>Gott, du bist mein Gott; dich suche ich von ganzem Herzen. Meine Seele dürstet nach dir, mein ganzer Leib sehnt sich nach dir in diesem dürren, trockenen Land, in dem es kein Wasser gibt.</p>
+<p>Ich habe dich in deinem Heiligtum gesehen und deine Macht und Herrlichkeit bestaunt.</p>
+<p>Deine Gnade bedeutet mir mehr als das Leben; dich preise ich von ganzem Herzen!</p>
+<p>Ich will dich ehren, solange ich lebe, und meine Hände im Gebet zu dir erheben.</p>
+<p>Wie mit köstlichen Speisen, so machst du mich glücklich, dich will ich loben und preisen.</p>
+<p>Wenn ich in der Nacht wach liege, denke ich über dich nach, die ganze Nacht denke ich nur an dich.</p>
+<p>Ich denke daran, wie sehr du mir geholfen hast; ich juble vor Freude, beschützt im Schatten deiner Flügel.</p>
+<p>Ich halte mich nah zu dir, denn deine rechte Hand hält mich sicher.</p>
+<p>Die aber, die mich vernichten wollen, werden selbst in den Tiefen der Erde verschwinden.</p>
+<p>Durch das Schwert werden sie sterben und zur Beute der Schakale werden.</p>
+<p>Der König wird sich in Gott freuen. Und alle, die auf ihn vertrauen, werden ihn loben, denn die Lügner müssen schweigen.</p>
+<p class="rubric">Hier betet man kein „Ehre sei dem Vater", sondern fügt an;</p>
+
+<h3>aus Psalm 67 (Neues Leben Bibel)</h3>
+<p>Gott, sei uns gnädig und segne uns. Er lasse sein Angesicht gnädig über uns leuchten.</p>
+<p>Auf der ganzen Welt soll dein Weg bekannt werden, alle Menschen sollen sehen, wie du hilfst.</p>
+<p>Gott, die Völker sollen dir danken, alle Völker sollen dich loben.</p>
+<p>Die Völker werden sich freuen und vor Freude jubeln, weil du sie gerecht richtest und alle Völker auf der Erde regierst.</p>
+<p>Gott, die Völker sollen dir danken, alle Völker sollen dich loben.</p>
+<p>Dann wird die Erde eine gute Ernte hervorbringen, und Gott, unser Gott, wird uns überreich segnen.</p>
+<p>Ja, Gott wird uns segnen, und die Völker der Welt werden ihn verehren.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hohelied 1,14): Siehe, du * bist schön, meine Freundin, siehe, du bist schön; deine Augen sind wie die von Tauben.</p>
+
+<h3>Lobgesang des Daniel (Einheitsübersetzung 2016)</h3>
+<p>Gepriesen bist du, HERR, du Gott unserer Väter, gelobt und gerühmt in Ewigkeit. Gepriesen ist dein heiliger, herrlicher Name, hochgelobt und verherrlicht in Ewigkeit.</p>
+<p>Gepriesen bist du, im Tempel deiner heiligen Herrlichkeit, hoch gerühmt und verherrlicht in Ewigkeit.</p>
+<p>Gepriesen bist du, der in die Tiefen schaut und auf Cherubim thront, gelobt und gerühmt in Ewigkeit.</p>
+<p>Gepriesen bist du, auf dem Thron deiner Herrschaft, hoch gerühmt und gefeiert in Ewigkeit.</p>
+<p>Gepriesen bist du, am Gewölbe des Himmels, gerühmt und verherrlicht in Ewigkeit.</p>
+<p>Preist den HERRN, all ihr Werke des HERRN; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Himmel; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Engel des HERRN; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, all ihr Wasser über dem Himmel; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, all ihr Mächte des HERRN; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Sonne und Mond; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Sterne am Himmel; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, aller Regen und Tau; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, all ihr Winde; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Feuer und Glut; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Frost und Hitze; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Tau und Schnee; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Eis und Kälte; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Raureif und Schnee; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Nächte und Tage; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Licht und Dunkel; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Blitze und Wolken; lobt und rühmt ihn in Ewigkeit!</p>
+<p>Die Erde preise den HERRN; sie lobe und rühme ihn in Ewigkeit.<br>
+Preist den HERRN, ihr Berge und Hügel; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, all ihr Gewächse auf Erden; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Quellen; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Meere und Flüsse; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Tiere des Meeres und alles, was sich regt im Wasser; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, all ihr Vögel am Himmel; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, all ihr Tiere, wilde und zahme; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Menschen; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Israeliten; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr seine Priester; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr seine Knechte; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Geister und Seelen der Gerechten; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, ihr Demütigen und Frommen; lobt und rühmt ihn in Ewigkeit!<br>
+Preist den HERRN, Hananja, Asarja und Mischaël; lobt und rühmt ihn in Ewigkeit!</p>
+<p>Denn er hat uns der Unterwelt entrissen und aus der Gewalt des Todes errettet. Er hat uns aus dem lodernden Ofen befreit, uns mitten aus dem Feuer erlöst.</p>
+<p>Dankt dem HERRN, denn er ist gütig; denn seine Huld währt ewig!</p>
+<p>Preist alle den HERRN, ihr seine Verehrer, preist den Gott der Götter; singt ihm Lob und Dank; denn ewig währt seine Güte!</p>
+<p class="rubric">Hier betet man kein „Ehre sei dem Vater", sondern fügt an</p>
+
+<h3>aus Psalm 148 (Neues Leben Bibel)</h3>
+<p>Halleluja! Lobt den Herrn im Himmel! Lobt ihn in der Höhe!</p>
+<p>Lobt ihn, all seine Engel! Lobt ihn, ihr himmlischen Heerscharen!<br>
+Lobt ihn, Sonne und Mond! Lobt ihn, ihr funkelnden Sterne!<br>
+Lobt ihn, alle Himmel! Lobt ihn, ihr Wasser, die ihr über dem Himmel seid!</p>
+<p>Sie sollen den Namen des Herrn loben, denn er hat es befohlen, und alles wurde geschaffen. Er lässt sie für immer und ewig bestehen. Er gab Gebote, die man nicht überschreiten darf.</p>
+<p>Lobt den Herrn auf der Erde, ihr Fische des Meeres und ihr tiefen Ozeane, Feuer und Hagel, Schnee und Sturm, Wind und Wetter, die ihm gehorchen, Berge und alle Hügel, Obstbäume und Zedern, wilde Tiere und Vieh, Reptilien und Vögel, Könige der Erde und alle Völker, Herrscher und Richter der Erde, junge Männer und junge Frauen, alte wie junge Menschen.</p>
+<p>Alle sollen den Namen des Herrn loben. Denn allein sein Name ist groß und sein Ruhm überragt Erde und Himmel!</p>
+<p>Er hat sein Volk stark gemacht und seine Gottesfürchtigen zu Ehren gebracht und das Volk Israel, das ihm nahe ist. Halleluja!</p>
+<p class="rubric">Hier betet man kein „Ehre sei dem Vater", sondern fügt an;</p>
+
+<h3>aus Psalm 149 (Neues Leben Bibel)</h3>
+<p>Halleluja! Singt dem Herrn ein neues Lied. Singt sein Lob in der Versammlung der Gläubigen.</p>
+<p>Israel, freue dich an deinem Schöpfer. Ihr Einwohner Jerusalems, jubelt über euren König.</p>
+<p>Lobt seinen Namen beim Tanz und spielt für ihn mit Tamburin und Harfe.</p>
+<p>Denn der Herr freut sich über sein Volk; er krönt die Demütigen mit seiner Hilfe.</p>
+<p>Die ihm vertrauen, sollen sich an seiner Herrlichkeit freuen. Sie sollen vor Freude singen, wenn sie sich schlafen legen.</p>
+<p>Sie sollen Gott mit ihrem Mund loben und ein scharfes Schwert in den Händen halten, um an den Völkern Rache zu nehmen und die Menschen zu strafen, um ihre Könige in Ketten zu legen und ihre Anführer in Eisen, um das Gericht zu vollziehen, das für sie bestimmt ist.</p>
+<p>Das ist eine Ehre für alle, die Gott vertrauen. Halleluja!</p>
+<p class="rubric">Hier betet man kein „Ehre sei dem Vater", sondern fügt an;</p>
+
+<h3>aus Psalm 150 (Neues Leben Bibel)</h3>
+<p>Halleluja! Lobt Gott in seinem Heiligtum, lobt ihn in seiner himmlischen Wohnung!</p>
+<p>Lobt ihn für seine mächtigen Taten, lobt ihn in seiner unvergleichlichen Größe!</p>
+<p>Lobt ihn mit dem Klang der Posaune, lobt ihn mit Harfe und mit Zither!</p>
+<p>Lobt ihn mit Tanz und Tamburin, lobt ihn mit Saiteninstrumenten und Flöten!</p>
+<p>Lobt ihn mit klingenden Zimbeln, lobt ihn mit dem Klang lauter Zimbeln.</p>
+<p>Alles, was atmet, lobe den Herrn! Halleluja!</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hohelied 1,14): Siehe, du * bist schön, meine Freundin, siehe, du bist schön; deine Augen sind wie die von Tauben.</p>
+
+<h3>Kapitel</h3>
+<p>Ich sprosste gleich wie ein Weinstock (den) Wohlgeruch hervor, und meine Blüten sind eine Frucht von Zierde und Schönheit. Dank sei Gott.</p>
+
+<h3>Versikel</h3>
+<p>Du bist gebenedeit unter den Frauen.<br>Und gebenedeit ist die Frucht deines Leibes.</p>
+
+<h3>Lobgesang aus dem Evangelium – Lobgesang des Zacharias</h3>
+<p>Antiphon (HldL 4,12): Ein Garten, * ein verschlossener, bist du, meine Schwester; du bist ein verschlossener Garten, ein versiegelter Quell.</p>
+<p>† Gepriesen sei der Herr, der Gott Israels, * denn heimgesucht hat er sein Volk und ihm Erlösung geschaffen.</p>
+<p>Ein Horn des Heils hat er uns errichtet * im Hause seines Knechtes David.</p>
+<p>Wie er gesprochen hat durch den Mund der Heiligen, * die von alters her sind, seine Propheten.</p>
+<p>Rettung von unseren Feinden * und aus der Hand aller, die uns hassen.</p>
+<p>Um Barmherzigkeit zu üben an unseren Vätern * und seines heiligen Bundes zu gedenken.</p>
+<p>Den Eid, den er unserem Vater Abraham geschworen hat, * uns zu verleihen, dass wir ohne Furcht, aus der Hand unserer Feinde befreit, * ihm dienen mögen.</p>
+<p>In Heiligkeit und Gerechtigkeit vor ihm * all unsere Tage.</p>
+<p>Und du, Kind, wirst Prophet des Höchsten genannt werden, * denn du wirst vor dem Angesicht des Herrn einhergehen, um seine Wege zu bereiten.</p>
+<p>Um seinem Volk die Wissenschaft des Heils zu geben * zur Vergebung ihrer Sünden.</p>
+<p>Durch das Innigste der Barmherzigkeit unseres Gottes, * in welcher er uns heimgesucht hat, ausgehend aus der Höhe.</p>
+<p>Um jene zu erleuchten, die in Finsternis und in Todesschatten sitzen, * und unsere Schritte zu lenken auf den Weg des Friedens.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (HldL 4,12): Ein Garten, * ein verschlossener, bist du, meine Schwester; du bist ein verschlossener Garten, ein versiegelter Quell.</p>
+
+<h3>Lasset uns beten</h3>
+<p>O Gott, durch die fruchtbare Jungfrauschaft der seligen Maria hast Du dem Menschengeschlecht die Güter des ewigen Heils geschenkt; lass uns, wir bitten Dich, erfahren, dass sie selber für uns Fürsprache einlegt, durch die wir den Urheber des Lebens empfangen durften, unseren Herrn Jehoschua, Deinen Sohn, Der mit Dir lebt und regiert in der Einheit des Heiligen Geistes, Gott von Ewigkeit zu Ewigkeit. Amen.</p>
+
+<h3>Versikel</h3>
+<p>Vater, erhöre mein Gebet. Und lass mein Rufen zu dir kommen.</p>
+<p>Lasset uns preisen den Herrn. Dank sei Gott.</p>
+
+<h3>Versikel für die Armen Seelen</h3>
+<p>Die Seelen aller verstorbenen Gläubigen mögen durch die Barmherzigkeit Gottes ruhen in Frieden. Amen.</p>
+
+<h3>Marianische Antiphon</h3>
+<p class="rubric">Hier † nehmen wir Veniam (Kuss des Kreuzes / Medaille des Rosenkranzes).</p>
+<p>Sei gegrüßt, o Königin, Mutter der Barmherzigkeit, † des Lebens Wonne und unsere Hoffnung, sei gegrüßt. Zu dir rufen wir verbannte Kinder Evas, zu dir seufzen wir trauernd und weinend in diesem Tal der Tränen. Wohl an denn, unsere Fürsprecherin, wende deine barmherzigen Augen uns zu, und nach diesem Elend zeige uns Jehoschua, die gebenedeite Frucht deines Leibes, als gnädigen Heiland.</p>
+<p>O gütige, o milde, o süße Jungfrau Maria! In aller Trübsal und Angst komm uns zu Hilfe, o allerseeligste Jungfrau Maria. Amen.</p>
+
+<h3>Weihegebet an die Heilige Dreifaltigkeit, durch Maria …</h3>
+<p>Maria, du hast mich eingeladen, das ich mich deinem Unbefleckten Herzen weihe. Ich weiß, du möchtest mich zu Gott führen, denn du liebst mich unendlich, willst, dass ich glücklich werde. Lass mich auf deine Einladung antworten.</p>
+<p>So wie Jehoschua am Kreuz dich mir geschenkt hat, will auch ich mich dir schenken. In deine Hände erneuere ich mein Taufversprechen und weihe mich deinem Unbefleckten Herzen, um ganz der Heiligsten Dreifaltigkeit zu gehören.</p>
+<p>Ich gebe dir mein Herz, meine Seele, meinen Geist und meinen Leib, meine Talente und Gaben, meine Vergangenheit, Gegenwart und Zukunft.</p>
+<p>Nimm mich in deine Arme und hilf mir, Jehoschua so zu lieben, wie du ihn liebst! Von dir will ich lernen, auf das Wort des Vaters zu hören und seinen Willen zu tun.</p>
+<p>Wie du, Maria, will ich den Heiligen Geist in meinem Herzen empfangen. Mit dir, Maria, möchte ich lernen, alle Menschen zu lieben, denn sie gehören alle Jehoschua.</p>
+<p>Ich weihe mich dir, damit mein Gebet, ein Gebet mit dem Herzen sei, durch das ich den Frieden, die Freude, die Liebe und die Kraft finde, mich mit meinen Mitmenschen zu versöhnen.</p>
+<p>Ich weihe dir meine Familie, meine Freunde und alle Menschen auf dieser Erde, insbesondere die, welche am meisten die Hilfe und Barmherzigkeit deines Sohnes, unseres Herrn und Gottes benötigen.</p>
+<p>So wie Jehoschua möchte ich jeden Tag an deiner Seite leben. Von jetzt an soll alles in mir den Herrn preisen! Mein Herz möge sich freuen in Gott meinem Retter! Amen.</p>
+<p class="rubric">Entsprechend Gebet für die Welt oder Gebet am Fastentag</p>
+
+<h3>Angelus – der Engel des Herrn</h3>
+<p class="rubric">Morgens, mittags und abends wird (beim Geläut der Glocken) das Angelus Gebet gesprochen. Es erinnert an die Verkündigung des Engels Gabriel an Maria und an die Geheimnisse der Menschwerdung Gottes.</p>
+<p>Der Engel des Herrn, brachte Maria die Botschaft, und sie empfing vom Heiligen Geist ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Maria sprach, siehe ich bin die Magd des Herrn, mir geschehe nach deinem Wort ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Und das Wort ist Fleisch geworden, und hat unter uns gewohnt ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Bitte für uns heilige Gottesmutter, auf das wir würdig werden der Verheißungen Jehoschuas.</p>
+<p>Lasset uns beten; Allmächtiger Gott, gieße Deine Gnade in unsere Herzen ein. Durch die Botschaft des Engels haben wir die Menschwerdung Jehoschuas, Deines Sohnes erkannt. Lass uns durch sein Leiden und Kreuz zur Herrlichkeit der Auferstehung gelangen. Darum bitten wir dich, durch Jehoschua, unsern Herrn. Amen.</p>
+<p class="rubric">In der Osterzeit betet die Kirche anstelle des Angelus das „Regina caeli".</p>
+<p>Freu dich, du Himmelskönigin, Halleluja! Den du zu tragen würdig warst, Halleluja, er ist auferstanden, wie er gesagt, Halleluja. Bitte Gott für uns, Halleluja.</p>
+<p>Freu dich und frohlocke, Jungfrau Maria, Halleluja, denn der Herr ist wahrhaft auferstanden, Halleluja.</p>
+<p>Lasset uns beten. Allmächtiger Gott, durch die Auferstehung deines Sohnes, unseres Herrn Jehoschua, hast du die Welt mit Jubel erfüllt. Lass uns durch seine jungfräuliche Mutter Maria zur unvergänglichen Osterfreude gelangen. Darum bitten wir dich, durch Jehoschua, unseren Herrn. Amen.</p>
+
+<h3>Allgemeine Fürbitten</h3>
+<p><em>für alle, für die ich bete</em><br>
+Abba*, gedenke aller, für die ich bete. Halte deine barmherzige und liebende Hand über sie, gib ihnen die Hilfe und Unterstützung, die sie erbitten, oder dringend benötigen. Erbarme dich in besonderer Weise derer, die niemand mehr haben, der für sie betet, oder an sie denkt. Amen.</p>
+<p><em>für meine Familie</em><br>
+Abba*, schütze meine Familie vor allem Bösen und hilf ihnen, den Anforderungen Ihres Lebens, in deinem Sinne gerecht zu werden. Mögen sie deine große Liebe und Barmherzigkeit erfahren und sich ihrer würdig erweisen. Amen.</p>
+<p><em>für mich</em><br>
+Abba*, verzeih mir meine Unvollkommenheit und vergib mir meine heutigen Fehler und Unzulänglichkeiten. Sehe mir meine Sünden nach und sei barmherzig meiner Seele gegenüber. Nimm mich auf in dein Reich wenn meine Zeit gekommen ist. Amen.</p>
+<p><em>für den Tag</em><br>
+Abba*, segne meine Augen, die heute viele Bilder sehen werden. Segne meine Ohren, die bei dem Lärm des Tages, sich nach dir und Stille sehnen.</p>
+<p>Segne meine Lippen, die beim vielen Reden heute, dich all zu oft vergessen werden.</p>
+<p>Bilde mein Herz nach deinem Herzen, das es die Menschen versteht und sie lieben lernt, und bleibe du in mir, so wie ich in dir bleiben möchte.</p>
+<p>Segne mich und meine abwesenden Brüder und Schwestern, bewahre uns vor Unheil und führe uns zum ewigen Leben. Amen.</p>
+<p class="rubric">* der du mir auch Mutter bist</p>
+
+<h3>Gebet für unsere Verstorbenen</h3>
+<p>Vater, gib all unseren Verstorbenen die ewige Ruhe. Das ewige Licht leuchte ihnen. Lass sie ruhen in deinem Frieden. Amen.</p>
+<hr>
+<p>† Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+
+<h2>Nach dem Offizium</h2>
+<p>Der hochheiligen und ungeteilten Dreifaltigkeit, der Menschheit unseres gekreuzigten Herrn Jesus Christus, der fruchtbaren Unversehrtheit der allerseligsten und glorreichsten Jungfrau Maria und der Gesamtheit aller Heiligen sei ewig Lob, Ehre, Kraft und Ruhm von aller Kreatur, und uns sei Nachlass aller Sünden durch alle Ewigkeit.</p>
+<p class="response">℟. Amen.</p>
+<p>℣. Selig der Schoß der Jungfrau Maria, der den Sohn des ewigen Vaters getragen.</p>
+<p class="response">℟. Und selig die Brust, die Christus, den Herrn, genährt hat.<br>℟. Amen.</p>
+
+<h3>anschließend das Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Ave Maria</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+`;
+
+// ============================================================
+// EUCHARISTIE
+// ============================================================
+CONTENT.eucharistie = `
+<h2>Gebet vor der heiligen Messe</h2>
+<p>Himmlischer Vater, danke, das du mir die Begegnung mit dir, mit meinen Brüdern und Schwestern, in der heiligen Eucharistie, immer wieder neu ermöglichst.</p>
+<p>Danke, das du mich für die Gemeinschaft mit dir und ihnen erschaffen hast, mich die Liebe meiner Brüder und Schwestern glücklich macht.</p>
+<p>Danke für jede Hand die mir hilft, durch dieses Leben zu gehen.</p>
+<p>Danke für die Begegnungen, bei denen ich fühlen kann und wahrnehmen darf, das andere sich über mich freuen, das ich ihnen Freude bereite, bereitet habe.</p>
+<p>Danke, das du es mir ermöglichst, deinem Sohn Jesus Christus zu begegnen, der bei mir, bei uns geblieben ist, in seinem Wort, in der heiligen Eucharistie, in der heiligen Hostie.</p>
+<p>Danke für seine Anwesenheit unter uns.</p>
+<p>Jesus, ich möchte in dieser heiligen Messe dir begegnen. Möchte dein Wort hören, dich in der heiligen Eucharistie empfangen.</p>
+<p>Zu dir darf ich kommen, jederzeit. Auch dann, wenn ich anderen Menschen nicht traue, anderen Menschen nicht begegnen möchte. Darf bei dir bleiben, wenn andere mich meiden.</p>
+<p>Du allein kannst meinem Herzen Ruhe, Freude und Frieden schenken. Bitte, sende mir deinen Geist, damit ich begreife, was es bedeutet, dir heute und immer wieder begegnen zu dürfen.</p>
+<p>Maria, du hast lange Zeit jeden Tag mit Jesus verbracht, so das du ihn am besten kennst. Bitte hilf mir zu beseitigen, was meine Begegnung mit deinem Sohn stört, stören könnte.</p>
+<p>Maria, danke das du mich, das du uns eingeladen hast, immer wieder einlädst, uns auf die heilige Messe so vorzubereiten, wie wir uns auf die Begegnung mit unseren besten Freunden vorbereiten würden;</p>
+<p>„Liebe Kinder! Ich möchte euch einladen, die heilige Messe zu leben. Es gibt viele unter euch, die die Schönheit der heiligen Messe nicht empfinden, und es gibt auch solche, die nicht gerne zur heiligen Messe gehen. Ich habe euch auserwählt, liebe Kinder, und Jesus gibt euch seine Gnaden in der heiligen Messe. Darum lebt bewusst die heilige Messe und euer Kommen soll freudig sein. Kommt mit Freude und nehmt die heilige Messe in euch auf."</p>
+<p>Maria, ich möchte von der Liebe leben, die Jesus, dein Sohn, mir in dieser heiligen Messe schenken möchte. Erbitte für mich (für uns) die Gnade, das sein Wort mich (uns) belebt, das seine Liebe mich (uns) zur Liebe entflammt, seine Vergebung mich (uns) zur Vergebung befähigt.</p>
+<p>Gib, das ich mich über die Möglichkeit der Teilnahme an dieser heiligen Messe, so freuen kann wie du dich, über jede Begegnung mit deinem Sohn gefreut hast.</p>
+<p>Jesus, nimm jetzt von mir jede Bürde, jede Last, damit die heilige Messe eine Quelle der Freude für mich (uns) wird, weil wir dir begegnen dürfen. Danke, das du diese Begegnung mit mir (mit uns) immer wieder suchst, mir (uns) immer wieder ermöglichst.</p>
+<p>Verzeih mir wenn mich während der heiligen Messe, Begegnungen und Gedanken beschäftigen, mich belasten, oder ablenken. Oft ist diese, unsere Begegnung dann ohne wirkliche Freude, ohne wirkliche Einlassung auf dich. Manchmal frage ich mich dann, warum ich hierher komme, gekommen bin.</p>
+<p>Du opferst dich trotzdem immer mit der gleichen Liebe für mich, für uns alle auf. Immer wieder, uns bedingungslos liebend. Verzeih mir, verzeihe uns, nimm alle Last von uns, so das diese heilige Messe jetzt wirklich eine Begegnung mit dir werden kann.</p>
+<p>Ich bete für den Priester der die heilige Messe zelebriert. Sein Herz möge bereit sein allen Menschen zu verzeihen. Nimm jede Last von ihm, damit er frei wird für die Begegnung mit dir, frei wird für das Opfer, das du für ihn, für uns alle darbringen möchtest.</p>
+<p>Hilf ihm seine Routinen zu überwinden. Jede heilige Messe soll für ihn eine Erfahrung werden, aus der er Leben und Kraft, für seine Nachfolge schöpfen kann. Gib ihm die Gnade, uns alle immer wieder mit großer Freude, zu dir führen zu wollen.</p>
+<p>Lass mich beten für alle Priester, die von Ihren täglichen Sorgen erfüllt, keine Zeit finden zur Vorbereitung auf die Begegnung mit dir in der heiligen Eucharistie. Mögen sie, durch deine Liebe gestärkt, immer wieder die Kraft und Stärke finden, für diese wunderbare Aufgabe.</p>
+<p>Gib, das ihr Herz, immer mehr dem Herz deiner Mutter ähnlich wird, damit sie bei der heiligen Messe, das Glück deiner Gegenwart erleben. Gib ihnen die Gnade dein Wort mit ihrem Herzen zu hören, zu erleben, es freudig uns verkünden zu wollen.</p>
+<p>Jesus, ich weiß das bei dieser Begegnung mit dir, viele Brüder und Schwestern, anwesend sein könnten. Viele kommen nicht, weil sie Sorgen haben, den Versprechungen, den Verlockungen der Welt nachjagen, die Verbindung mit dir, vielleicht schon lange verloren haben.</p>
+<p>Ich kann mir vorstellen das du deswegen traurig bist. Du kommst zu uns, du opferst dich für uns auf, du bietest dich uns an als Speise und Trank. Und doch, so viele bleiben fern, hungrig, durstig, müde, suchend.</p>
+<p>Ich bitte dich, sende ihnen deine Gnade! Laß sie deinen Ruf hören, ihm folgen wollend. Das sie zu dir kommen so wie sie sind, ohne Angst, ohne Bedenken, ohne Zweifel.</p>
+<p>Jesus, ich bete für die Kinder, für die Jugendlichen, denen du gerne liebend begegnen würdest. Sie sehnen sich oftmals nach dieser Begegnung, nach dieser Verbundenheit mit dir. Aber sie fliehen. Wenn sie kommen, wissen sie nicht, was sie tun sollen, wie man sich dir nähert, sich dir nähern kann, weil es ihnen niemand gezeigt hat.</p>
+<p>Öffne ihre Herzen für das Geheimnis der Begegnung mit dir, damit sie bei dir, die wahre Freude, den wahren Frieden finden und erleben können.</p>
+<p>Jesus, in der Vorbereitung auf die Begegnung mit dir, bitte ich dich für meine Familie, die Familien meiner Brüder, meiner Kinder, meiner Freunde und Bekannten, für alle, die mir nahestehen, mit denen ich in Liebe und Zuneigung verbunden bin. Für unsere Kranken und für unsere älteren Mitmenschen, für alle, die nicht zur heiligen Messe kommen, aus welchem Grund auch immer.</p>
+<p>Sie sollen dir begegnen in denen, die bei dieser heiligen Messe anwesend sind. Gib uns allen die Kraft, die Liebe, die Bereitschaft, für alle Abwesenden diese Messe würdig zu feiern.</p>
+<p>Jesus, ich bete für die Ministranten, für die Musiker, die Sänger, die Lektoren. Sie sollen dir in Freude dienen, dir fröhlich singen, dein Wort mit ihrem Herzen verkünden. Unsere Herzen sollen sich im gemeinsamen Gesang, im aufmerksamen Zuhören, miteinander vereinen.</p>
+<p>Alles soll vor Freude erzittern, wenn du zu uns kommst, der du gesegnet bist in alle Ewigkeit.</p>
+<p>Liebe soll unsere Herzen erfüllen, Sünde und Hass sollen schwinden. Alles soll von neuem aufblühen, weil du dich mit deiner ganzen Liebe, für uns immer und immer wieder hingibst.</p>
+<p>Gib das ich, das wir alle, das Geheimnis deiner Aufopferung begreifen, dich mit allen Geschöpfen im Himmel und auf Erden in tiefer Demut anbeten.</p>
+<p>Lass durch diese heilige Messe in meiner Familie, in meinem Umfeld, auf der ganzen Welt, bei allen Menschen die Liebe und den Frieden aufblühen und wachsen.</p>
+<p>In meinem, in unseren Herzen, ist nun alles bereit für die Begegnung mit dir.</p>
+<p>Unsere Sünden und ihre Folgen sollen schwinden, damit du Freude hast an unserer Gemeinschaft mit dir.</p>
+<p>Jesus, ich warte auf dich! Meine Sehnsucht nach dir möge immer größer werden.</p>
+<p>Ich danke dir, das du zu mir, das zu uns kommst. In deinem Namen möge jetzt meine, unsere Begegnung, mit dir in dieser heiligen Messe beginnen! Amen.</p>
+
+<h2>Die Feier der heiligen Messe</h2>
+
+<h3>Eröffnung</h3>
+<p class="rubric">Einzug – Gesang zur Eröffnung. Während der P. (Priester) einzieht, kann der Eröffnungsgesang gesungen werden.</p>
+
+<h3>Verehrung des Altares / Begrüßung der Gemeinde</h3>
+<p class="rubric">Nachdem der P. den Altar begrüßt hat und an seinen Platz gegangen ist, spricht er;</p>
+<p>+ Im Namen des Vaters und des Sohnes und des Heiligen Geistes.</p>
+<p>Der Herr sei mit euch.</p>
+<p class="rubric">oder</p>
+<p>+ Die Gnade unseres Herrn Jesus Christus, die Liebe Gottes des Vaters und die Gemeinschaft des Heiligen Geistes sei mit euch.</p>
+<p class="response">A. Und mit deinem Geiste.</p>
+
+<h3>Allgemeines Schuldbekenntnis</h3>
+<p class="rubric">Das Allgemeine Schuldbekenntnis erfolgt in einer der Formen A, B oder C. An Sonntagen kann an die Stelle des Allgemeinen Schuldbekenntnisses das sonntägliche Taufgedächtnis (Besprengung mit Weihwasser) treten.</p>
+
+<p><strong>Form A</strong><br>
+P. Brüder und Schwestern, damit wir die heiligen Geheimnisse in rechter Weise feiern können, wollen wir bekennen, dass wir gesündigt haben.</p>
+<p class="rubric">(oder) Bevor wir das Gedächtnis des Herrn begehen, wollen wir uns besinnen und bekennen, dass wir sündige Menschen sind.<br>
+(oder) Brüder und Schwestern, bevor wir das Wort Gottes hören und das Opfer Christi feiern, wollen wir uns bereiten und Gott um Vergebung unserer Sünden bitten.<br>
+(oder) Damit wir das Gedächtnis des Herrn recht begehen, prüfen wir uns selbst und bekennen unsere Schuld vor Gott und der Kirche.</p>
+<p class="rubric">Es folgt eine kurze Stille für die Besinnung; danach das Schuldbekenntnis.</p>
+<p>P. Wir sprechen gemeinsam das Schuldbekenntnis:<br>
+Ich bekenne Gott, dem Allmächtigen, und allen Brüdern und Schwestern, dass ich Gutes unterlassen und Böses getan habe ich habe gesündigt in Gedanken, Worten und Werken durch meine Schuld, durch meine Schuld, durch meine große Schuld. Darum bitte ich die selige Jungfrau Maria, alle Engel und Heiligen und euch, Brüder und Schwestern, für mich zu beten bei Gott, unserem Herrn.</p>
+<p class="rubric">Das Schuldbekenntnis kann durch ein Bußlied ersetzt werden. Das Schuldbekenntnis wird durch die Vergebungsbitte abgeschlossen.</p>
+<p>P. Der allmächtige Gott erbarme sich unser. Er lasse uns die Sünden nach und führe uns zum ewigen Leben. A. Amen.</p>
+<p class="rubric">(oder)</p>
+<p>P. Nachlass, Vergebung und Verzeihung unserer Sünden gewähre uns der allmächtige und barmherzige Herr. A. Amen.</p>
+
+<p><strong>Form B</strong><br>
+P. Bevor wir das Gedächtnis des Herrn begehen, wollen wir uns besinnen und bekennen, dass wir sündige Menschen sind. A. Amen.</p>
+<p class="rubric">Es folgt eine kurze Stille für die Besinnung; danach das Schuldbekenntnis.</p>
+<p>P. Erbarme dich, Herr, unser Gott, erbarme dich.<br>
+A. Denn wir haben vor dir gesündigt.<br>
+P. Erweise, Herr, uns deine Huld.<br>
+A. Und schenke (gewähre) uns dein Heil.</p>
+<p class="rubric">Das Schuldbekenntnis wird durch die Vergebungsbitte abgeschlossen.</p>
+<p>P. Der allmächtige Gott erbarme sich unser. Er lasse uns die Sünden nach und führe uns zum ewigen Leben. A. Amen.</p>
+<p class="rubric">(oder)</p>
+<p>P. Nachlass, Vergebung und Verzeihung unserer Sünden gewähre uns der allmächtige und barmherzige Herr. A. Amen.</p>
+
+<p><strong>Form C</strong><br>
+P. Zu Beginn dieser Messfeier wollen wir uns besinnen und das Erbarmen des Herrn auf uns herab rufen.<br>
+P. Herr Jesus Christus, du bist vom Vater gesandt, zu heilen, was verwundet ist:</p>
+
+<h3>Kyrie (Priester und Gemeinde im Wechsel)</h3>
+<p>Herr, erbarme dich (unser). Kyrie, eleison.<br>
+Herr, erbarme dich (unser). Kyrie, eleison.<br>
+Christus, erbarme dich (unser). Christe, eleison.<br>
+Christus, erbarme dich (unser). Christe, eleison.<br>
+Herr, erbarme dich (unser). Kyrie, eleison.<br>
+Herr, erbarme dich (unser). Kyrie, eleison.</p>
+
+<h3>Gloria</h3>
+<table>
+<tr><td class="lat">Gloria in excelsis Deo et in terra pax hominibus bonae voluntatis. Laudamus te, benedicimus te, adoramus te, glorificamus te, gratias agimus tibi propter magnam gloriam tuam, Domine Deus, Rex caelestis, Deus Pater omnipotens, Domine Fili unigenite, Jesu Christe, Domine Deus, Agnus Dei, Filius Patris, qui tollis peccata mundi, miserere nobis; qui tollis peccata mundi, suscipe deprecationem nostram. Qui sedes ad dexteram Patris, miserere nobis. Quoniam tu solus Sanctus, tu solus Dominus, tu solus Altissimus, Jesu Christe, cum Sancto Spiritu: in gloria Dei Patris. Amen.</td>
+<td>Ehre sei Gott in der Höhe und Friede auf Erden den Menschen seiner Gnade. Wir loben dich, wir preisen dich, wir beten dich an, wir rühmen dich und danken dir, denn groß ist deine Herrlichkeit. Herr und Gott, König des Himmels, Gott und Vater, Herrscher über das All. Herr, eingeborener Sohn, Jesus Christus. Herr und Gott, Lamm Gottes, Sohn des Vaters, du nimmst hinweg die Sünde der Welt: erbarme dich unser; du nimmst hinweg die Sünde der Welt: nimm an unser Gebet; du sitzest zur Rechten des Vaters: erbarme dich unser. Denn du allein bist der Heilige, du allein der Herr, du allein der Höchste: Jesus Christus mit dem Heiligen Geist, zur Ehre Gottes des Vaters. Amen.</td></tr>
+</table>
+
+<h3>Tagesgebet</h3>
+<p>Lasset uns beten.</p>
+<p class="rubric">Nach einer kurzen Stille spricht der P. das Tagesgebet. Die Gemeinde beschließt das Gebet mit Amen.</p>
+
+<h3>Wortgottesdienst</h3>
+<p><strong>Erste Lesung und erster Zwischengesang</strong><br>
+Die/Der Lektor/in geht zum Ambo und trägt die erste Lesung vor. Alle hören sitzend zu.</p>
+<p class="rubric">Wo nach der Lesung ein Zuruf der Gemeinde üblich ist, fügt die/der Lektor/in an</p>
+<p>Lektor: Wort des lebendigen Gottes. A. Dank sei Gott.</p>
+<p class="rubric">Danach kann eine kurze Stille folgen. Dann trägt die/der Kantor/in (Psalmist/in) als ersten Zwischengesang den Antwortpsalm vor. Die Gemeinde übernimmt den Kehrvers.</p>
+
+<p><strong>Zweite Lesung und zweiter Zwischengesang</strong><br>
+Die/Der Lektor/in geht zum Ambo und trägt die zweite Lesung vor. Alle hören sitzend zu.</p>
+<p class="rubric">Wo nach der Lesung ein Zuruf der Gemeinde üblich ist, fügt die/der Lektor/in an</p>
+<p>Lektor: Wort des lebendigen Gottes. A. Dank sei Gott.</p>
+<p class="rubric">Danach kann eine kurze Stille folgen. Auf die zweite Lesung folgt als zweiter Zwischengesang das Halleluja bzw. der an dessen Stelle vorgesehene Ruf vor dem Evangelium.</p>
+
+<h3>Evangelium</h3>
+<p>P. Der Herr sei mit euch. A. Und mit deinem Geiste.<br>
+P. + Aus dem heiligen Evangelium nach N.</p>
+<p class="rubric">Dabei bezeichnet er das Buch und sich selbst (auf Stirn, Mund und Brust) mit dem Kreuzzeichen.</p>
+<p>A. Ehre sei dir, o Herr.</p>
+<p class="rubric">Wo nach dem Evangelium ein Zuruf der Gemeinde üblich ist, fügt der P. an</p>
+<p>P. Evangelium unseres Herrn Jesus Christus. A. Lob sei dir, Christus.</p>
+<p class="rubric">Danach küsst der P. das Buch und spricht leise:</p>
+<p>Herr, durch dein Evangelium, nimm hinweg unsere Sünden.</p>
+
+<h3>Die Homilie (Predigt)</h3>
+<p class="rubric">Die Homilie ist ein Teil der Liturgie. Sie ist an allen Sonntagen und gebotenen Feiertagen vorgeschrieben, sonst empfohlen. An Sonntagen, an Hochfesten und bei anderen festlichen Gottesdiensten folgt nach der Predigt das Credo:</p>
+
+<h3>Credo (apostolisches)</h3>
+<p>P. Wir sprechen das apostolische Glaubensbekenntnis;</p>
+<table>
+<tr><td class="lat">Credo in Deum Patrem omnipotentem, Creatorem caeli et terrae. Et in Iesum Christum, Filium eius unicum, Dominum nostrum, qui conceptus est de Spiritu Sancto, natus ex Maria Virgine, passus sub Pontio Pilato, crucifixus, mortuus, et sepultus, descendit ad inferos, tertia die resurrexit a mortuis, ascendit ad caelos, sedet ad dexteram Dei Patris omnipotentis, inde venturus est iudicare vivos et mortuos. Credo in Spiritum Sanctum, sanctam Ecclesiam catholicam, sanctorum communionem, remissionem peccatorum, carnis resurrectionem, vitam aeternam. Amen.</td>
+<td>A. Ich glaube an Gott, den Vater, den Allmächtigen, den Schöpfer des Himmels und der Erde, und an Jesus Christus, seinen eingeborenen Sohn, unsern Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allmächtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten. Ich glaube an den Heiligen Geist, die heilige Katholische Kirche, Gemeinschaft der Heiligen, Vergebung der Sünden, Auferstehung der Toten und das ewige Leben. Amen.</td></tr>
+</table>
+
+<h3>Credo (Glaubensbekenntnis von Nizäa-Konstantinopel)</h3>
+<p>P. Wir sprechen das große Glaubensbekenntnis;</p>
+<table>
+<tr><td class="lat">Credo in unum Deum, Patrem omnipotentem, factorem cæli et terræ, visibilium omnium et invisibilium. Et in unum Dominum Iesum Christum, Filium Dei unigenitum, et ex Patre natum ante omnia sæcula. Deum de Deo, Lumen de Lumine, Deum verum de Deo vero, genitum non factum, consubstantialem Patri; per quem omnia facta sunt. Qui propter nos homines et propter nostram salutem descendit de cælis. Et incarnatus est de Spiritu Sancto ex Maria Virgine, et homo factus est. Crucifixus etiam pro nobis sub Pontio Pilato, passus et sepultus est, et resurrexit tertia die, secundum Scripturas, et ascendit in cælum, sedet ad dexteram Patris. Et iterum venturus est cum gloria, iudicare vivos et mortuos, cuius regni non erit finis. Et in Spiritum Sanctum, Dominum et vivificantem, qui ex Patre (Filioque) procedit. Qui cum Patre et Filio simul adoratur et conglorificatur: qui locutus est per prophetas. Et unam, sanctam, catholicam et apostolicam Ecclesiam. Confiteor unum baptisma in remissionem peccatorum. Et expecto resurrectionem mortuorum, et vitam venturi sæculi. Amen.</td>
+<td>Wir glauben an den einen Gott, den Vater, den Allmächtigen, der alles geschaffen hat, Himmel und Erde, die sichtbare und die unsichtbare Welt. Und an den einen Herrn Jesus Christus, Gottes eingeborenen Sohn, aus dem Vater geboren vor aller Zeit: Gott von Gott, Licht vom Licht, wahrer Gott vom wahren Gott, gezeugt, nicht geschaffen, eines Wesens mit dem Vater; durch ihn ist alles geschaffen. Für uns Menschen und zu unserem Heil ist er vom Himmel gekommen, hat Fleisch angenommen durch den Heiligen Geist von der Jungfrau Maria und ist Mensch geworden. Er wurde für uns gekreuzigt unter Pontius Pilatus, hat gelitten und ist begraben worden, ist am dritten Tage auferstanden nach der Schrift und aufgefahren in den Himmel. Er sitzt zur Rechten des Vaters und wird wiederkommen in Herrlichkeit, zu richten die Lebenden und die Toten; seiner Herrschaft wird kein Ende sein. Wir glauben an den Heiligen Geist, der Herr ist und lebendig macht, der aus dem Vater (und dem Sohn) hervorgeht, der mit dem Vater und dem Sohn angebetet und verherrlicht wird, der gesprochen hat durch die Propheten, und die eine heilige, christliche, katholische und apostolische Kirche. Wir bekennen die eine Taufe zur Vergebung der Sünden. Wir erwarten die Auferstehung der Toten und das Leben der kommenden Welt. Amen.</td></tr>
+</table>
+
+<h3>Fürbitten (allgemeines Gebet)</h3>
+<p class="rubric">Die Fürbitten werden vom P. eingeleitet und abgeschlossen. Die einzelnen Anliegen können vom Diakon, vom Lektor/von der Lektorin, vom Kantor/von der Kantorin oder von anderen vorgetragen werden.</p>
+
+<h3>Eucharistiefeier und Gabenbereitung</h3>
+<p class="rubric">Das Herbeibringen und die Bereitung der Gaben können von einem geeigneten Gesang oder von Orgelspiel begleitet werden oder auch in Stille geschehen.</p>
+
+<h3>Begleitgebete zur Gabenbereitung</h3>
+<p><strong>Über das Brot</strong><br>
+P. Gepriesen bist du, Herr, unser Gott, Schöpfer der Welt. Du schenkst uns das Brot, die Frucht der Erde, und der menschlichen Arbeit. Wir bringen dieses Brot vor dein Angesicht, damit es uns das Brot des Lebens werde.<br>
+A. „Gepriesen bist du in Ewigkeit, Herr, unser Gott."</p>
+<p class="rubric">Der P. gießt Wein und ein wenig Wasser in den Kelch und spricht leise:</p>
+<p>P. Wie das Wasser sich mit dem Wein verbindet zum heiligen Zeichen, so lasse uns dieser Kelch Teil haben an der Gottheit Christi, der unsere Menschennatur angenommen hat.</p>
+<p><strong>Über den Kelch</strong><br>
+P. Gepriesen bist du, Herr, unser Gott, Schöpfer der Welt. Du schenkst uns den Wein, die Frucht des Weinstocks und der menschlichen Arbeit. Wir bringen diesen Kelch vor dein Angesicht, damit er uns der Kelch des Heiles werde.<br>
+A. „Gepriesen bist du in Ewigkeit, Herr, unser Gott."</p>
+<p class="rubric">Der P. verneigt sich und spricht leise:</p>
+<p>Herr, wir kommen zu dir mit reumütigem Herzen und mit demütigem Sinn. Nimm uns an und gib, dass unser Opfer dir gefalle.</p>
+<p class="rubric">Der P. kann den Altar und die Gaben inzensieren (mit Weihrauch beräuchern); anschließend können der P. und die Gemeinde inzensiert werden.</p>
+<p><strong>Zur Händewaschung</strong><br>
+P. Herr, wasche ab meine Schuld, von meinen Sünden mach mich rein.</p>
+
+<h3>Einladung zum Gabengebet</h3>
+<p>P. Lasset uns beten.</p>
+<p class="rubric">(oder)</p>
+<p>P. Betet, Brüder und Schwestern, dass mein und euer Opfer Gott, dem allmächtigen Vater, gefalle.<br>
+A. Der Herr nehme das Opfer an aus deinen Händen, zum Lob und Ruhme seines Namens, zum Segen für uns, und seine ganze heilige Kirche.</p>
+
+<h3>Gabengebet</h3>
+<p class="rubric">Durch das Gabengebet wird die Bereitung der Opfergaben abgeschlossen. Die Gemeinde beschließt das Gebet mit dem Ruf: „Amen."</p>
+
+<h2>Das Eucharistische Hochgebet</h2>
+
+<h3>Präfation (vom Tage) und Sanctus</h3>
+<p>P. Der Herr sei mit euch. A. Und mit deinem Geiste.<br>
+P. Erhebet die Herzen. A. Wir haben sie beim Herrn.<br>
+P. Lasset uns danken dem Herrn, unserm Gott. A. Das ist würdig und Recht.<br>
+P. In Wahrheit ist es würdig und Recht …</p>
+<table>
+<tr><td class="lat">Sanctus, sanctus, sanctus Dominus Deus Sabaoth. Pleni sunt coeli et terra gloria tua. Hosanna in excelsis. Benedictus qui venit in nomine Domini. Hosanna in excelsis.</td>
+<td>Heilig, heilig, heilig Gott, Herr aller Mächte und Gewalten. Erfüllt sind Himmel und Erde von deiner Herrlichkeit. Hosanna in der Höhe. Hochgelobt sei, der da kommt im Namen des Herrn. Hosanna in der Höhe.</td></tr>
+</table>
+<p class="rubric">Das Sanctus darf nur durch ein Lied ersetzt werden, das mit dem dreimaligen Heilig-Ruf beginnt und dem Inhalt des Sanctus entspricht.</p>
+
+<h3>Erstes Hochgebet</h3>
+<p>Dich, gütiger Vater, bitten wir durch deinen Sohn, unseren Herrn Jesus Christus. Nimm diese heiligen, makellosen Opfergaben an und segne + sie.</p>
+<p><strong>Für die Kirche und ihre Hirten</strong><br>
+Wir bringen sie dar vor allem für deine heilige katholische Kirche in Gemeinschaft mit deinem Diener, unserem Papst N., mit unserem Bischof N. und mit allen, die Sorge tragen für den rechten, katholischen und apostolischen Glauben. Schenke deiner Kirche Frieden und Einheit, behüte und leite sie auf der ganzen Erde.</p>
+<p><strong>Für anwesende und abwesende Gläubige</strong><br>
+Gedenke deiner Diener und Dienerinnen N. (für die wir heute besonders beten) und aller, die hier versammelt sind. Herr, du kennst ihren Glauben und ihre Hingabe; für sie bringen wir dieses Opfer des Lobes dar, und sie selber weihen es dir für sich und für alle, die ihnen verbunden sind, für ihre Erlösung und für ihre Hoffnung auf das unverlierbare Heil. Vor dich, den ewigen, lebendigen und wahren Gott, bringen sie ihre Gebete und Gaben.</p>
+<p><strong>Stilles Gedenken – Gedächtnis der Heiligen</strong><br>
+<em>unter der Woche …</em> In Gemeinschaft mit der ganzen Kirche gedenken wir deiner Heiligen.<br>
+<em>an den Sonntagen …</em> In Gemeinschaft mit der ganzen Kirche feiern wir den ersten Tag der Woche als den Tag, an dem Christus von den Toten erstanden ist, und gedenken deiner Heiligen.</p>
+<p class="rubric">dann weiter ...</p>
+<p>Wir ehren vor allem Maria, die glorreiche, allzeit jungfräuliche Mutter unseres Herrn und Gottes Jesus Christus. Wir ehren ihren Bräutigam, den heiligen Josef, deine heiligen Apostel und Märtyrer: Petrus und Paulus, Andreas (Jakobus, Johannes, Thomas, Jakobus, Philippus, Bartholomäus, Matthäus, Simon und Thaddäus, Linus, Kletus, Klemens, Xystus, Kornelius, Cyprianus, Laurentius, Chrysogonus, Johannes und Paulus, Kosmas und Damianus) und alle deine Heiligen; blicke auf ihr heiliges Leben und Sterben und gewähre uns auf ihre Fürsprache in allem deine Hilfe und deinen Schutz.</p>
+<p><strong>Für die Ortsgemeinde</strong><br>
+Nimm gnädig an, o Gott, diese Gaben deiner Diener und deiner ganzen Gemeinde; ordne unsere Tage in deinem Frieden, rette uns vor dem ewigen Verderben und nimm uns auf in die Schar deiner Erwählten.</p>
+<p><strong>Bitte um Heiligung der Gaben</strong><br>
+Schenke, o Gott, diesen Gaben Segen in Fülle und nimm sie zu Eigen an. Mache sie uns zum wahren Opfer im Geiste, das dir wohl gefällt: zum Leib und Blut deines geliebten Sohnes, unseres Herrn Jesus Christus.</p>
+
+<h3>Einsetzungsbericht – Wandlung</h3>
+<p>Am Abend vor seinem Leiden nahm er das Brot in seine heiligen und ehrwürdigen Hände, erhob die Augen zum Himmel, zu dir, seinem Vater, dem allmächtigen Gott, sagte dir Lob und Dank, brach das Brot, reichte es seinen Jüngern und sprach:</p>
+<p>Nehmet und esset alle davon: Das ist mein Leib, der für euch hingegeben wird.</p>
+<p>Ebenso nahm er nach dem Mahl diesen erhabenen Kelch in seine heiligen und ehrwürdigen Hände, sagte dir Lob und Dank, reichte den Kelch seinen Jüngern und sprach:</p>
+<p>Nehmet und trinket alle daraus: Das ist der Kelch des neuen und ewigen Bundes, mein Blut, das für euch und für alle vergossen wird zur Vergebung der Sünden.</p>
+<p>Tut dies zu meinem Gedächtnis.</p>
+<p>P. Geheimnis des Glaubens.<br>
+A. Deinen Tod, o Herr, verkünden wir und deine Auferstehung preisen wir, bis du kommst in Herrlichkeit.</p>
+<p>P. Darum, gütiger Vater, feiern wir, deine Diener und dein heiliges Volk, das Gedächtnis deines Sohnes, unseres Herrn Jesus Christus. Wir verkünden sein heilbringendes Leiden, seine Auferstehung von den Toten und seine glorreiche Himmelfahrt. So bringen wir aus den Gaben, die du uns geschenkt hast, dir, dem erhabenen Gott, die reine, heilige und makellose Opfergabe dar, das Brot des Lebens und den Kelch des ewigen Heiles. Blicke versöhnt und gütig darauf nieder und nimm sie an, wie einst die Gaben deines gerechten Dieners Abel, wie das Opfer unseres Vaters Abraham, wie die heilige Gabe, das reine Opfer deines Hohen Priesters Melchisedek. Wir bitten dich, allmächtiger Gott: Dein heiliger Engel trage diese Opfergabe auf deinen himmlischen Altar vor deine göttliche Herrlichkeit; und wenn wir durch unsere Teilnahme am Altar, den heiligen Leib und das Blut deines Sohnes empfangen, erfülle uns mit aller Gnade und allem Segen des Himmels.</p>
+<p><strong>Für die Verstorbenen</strong><br>
+Gedenke auch deiner Diener und Dienerinnen (N. und N.), die uns voran gegangen sind, bezeichnet mit dem Siegel des Glaubens, und die nun ruhen in Frieden. Wir bitten dich: Führe sie und alle, die in Christus entschlafen sind, in das Land der Verheißung, des Lichtes und des Friedens.</p>
+<p><strong>Requiem</strong><br>
+Erbarme dich unseres Bruders N. (unserer Schwester N.), den (die) du aus dieser Welt zu dir gerufen hast. Durch die Taufe gehörte er (sie) Christus an, ihm ist er (sie) gleich geworden im Tod: gib ihm (ihr) auch Anteil an der Auferstehung, wenn Christus die Toten auferweckt und unseren irdischen Leib seinem verklärten Leib ähnlich macht.</p>
+<p class="rubric">Stilles Gedenken</p>
+<p><strong>Weitere Bitten</strong><br>
+Auch uns, deinen sündigen Dienern, die auf deine reiche Barmherzigkeit hoffen, gib Anteil und Gemeinschaft mit deinen heiligen Aposteln und Märtyrern: Johannes, Stephanus, Matthias, Barnabas (Ignatius, Alexander, Marzellinus, Petrus, Felicitas, Perpetua, Agatha, Lucia, Agnes, Cäcilia, Anastasia) und mit allen deinen Heiligen; wäge nicht unser Verdienst, sondern schenke gnädig Verzeihung und gib uns mit ihnen das Erbe des Himmels. Darum bitten wir durch unseren Herrn Jesus Christus. Denn durch ihn erschaffst du immerfort all diese guten Gaben, gibst ihnen Leben und Weihe und spendest sie uns.</p>
+<p><strong>Abschließender Lobpreis (Doxologie)</strong><br>
+Durch ihn und mit ihm und in ihm ist dir, Gott, allmächtiger Vater, in der Einheit des Heiligen Geistes alle Herrlichkeit und Ehre jetzt und in Ewigkeit.<br>
+A. Amen.</p>
+
+<h3>Zweites Hochgebet</h3>
+<p><em>unter der Woche ….</em> Ja, du bist heilig, großer Gott, du bist der Quell aller Heiligkeit. Darum bitten wir dich:</p>
+<p><em>an den Sonntagen ….</em> Ja, du bist heilig, großer Gott, du bist der Quell aller Heiligkeit. Darum kommen wir vor dein Angesicht und feiern in Gemeinschaft mit der ganzen Kirche den ersten Tag der Woche als den Tag, an dem Christus von den Toten erstanden ist. Durch ihn, den du zu deiner Rechten erhöht hast, bitten wir dich:</p>
+<p><em>Von Weihnachten bis Neujahr ….</em> Darum kommen wir vor dein Angesicht und feiern in Gemeinschaft mit der ganzen Kirche den hochheiligen Tag, an dem Maria in unversehrter Jungfräulichkeit der Welt den Erlöser geboren hat. Durch ihn, unseren Retter und Herrn, bitten wir dich:</p>
+<p><em>Von der Osternacht bis zum Weißen Sonntag ….</em> Darum kommen wir vor dein Angesicht und feiern in Gemeinschaft mit der ganzen Kirche das Hochfest der Auferstehung unseres Herrn Jesus Christus. Durch ihn, der zu deiner Rechten erhöht ist, bitten wir dich:</p>
+<p class="rubric">dann weiter ...</p>
+<p>Sende deinen Geist auf diese Gaben herab und heilige sie, damit sie uns werden Leib + und Blut deines Sohnes, unseres Herrn Jesus Christus.</p>
+
+<h3>Einsetzungsbericht — Wandlung</h3>
+<p>Denn am Abend, an dem er ausgeliefert wurde und sich aus freiem Willen dem Leiden unterwarf, nahm er das Brot, sagte Dank, brach es, reichte es seinen Jüngern und sprach:</p>
+<p>Nehmet und esset alle davon: Das ist mein Leib, der für euch hingegeben wird.</p>
+<p>Ebenso nahm er nach dem Mahl den Kelch, dankte wiederum, reichte ihn seinen Jüngern und sprach:</p>
+<p>Nehmet und trinket alle daraus: Das ist der Kelch des neuen und ewigen Bundes, mein Blut, das für euch und für alle vergossen wird zur Vergebung der Sünden.</p>
+<p>Tut dies zu meinem Gedächtnis.</p>
+<p>P. Geheimnis des Glaubens.<br>
+A. Deinen Tod, o Herr verkünden wir, und deine Auferstehung preisen wir, bis du kommst in Herrlichkeit.</p>
+<p><strong>Erinnerung – Darbringung – Dank und Bitte</strong><br>
+Darum, gütiger Vater, feiern wir das Gedächtnis des Todes und der Auferstehung deines Sohnes und bringen dir so das Brot des Lebens und den Kelch des Heiles dar. Wir danken dir, dass du uns berufen hast, vor dir zu stehen und dir zu dienen.</p>
+<p>Wir bitten dich; Schenke uns Anteil an Christi Leib und Blut und lass uns eins werden durch den Heiligen Geist.</p>
+<p><strong>Fürbitten für die Kirche und ihre Hirten</strong><br>
+Gedenke deiner Kirche auf der ganzen Erde und vollende dein Volk in der Liebe, vereint mit unserem Papst N., unserem Bischof N. und allen Bischöfen, unseren Priestern und Diakonen, und mit allen, die zum Dienst in der Kirche bestellt sind.</p>
+<p><strong>Für die Verstorbenen</strong><br>
+Gedenke unserer Brüder und Schwestern, die entschlafen sind in der Hoffnung, dass sie auferstehen. Nimm sie und alle, die in deiner Gnade aus dieser Welt geschieden sind, in dein Reich auf, wo sie dich schauen von Angesicht zu Angesicht.</p>
+<p><strong>Requiem</strong><br>
+Erbarme dich unseres Bruders N. (unserer Schwester N.), den (die) du aus dieser Welt zu dir gerufen hast. Durch die Taufe gehörte er (sie) Christus an, ihm ist er (sie) gleich geworden im Tod: gib ihm (ihr) auch Anteil an der Auferstehung, wenn Christus die Toten auferweckt und unseren irdischen Leib seinem verklärten Leib ähnlich macht.</p>
+<p><strong>für alle</strong><br>
+Vater, erbarme dich über uns alle, damit uns das ewige Leben zuteil wird in der Gemeinschaft mit der seligen Jungfrau und Gottesmutter Maria, mit ihrem Bräutigam, dem heiligen Josef, mit deinen Aposteln und mit allen, die bei dir Gnade gefunden haben von Anbeginn der Welt, dass wir dich loben und preisen durch deinen Sohn Jesus Christus.</p>
+<p><strong>Abschließender Lobpreis (Doxologie)</strong><br>
+Durch ihn und mit ihm und in ihm ist dir, Gott, allmächtiger Vater, in der Einheit des Heiligen Geistes alle Herrlichkeit und Ehre jetzt und in Ewigkeit.<br>
+A. Amen.</p>
+
+<h3>Drittes Hochgebet</h3>
+<p><strong>Lobpreis</strong><br>
+Ja, du bist heilig, großer Gott, und alle deine Werke verkünden dein Lob. Denn durch deinen Sohn, unseren Herrn Jesus Christus, und in der Kraft des Heiligen Geistes, erfüllst du die ganze Schöpfung mit Leben und Gnade. Bis ans Ende der Zeiten versammelst du dir ein Volk, damit deinem Namen das reine Opfer dargebracht werde, vom Aufgang der Sonne bis zum Untergang.</p>
+<p><strong>Bitte um Heiligung der Gaben</strong><br>
+<em>an den Werktagen ….</em> Darum bitten wir dich, allmächtiger Gott:</p>
+<p><em>an den Sonntagen ….</em> Darum kommen wir vor dein Angesicht und feiern in Gemeinschaft mit der ganzen Kirche, den ersten Tag der Woche als den Tag, an dem Christus von den Toten erstanden ist. Durch ihn, den du zu deiner Rechten erhöht hast, bitten wir dich, allmächtiger Gott:</p>
+<p><em>Von Weihnachten bis Neujahr ….</em> Darum kommen wir vor dein Angesicht und feiern in Gemeinschaft mit der ganzen Kirche, den hochheiligen Tag, an dem Maria in unversehrter Jungfräulichkeit, der Welt den Erlöser geboren hat. Durch ihn, unseren Retter und Herrn, bitten wir dich:</p>
+<p><em>von der Osternacht bis zum Weißen Sonntag ….</em> Darum kommen wir vor dein Angesicht und feiern in Gemeinschaft mit der ganzen Kirche (die hochheilige Nacht), das Hochfest der Auferstehung unseres Herrn Jesus Christus. Durch ihn, der zu deiner Rechten erhöht ist, bitten wir dich, allmächtiger Gott:</p>
+<p class="rubric">dann weiter ….</p>
+<p>Heilige unsere Gaben durch deinen Geist, damit sie uns werden Leib + und Blut deines Sohnes, unseres Herrn Jesus Christus, der uns aufgetragen hat, dieses Geheimnis zu feiern.</p>
+
+<h3>Einsetzungsbericht — Wandlung</h3>
+<p>Denn in der Nacht, da er verraten wurde, nahm er das Brot und sagte Dank, brach es, reichte es seinen Jüngern und sprach:</p>
+<p>Nehmet und esset alle davon: Das ist mein Leib, der für euch hingegeben wird.</p>
+<p>Ebenso nahm er nach dem Mahl den Kelch, dankte wiederum, reichte ihn seinen Jüngern und sprach:</p>
+<p>Nehmet und trinket alle daraus: Das ist der Kelch des neuen und ewigen Bundes, mein Blut, das für euch und für alle vergossen wird zur Vergebung der Sünden.</p>
+<p>Tut dies zu meinem Gedächtnis.</p>
+<p>P. Geheimnis des Glaubens.<br>
+A. Deinen Tod, o Herr, verkünden wir und deine Auferstehung preisen wir, bis du kommst in Herrlichkeit.</p>
+<p><strong>Erinnerung – Darbringung – Bitte</strong><br>
+Darum, gütiger Vater, feiern wir das Gedächtnis deines Sohnes. Wir verkünden sein Heil bringendes Leiden, seine glorreiche Auferstehung und Himmelfahrt und erwarten seine Wiederkunft. So bringen wir dir mit Lob und Dank dieses heilige und lebendige Opfer dar.</p>
+<p>Schau gütig auf die Gabe deiner Kirche. Denn sie stellt dir das Lamm vor Augen, das geopfert wurde und uns nach deinem Willen mit dir versöhnt hat. Stärke uns durch den Leib und das Blut deines Sohnes, und erfülle uns mit seinem Heiligen Geist, damit wir ein Leib und ein Geist werden in Christus.</p>
+<p>Er mache uns auf immer zu einer Gabe, die dir wohl gefällt, damit wir das verheißene Erbe erlangen mit deinen Auserwählten, mit der seligen Jungfrau und Gottesmutter Maria, mit ihrem Bräutigam, dem heiligen Josef, mit deinen Aposteln und Märtyrern (mit dem/der heiligen N.: Tagesheilige/r oder Patron/in) und mit allen Heiligen, auf deren Fürsprache wir vertrauen.</p>
+<p><strong>Fürbitten für die Welt, die Kirche und ihre Hirten</strong><br>
+Barmherziger Gott, wir bitten dich: Dieses Opfer unserer Versöhnung bringe der ganzen Welt Frieden und Heil. Beschütze deine Kirche auf ihrem Weg durch die Zeit und stärke sie im Glauben und in der Liebe: deinen Diener, unseren Papst N., unseren Bischof N. und die Gemeinschaft der Bischöfe, für unsere Priester und Diakone, für alle, die zum Dienst in der Kirche bestellt sind, und das ganze Volk deiner Erlösten.</p>
+<p><strong>Für die anwesende Gemeinde und für alle</strong><br>
+Erhöre, gütiger Vater, die Gebete der hier versammelten Gemeinde und führe zu dir auch alle deine Söhne und Töchter, die noch fern sind von dir.</p>
+<p><strong>Für die Verstorbenen</strong><br>
+Erbarme dich (aller) unserer verstorbenen Brüder und Schwestern und aller, die in deiner Gnade aus dieser Welt geschieden sind. Nimm sie auf in deine Herrlichkeit. Und mit ihnen lass auch uns, wie du verheißen hast, zu Tische sitzen in deinem Reich.</p>
+<p><strong>Requiem</strong><br>
+Erbarme dich unseres Bruders N. (unserer Schwester N.), den (die) du aus dieser Welt zu dir gerufen hast. Durch die Taufe gehörte er (sie) Christus an, ihm ist er (sie) gleich geworden im Tod: gib ihm (ihr) auch Anteil an der Auferstehung, wenn Christus die Toten auferweckt und unseren irdischen Leib seinem verklärten Leib ähnlich macht.</p>
+<p>Darum bitten wir dich durch unseren Herrn Jesus Christus. Denn durch ihn schenkst du der Welt alle guten Gaben.</p>
+<p><strong>Abschließender Lobpreis (Doxologie)</strong><br>
+Durch ihn und mit ihm und in ihm, ist dir, Gott, allmächtiger Vater, in der Einheit des Heiligen Geistes alle Herrlichkeit und Ehre jetzt und in Ewigkeit.<br>
+A. Amen.</p>
+
+<h3>Viertes Hochgebet</h3>
+<p><strong>Dank für das Werk der Schöpfung und der Erlösung</strong><br>
+Wir preisen dich, heiliger Vater, denn groß bist du, und alle deine Werke künden deine Weisheit und Liebe.</p>
+<p>Den Menschen hast du nach deinem Bild geschaffen und ihm die Sorge für die ganze Welt anvertraut. Über alle Geschöpfe sollte er herrschen und allein dir seinem Schöpfer, dienen.</p>
+<p>Als er im Ungehorsam, deine Freundschaft verlor, und der Macht des Todes verfiel, hast du ihn dennoch nicht verlassen, sondern voll Erbarmen allen geholfen, dich zu suchen und zu finden.</p>
+<p>Immer wieder hast du den Menschen deinen Bund angeboten und sie durch die Propheten gelehrt das Heil zu erwarten.</p>
+<p>So sehr hast du die Welt geliebt, heiliger Vater, dass du deinen eingeborenen Sohn als Retter gesandt hast, nachdem die Fülle der Zeiten, gekommen war.</p>
+<p>Er ist Mensch geworden durch den Heiligen Geist, geboren von der Jungfrau Maria. Er hat wie wir, als Mensch gelebt, in allem uns gleich, außer der Sünde.</p>
+<p>Den Armen verkündete er die Botschaft vom Heil, den Gefangenen Freiheit, den Trauernden Freude.</p>
+<p>Um deinen Ratschluss zu erfüllen, hat er sich dem Tod überliefert, durch seine Auferstehung den Tod bezwungen und das Leben neu geschaffen.</p>
+<p>Damit wir nicht mehr uns selber leben, sondern ihm, der für uns gestorben und auferstanden ist, hat er von dir, Vater, als erste Gabe für alle, die glauben, den Heiligen Geist gesandt, der das Werk deines Sohnes auf Erden weiter führt und alle Heiligung vollendet.</p>
+<p><strong>Bitte um Heiligung der Gaben</strong><br>
+So bitten wir dich, Vater: der Geist heilige diese Gaben, damit sie uns werden Leib + und Blut unseres Herrn Jesus Christus, der uns die Feier dieses Geheimnisses aufgetragen hat als Zeichen des ewigen Bundes.</p>
+
+<h3>Einsetzungsbericht – Wandlung</h3>
+<p>Da er die Seinen liebte, die in der Welt waren, liebte er sie bis zur Vollendung. Und als die Stunde kam, da er von dir verherrlicht werden sollte, nahm er beim Mahl das Brot und sagte Dank, brach das Brot, reichte es seinen Jüngern und sprach:</p>
+<p>Nehmet und esset alle davon: Das ist mein Leib, der für euch hingegeben wird.</p>
+<p>Ebenso nahm er den Kelch mit Wein, dankte wiederum, reichte den Kelch seinen Jüngern und sprach:</p>
+<p>Nehmet und trinket alle daraus: Das ist der Kelch des neuen und ewigen Bundes, mein Blut, das für euch und für alle vergossen wird zur Vergebung der Sünden.</p>
+<p>Tut dies zu meinem Gedächtnis.</p>
+<p>P. Geheimnis des Glaubens.<br>
+A. Deinen Tod, o Herr, verkünden wir und deine Auferstehung preisen wir, bis du kommst in Herrlichkeit.</p>
+<p><strong>Erinnerung – Darbringung – Bitte</strong><br>
+Darum, gütiger Vater, feiern wir das Gedächtnis unserer Erlösung. Wir verkünden den Tod deines Sohnes und sein Hinabsteigen zu den Vätern. Wir bekennen seine Auferstehung und Himmelfahrt und erwarten sein Kommen in Herrlichkeit. So bringen wir dir seinen Leib und sein Blut dar, das Opfer, das dir wohl gefällt und der ganzen Welt Heil bringt.</p>
+<p>Sieh her auf die Opfergabe, die du selber deiner Kirche bereitet hast, und gib, dass alle, die Anteil erhalten an dem einen Brot und dem einen Kelch, ein Leib werden im Heiligen Geist, eine lebendige Opfergabe in Christus zum Lob deiner Herrlichkeit.</p>
+<p><strong>Fürbitten für die Kirche und ihre Hirten, für die anwesende Gemeinde und für alle nicht Anwesenden</strong><br>
+Herr, gedenke aller, für deren Heil wir das Opfer darbringen. Wir bitten dich für unseren Papst N., unseren Bischof N. und die Gemeinschaft der Bischöfe, für unsere Priester und Diakone und für alle, die zum Dienst in der Kirche bestellt sind, für alle, die ihre Gaben spenden, für die hier versammelte Gemeinde, für dein ganzes Volk und für alle Menschen, die mit lauterem Herzen dich suchen.</p>
+<p><strong>Für die Verstorbenen</strong><br>
+Wir empfehlen dir auch jene, die im Frieden Christi Heim gegangen sind, und alle Verstorbenen, um deren Glauben niemand weiß als du.</p>
+<p><strong>im Requiem</strong><br>
+Erbarme dich unseres Bruders N. (unserer Schwester N.), den (die) du aus dieser Welt zu dir gerufen hast. Durch die Taufe gehörte er (sie) Christus an, ihm ist er (sie) gleich geworden im Tod: gib ihm (ihr) auch Anteil an der Auferstehung, wenn Christus die Toten auferweckt und unseren irdischen Leib seinem verklärten Leib ähnlich macht.</p>
+<p>Gütiger Vater, gedenke, dass wir deine Kinder sind, und schenke uns allen das Erbe des Himmels in Gemeinschaft mit der seligen Jungfrau und Gottesmutter Maria, mit ihrem Bräutigam, dem heiligen Josef, mit deinen Aposteln und mit allen Heiligen. Und wenn die ganze Schöpfung von der Verderbnis der Sünde und des Todes befreit ist, lass uns zusammen mit ihr, dich verherrlichen in deinem Reich, durch unseren Herrn Jesus Christus. Denn durch ihn schenkst du der Welt alle guten Gaben.</p>
+<p><strong>Abschließender Lobpreis (Doxologie)</strong><br>
+Durch ihn und mit ihm und in ihm, ist dir, Gott, allmächtiger Vater, in der Einheit des Heiligen Geistes, alle Herrlichkeit und Ehre, jetzt und in Ewigkeit.<br>
+A. Amen.</p>
+
+<h3>Das Gebet des Herrn</h3>
+<p>Dem Wort unseres Herrn und Erlösers gehorsam, und getreu seiner göttlichen Weisung, wagen wir zu sprechen:</p>
+<p class="rubric">(oder) Lasset uns beten, wie der Herr uns zu beten gelehrt hat;<br>
+(oder) Wir heißen Kinder Gottes und sind es. Darum beten wir voll Vertrauen:<br>
+(oder) Wir haben den Geist empfangen, der uns zu Kindern Gottes macht. Darum wagen wir zu sprechen:</p>
+<table>
+<tr><td class="lat">Pater Noster, qui es in caelis, sanctificetur nomen tuum. Adveniat regnum tuum. Fiat voluntas tua, sicut in caelo, et in terra. Panem nostrum quotidianum da nobis hodie. Et dimitte nobis debita nostra, sicut et nos dimittimus debitoribus nostris. Et ne nos inducas in tentationem: sed libera nos a malo. Quia tuum est regnum et potestas et Gloria in saecula. Amen.</td>
+<td>Vater unser im Himmel, geheiligt werde dein Name, dein Reich komme, dein Wille geschehe wie im Himmel, so auf Erden. Unser tägliches Brot gib uns heute und vergib uns unsere Schuld, wie auch wir vergeben unseren Schuldigern. Und führe (lass) uns nicht in die (der) Versuchung, sondern erlöse uns von dem Bösen. Amen.</td></tr>
+</table>
+<p>P. Erlöse uns, Herr, allmächtiger Vater, von allem Bösen und gib Frieden in unseren Tagen. Komm uns zu Hilfe mit deinem Erbarmen und bewahre uns vor Verwirrung und Sünde, damit wir voll Zuversicht das Kommen unseres Erlösers Jesus Christus erwarten.<br>
+A. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Friedensgebet</h3>
+<p class="rubric">Der P. lädt nun mit folgenden oder ähnlichen Worten zum Friedensgebet ein:</p>
+<p>P. Der Herr hat zu seinen Aposteln gesagt: „Frieden hinterlasse ich euch, meinen Frieden gebe ich euch." Deshalb bitten wir: „Herr Jesus Christus, schau nicht auf unsere Sünden, sondern auf den Glauben deiner Kirche und schenke ihr nach deinem Willen Einheit und Frieden."</p>
+<p><em>In der Weihnachtszeit</em><br>
+Als Christus geboren wurde, verkündeten Engel den Frieden auf Erden. Deshalb bitten wir: „Herr Jesus Christus, starker Gott, Friedensfürst, schau nicht … "</p>
+<p><em>In der Fastenzeit</em><br>
+Christus ist unser Friede und unsere Versöhnung. Deshalb bitten wir: „Herr Jesus Christus, schau nicht … "</p>
+<p><em>In der Osterzeit</em><br>
+Am Ostertag trat Jesus in die Mitte seiner Jünger und sprach den Friedensgruß. Deshalb bitten wir: „Herr Jesus Christus, du Sieger über Sünde und Tod, schau nicht …"</p>
+<p class="rubric">Der Gemeinde zugewandt, breitet der P. die Hände aus, singt oder spricht:</p>
+<p>P. Der Friede des Herrn sei allezeit mit euch. A. Und mit deinem Geiste.<br>
+P. Gebt einander ein Zeichen des Friedens und der Versöhnung.</p>
+
+<h3>Vorbereitung zur heiligen Kommunion</h3>
+<p><strong>Brechung des Brotes</strong><br>
+<span class="rubric">Der P. bricht die Hostie in mehrere Teile zum Zeichen, dass alle an dem einen Leib Christi Teil haben. Ein kleines Fragment der Hostie senkt er in den Kelch. Dabei spricht er leise:</span></p>
+<p>P. Das Sakrament des Leibes und Blutes Christi schenke uns ewiges Leben.</p>
+<p class="rubric">Inzwischen wird der Gesang zur Brotbrechung (Agnus Dei) gesungen bzw. gesprochen:</p>
+<table>
+<tr><td class="lat">Agnus Dei, qui tollis peccata mundi, miserere nobis; Agnus Dei, qui tollis peccata mundi, miserere nobis; Agnus Dei, qui tollis peccata mundi, dona nobis pacem.</td>
+<td>Lamm Gottes, Du nimmst hinweg die Sünde der Welt, erbarme dich unser; Lamm Gottes, Du nimmst hinweg die Sünde der Welt, erbarme dich unser; Lamm Gottes, Du nimmst hinweg die Sünde der Welt, gib uns Deinen Frieden.</td></tr>
+</table>
+
+<h3>Stilles Gebet vor der heiligen Kommunion (Priester)</h3>
+<p>Herr Jesus Christus, Sohn des lebendigen Gottes, dem Willen des Vaters gehorsam, hast du im Heiligen Geist, durch deinen Tod der Welt das Leben geschenkt. Erlöse mich durch deinen Leib und dein Blut von allen Sünden und allem Bösen. Hilf mir, dass ich deine Gebote treu erfülle, und lass nicht zu, dass ich jemals von dir getrennt werde.</p>
+
+<h3>Einladung zur heiligen Kommunion</h3>
+<p class="rubric">Der P. hält ein Stück der Hostie über der Schale und spricht, zur Gemeinde gewandt, laut:</p>
+<p>Seht das Lamm Gottes, das hinweg nimmt die Sünde der Welt.</p>
+<p class="rubric">Gemeinsam mit der Gemeinde spricht er einmal;</p>
+<p>Herr, ich bin nicht würdig, dass du eingehst unter mein Dach, aber sprich nur ein Wort, so wird meine Seele gesund.</p>
+
+<h3>Eigenes Gebet vor der Kommunion</h3>
+<p>Komme zu mir Jesus, wenn ich jetzt die Heilige Kommunion empfange. Wohne du in mir, damit Gott bei mir ist. Lass mich in dir wohnen, damit ich Gemeinschaft habe mit allen, die zu deinem Volk gehören. Dein Leib, den ich empfangen darf, soll immer meine Speise sein, damit ich jeden Tag Kraft habe, Gott aus ganzem Herzen zu lieben und meinen Nächsten wie mich selbst. Amen.</p>
+
+<h3>Geistige Kommunion (Gebet des Hl. Pater Pio)</h3>
+<p>Jesus, ich glaube, dass du gegenwärtig bist im allerheiligsten Altarsakrament. Ich liebe dich über alles, ich sehne mich nach dir von ganzem Herzen. Da ich dich jetzt nicht in der sakramentalen Gestalt empfangen kann, bitte ich dich, geistiger weise in mein Herz zu kommen. Ich bin sicher, dass du schon gekommen bist. Daher umarme ich dich und vereinige mich ganz mit dir, halte mich fest und lass mich niemals von dir scheiden.</p>
+<p>Mein Jesus, ich liebe dich aus ganzem Herzen, ich bereue es, dass ich so vielmal das Vergängliche deiner unendlichen Güte vorgezogen habe. Mit deiner Hilfe nehme ich mir fest vor, in Zukunft dich nie mehr zu beleidigen.</p>
+<p>Und jetzt weihe ich mich Armseliger ganz dir. Ich verzichte ohne Vorbehalt auf meinen eigenen Willen, mein Begehren, auf alles was ich habe. Ich übergebe mich ganz dir. Von heute an darfst du mit mir und mit allem, was ich besitze, machen was du willst. Ich suche ganz allein dich, ich verlange nach nichts anderem, als nach deiner heiligen Liebe, nach der Beharrlichkeit bis ans Ende und nach der vollkommenen Erfüllung deines Willens. Amen.</p>
+
+<h3>Eigene Kommunion</h3>
+<p>Dein Leib Christi schenke mir das ewige Leben.<br>
+Dein Blut Christi schenke mir das ewige Leben.</p>
+
+<h3>Kommunionvers</h3>
+<p class="rubric">Während oder nach der Kommunion kann ein Kommunionvers oder ein entsprechendes Lied gebetet oder gesungen werden.</p>
+
+<h3>Eigenes Gebet nach der Kommunion</h3>
+<p>Ich danke dir Jesus, du schenkst Gemeinschaft mit dir in deinem Heiligen Leib. Du schenkst Gemeinschaft mit Gott, deinem Vater, der mich und alles geschaffen hat, weil er uns liebt. Du schenkst Gemeinschaft mit allen Menschen, weil in dir, Jesus Christus, Gott selbst Mensch geworden ist. Lass mich Gottes Liebe erfahren in dieser Heiligen Messe und jeden Tag meines Lebens. Amen.</p>
+<p class="rubric">Nach der Austeilung der Kommunion betet der P. still:</p>
+<p>Was wir mit dem Munde empfangen haben, Herr, das lass uns mit reinem Herzen aufnehmen, und diese zeitliche Speise werde uns zur Arznei der Unsterblichkeit. Amen.</p>
+
+<h3>Besinnung und Dank</h3>
+<p class="rubric">Nach der Kommunion der Gemeinde kann der P. an seinen Sitz zurück kehren. Die Gemeinde kann einige Zeit in stillem Gebet verweilen. Es kann ein Dankpsalm oder ein Loblied gesungen werden.</p>
+
+<h3>Schlussgebet</h3>
+<p class="rubric">Der P. singt oder spricht das Schlussgebet. Die Gemeinde beschließt das Gebet mit dem Ruf: „Amen".</p>
+
+<h3>Entlassung</h3>
+<p>P. Der Herr sei mit euch. A. Und mit deinem Geiste.<br>
+P. Es segne euch der allmächtige Gott, der Vater und der Sohn und der Heilige Geist. A. Amen.</p>
+<p class="rubric">(oder beim Bischofssegen)</p>
+<p>P. Der Herr sei mit euch. A. Und mit deinem Geiste.<br>
+P. Der Name des Herrn sei gepriesen. A. Von nun an bis in Ewigkeit.<br>
+P. Unsere Hilfe ist im Namen des Herrn. A. Der Himmel und Erde erschaffen hat.<br>
+P. Es segne euch der allmächtige Gott, der Vater und der Sohn + und der Heilige Geist. A. Amen.<br>
+P. Gehet hin in Frieden. A. Dank sei Gott, dem Herrn.</p>
+
+<h2>Ende der Messe / Auszug</h2>
+<h3>Vater, segne und behüte mich ….</h3>
+<p>Vater, segne und behüte mich. Gebe mir Rat und Schutz in all meinen Ängsten. Gebe mir den Mut aufzubrechen, und die Kraft neue Wege zu gehen. Schenke mir die Gewissheit immer heim kommen zu dürfen, zu dir.</p>
+<p>Lass dein Angesicht leuchten über mir und sei mir gnädig. Sei Licht auf meinem Wege. Sei bei mir wenn ich Umwege und/oder Irrwege gehe.</p>
+<p>Nehme mich bei der Hand und gebe mir viele Zeichen deiner Nähe. Erhebe dein Angesicht über mich und gebe mir deinen Frieden. Ganz sein von Seele und Leib.</p>
+<p>Das Bewusstsein der Geborgenheit in dir. Ein Vertrauen, das immer größer wird, und sich nicht beirren lässt.</p>
+<p>So segne mich Vater mit deinem Sohn + und dem Heiligen Geist. Amen.</p>
+
+<h3>Gebet nach der heiligen Messe</h3>
+<p>Jesus, nachdem ich dir in der heiligen Messe mit Freude begegnet bin, sendest du mich von neuem in die Welt. Du gibst mir deinen Segen, du lässt mich nicht alleine. Du willst das ich den Frieden, die Liebe, die ich hier erfahren habe, hinaus in die Welt trage.</p>
+<p>Hier bin ich Jesus, bereit dein Zeuge zu sein. Segne mich! Segne jene, mit denen ich heute lebe, denen ich heute begegnen werde.</p>
+<p>Du hast gesagt wir sind das Licht in dieser Welt. Gib das sich das Licht in meinem Herzen entzündet, das es kein Sturm, kein Gewitter, keine Leidenschaft und keine Sünde wieder auslöschen kann.</p>
+<p>Ich möchte mit dem Licht, das ich von dir erhalten habe, neue Lichter entzünden, damit es in unseren zwischenmenschlichen Beziehungen, keine Finsternis mehr gibt.</p>
+<p>Jesus, du hast mir während der heiligen Messe angeboten, mein Weg zu sein. Hilf mir, das ich diesen Weg nie verlasse. Hilf mir, das ich ihn immer sicherer, mit dir an meiner Seite weitergehen kann. Besonders bitte ich dich, verlass mich nicht, wenn mein Weg zu einem, zu meinem Kreuzweg, wird. Dann soll meine Geduld stärker sein als die Ungeduld, der Friede stärker als der Unfriede in mir, die Liebe stärker als der Hass.</p>
+<p>Jesus, du möchtest dich meiner Schritte bedienen um in der Welt zu leben. Segne meine Schritte! Sie sollen Schritte des Friedens und der Versöhnung werden. Schritte, durch die du denen näher kommen kannst, die einsam und/oder auf Suche nach dir sind.</p>
+<p>Jesus, du möchtest durch meine Hände wirken. Heilige und segne meine Hände, das sie nie nach dem Bösen greifen, meine Finger, das sie nie auf meine Mitmenschen zeigen, um sie anzuklagen.</p>
+<p>Mit deinem Blick hast du ermahnt, Mitleid ausgedrückt, uns zur Liebe aufgerufen. In deinen Augen glüht die Liebe, der Friede, die Barmherzigkeit, die Gerechtigkeit. Ich weihe dir heute meine Augen. Segne meinen Blick, das er sich nie verfinstert durch die Sünde der Selbstsucht und des Hochmutes. In meinen Augen sollen nie Hass und Rachsucht aufflammen.</p>
+<p>Dein Herz hat für alle Menschen geschlagen, ihnen Wärme gebracht. Bilde jetzt mein Herz nach deinem Herzen, damit durch mein Herz, die Wärme deiner Liebe in meine Familie eingeht, zu allen Menschen kommt mit denen ich zusammenlebe, denen ich heute begegnen werde.</p>
+<p>Durch mein Herz, ermögliche es allen, die mir begegnen, deine Liebe zu erfahren. Bilde mein Herz nach deinem Herzen, das es die Menschen versteht und sie liebt.</p>
+<p>Maria, du bist meine Mutter. Nachdem ich in der heiligen Messe deinem Sohn begegnen durfte, möchte ich mit dir in das Leben hinausgehen. Erbitte für mich die Gnade, das ich Zeuge seiner Liebe sein darf, das ich sie in die Welt hinaustragen kann.</p>
+<p>Maria, die Entscheidung das zu tun, was du, was er sich wünscht, fällt mir nicht immer leicht. Ich danke dir für deine Hilfe, für dein Vertrauen, das du mir erweist, indem du mich immer wieder zu den anderen sendest.</p>
+<p>Der Wille des Vaters soll geschehen in mir und durch mich in seinem Namen! Amen.</p>
+
+<h3>Gebet zum Heiligsten Herzen Jesu</h3>
+<p class="rubric">(wurde von P. Pio immer nach der Kommunion und sonst öfters gebetet)</p>
+<p>O mein Jesus, der Du gesagt hast: «Wahrlich, ich sage euch, bittet und ihr werdet empfangen, suchet und ihr werdet finden, klopfet an und es wird euch aufgetan werden», siehe, ich klopfe an, ich suche, ich bitte um die Gnade der Beharrlichkeit.</p>
+<p><em>das Vater unser, Ave Maria, Ehre sei dem Vater … Alleluja.</em></p>
+<p>Heiligstes Herz Jesu, ich vertraue und hoffe auf Dich!</p>
+<p>O mein Jesus, der Du gesagt hast: «Wahrlich, ich sage euch, um was immer ihr den Vater in meinem Namen bittet, wird er euch gewähren», siehe, in Deinem Namen erbitte ich von Deinem Vater die Gnade der schenkenden Liebe zu Dir und den Mitmenschen.</p>
+<p><em>das Vater unser, Ave Maria, Ehre sei dem Vater … Alleluja.</em></p>
+<p>Heiligstes Herz Jesu, ich vertraue und hoffe auf Dich!</p>
+<p>O mein Jesus, der Du gesagt hast: «Wahrlich, ich sage euch, Himmel und Erde werden vergehen, aber meine Worte werden nicht vergehen», siehe, gestützt auf die Unfehlbarkeit Deiner Worte bitte ich um die Gnade der Treue zu der von Dir offenbarten Wahrheit.</p>
+<p><em>das Vater unser, Ave Maria, Ehre sei dem Vater … Alleluja.</em></p>
+<p>Heiligstes Herz Jesu, ich vertraue und hoffe auf Dich!</p>
+<p>O heiligstes Herz Jesu, dem es unmöglich ist, kein Mitleid zu haben mit den Unglücklichen, habe Erbarmen mit mir armen Sünder und gewähre mir die Gnade echter Reue und die Kraft mich zu bessern. Höre auf die Fürbitte Des Unbefleckten Herzens Marias, Deiner und unserer geliebten Mutter.</p>
+<p><em>das Vater unser, Ave Maria, Ehre sei dem Vater … Alleluja.</em></p>
+<p>Heiliger Josef, innigst mit dem heiligsten Herzen Jesu verbunden, bitte für uns!</p>
+
+<h2>Eucharistischer Segen am Herz-Jesu-Freitag</h2>
+<p class="rubric">(erster Freitag im Monat / Herz-Jesu Freitag)</p>
+
+<h3>Litanei vom Heiligsten Herzen Jesu</h3>
+<p>V. Hoch gelobt und gebenedeit sei das allerheiligste Sakrament des Altares!<br>
+A. Von nun an bis in Ewigkeit! Gepriesen seist Du, Gott! Gepriesen sei dein Heiliger Name!</p>
+<p>V./A. Herr, erbarme Dich unser<br>
+V./A. Christus, erbarme Dich unser<br>
+V./A. Herr, erbarme Dich unser<br>
+V./A. Christus höre uns<br>
+V./A. Christus erhöre uns</p>
+<p>V. Gott Vater im Himmel — A. erbarme Dich unser<br>
+V. Gott Sohn, Erlöser der Welt — A. erbarme Dich unser<br>
+V. Gott Heiliger Geist — A. erbarme Dich unser<br>
+V. Heiligste Dreifaltigkeit, ein Einiger Gott — A. erbarme Dich unser<br>
+V. Herz Jesu, des Sohnes Gottes — A. erbarme Dich unser</p>
+<p>Herz Jesu, im Schoße der Jungfrau Maria vom Heiligen Geiste gebildet<br>
+Herz Jesu, mit dem Worte Gottes wesenhaft vereinigt<br>
+Herz Jesu, unendlich erhaben<br>
+Herz Jesu, Du heiliger Tempel Gottes<br>
+Herz Jesu, Du Zelt des Allerhöchsten<br>
+Herz Jesu, Du Haus Gottes und Pforte des Himmels<br>
+Herz Jesu, Du Feuerherd der Liebe<br>
+Herz Jesu, Du Wohnstatt der Gerechtigkeit und Liebe<br>
+Du Herz voll Güte und Liebe<br>
+Herz Jesu, Du Abgrund aller Tugenden<br>
+Herz Jesu, würdig allen Lobes<br>
+Herz Jesu, Du König und Mitte aller Herzen<br>
+Herz Jesu, in dem alle Schätze der Weisheit und Erkenntnis sind<br>
+Herz Jesu, in dem die ganze Fülle der Gottheit wohnt<br>
+Herz Jesu, das dem Vater wohl gefällt<br>
+Herz Jesu, aus dessen Gnade wir alle empfangen<br>
+Herz Jesu, Du Sehnsucht der Schöpfung von Anbeginn<br>
+Du Herz, geduldig und voll Erbarmen<br>
+Herz Jesu, reich für alle, die dich anrufen<br>
+Herz Jesu, Du Quell des Lebens und der Heiligkeit<br>
+Herz Jesu, Du Sühne für unsere Sünden<br>
+Herz Jesu, mit Schmach gesättigt<br>
+Herz Jesu, wegen unserer Missetaten zerschlagen<br>
+Herz Jesu, bis zum Tode gehorsam<br>
+Du Herz, durchbohrt von der Lanze<br>
+Herz Jesu, Du Quell allen Trostes<br>
+Herz Jesu, unsere Auferstehung und unser Leben<br>
+Herz Jesu, unser Friede und unsere Versöhnung<br>
+Herz Jesu, Du Opferlamm für die Sünder<br>
+Herz Jesu, Du Rettung aller, die auf Dich hoffen<br>
+Herz Jesu, Du Hoffnung aller, die in dir sterben<br>
+Herz Jesu, Du Freude aller Heiligen</p>
+<p>V. Lamm Gottes, Du nimmst hinweg die Sünden der Welt, A. verschone uns, o Herr<br>
+V. Lamm Gottes, Du nimmst hinweg die Sünden der Welt, A. erhöre uns, o Herr.<br>
+V. Lamm Gottes, Du nimmst hinweg die Sünden der Welt, A. erbarme Dich unser.<br>
+V. Jesus, gütig und selbstlos von Herzen — A. bilde unser Herz nach Deinem Herzen</p>
+<p>V. Lasset uns beten. — Gütiger Gott, aus dem geöffneten Herzen Deines Sohnes kommt die Fülle des Erbarmens. Hilf uns, dass wir seine Liebe nicht ohne Antwort lassen. Darum bitten wir durch ihn, Christus, unsern Herrn.<br>
+A. Amen.</p>
+<p>V. Hoch gelobt und gebenedeit sei das allerheiligste Sakrament des Altares!<br>
+A. Von nun an bis in Ewigkeit! Gepriesen seist Du, Gott Gepriesen sei dein Heiliger Name!</p>
+
+<h3>Varia</h3>
+<table>
+<tr><td class="lat">Tantum ergo sacramentum veneremur cernui et antiquum documentum novo cedat ritui praestet fides supplementum sensuum defectui.</td>
+<td>Lasst uns also dieses Zeichen hingestreckt nun beten an. Altes Vorbild möge weichen, da der neue Brauch begann. Was die Sinne nicht begreifen, nehme doch der Glaube an.</td></tr>
+<tr><td class="lat">Genitori, genitoque laus et iubilatio, salus, honor, virtus quoque sit et benedictio procedenti ab utroque Compar sit laudatio.</td>
+<td>Dem Erzeuger [Vater] und dem Erzeugten [Sohne] sei der Lobgesang geweiht, Freudenruf und Jubellieder, Ruhm und Segen allezeit, dem aus beiden Hervorgegangenen [Geist] sei gleicher Maßen Lobpreis!</td></tr>
+</table>
+
+<h3>Eucharistischer Segen</h3>
+<table>
+<tr><td class="lat">V. Panem de caelo praestitisti eis.<br>A. Omne delectamentum in se habentem.</td>
+<td>V. Brot vom Himmel hast du ihnen gegeben.<br>A. Das alle Erquickung in sich birgt.</td></tr>
+</table>
+
+<h3>Oration</h3>
+<table>
+<tr><td class="lat">Oremus. Deus, qui nobis sub sacramento mirabili passionis tuae memoriam reliquisti: tribue, quaesumus, ita nos corporis et sanguinis tui sacra mysteria venerari, ut redemptionis tuae fructum in nobis jugiter sentiamus. Qui vivis et regnas in saecula saeculorum. Amen.</td>
+<td>Lasset uns beten. Herr Jesus Christus, im wunderbaren Sakrament des Altares hast du uns das Gedächtnis deines Leidens und deiner Auferstehung hinterlassen. Gib uns die Gnade, die heiligen Geheimnisse deines Leibes und Blutes so zu verehren, dass uns die Frucht der Erlösung zuteil wird. Der du lebst und herrschest in Ewigkeit. Amen.</td></tr>
+</table>
+<p class="rubric">Der P. oder der Diakon erteilt dann den knienden Gläubigen den Segen mit der Monstranz oder dem Ziborium. Meist läuten dazu Ministranten mit den Altarschellen. Nach dem Segen wird das Allerheiligste wieder in den Tabernakel übertragen.</p>
+
+<h3>Herz-Jesu-Andacht (Gotteslob Nr. 676,3)</h3>
+<p>V. Das Herz ist ein Bild für die Liebe: die Liebe, die Menschen einander schenken, und die Liebe, die Gott schenkt. In seiner Barmherzigkeit ist er uns nahe gekommen in seinem Sohn. Jesus Christus wurde in allem uns gleich – außer der Sünde. Er hat die dunkle Macht der Sünde gebrochen durch seinen Tod am Kreuz.</p>
+<p>Als sie aber zu Jesus kamen und sahen, dass er schon tot war, zerschlugen sie ihm die Beine nicht, sondern einer der Soldaten stieß mit der Lanze in seine Seite, und sogleich floss Blut und Wasser heraus (Joh 19,33–34).</p>
+<p>Gott hat ein Herz für die Menschen; er liebt sein Volk wie Eltern ihre Kinder. Dieser liebende Gott hat sich uns in seinem Sohn offenbart. Dafür danken wir und beten: Herr Jesus, Abbild und Wesen des Vaters,<br>
+A. bilde unser Herz nach deinem Herzen.</p>
+<p>V. Von Anfang an scheiden sich an Jesus die Geister. Seine Liebe erfährt nicht immer Antwort. Doch der greise Simeon jubelt im Tempel über Jesus, den Messias: Er ist das Licht der Welt und das Heil aller Völker. Das bekennen auch wir und beten: Herr Jesus, Sohn des lebendigen Gottes,<br>
+A. bilde unser Herz nach deinem Herzen.</p>
+<p>V. Jesus wendet sich den Armen und Kranken zu, er tröstet Schwache und Einsame, er schenkt Heilung und Zuversicht. Das erhoffen auch wir und beten: Herr Jesus, Heiland der Kranken,<br>
+A. bilde unser Herz nach deinem Herzen.</p>
+<p>V. Eine Frau salbt Jesus mit Nardenöl. Der Herr spricht ihr die Vergebung der Sünden zu, weil sie so viel Liebe gezeigt hat. Er sitzt mit dem Sünder Zachäus zu Tisch und sagt ihm, dass seinem Haus Heil geschenkt ist. Jesus vergibt, wo Menschen Reue zeigen. Das erbitten auch wir und beten: Herr Jesus, Retter und Erlöser,<br>
+A. bilde unser Herz nach deinem Herzen.</p>
+<p>V. Viele Menschen haben erfahren, dass Jesus ihnen nahe ist, dass er unendlich geduldig ist, verhärtete Herzen aufbricht und Frieden schenkt. Darüber staunen wir und beten: Herr Jesus, Freund deiner Freunde,<br>
+A. bilde unser Herz nach deinem Herzen.</p>
+<p>V. Wer sich dem Herzen Jesu anvertraut, empfängt Kraft, das eigene Kreuz zu tragen, schwierige Situationen zu meistern und Liebe auch dort zu schenken, wo keine Gegenliebe zu erwarten ist. Dankbar für jedes Zeugnis christlicher Hoffnung beten wir: Herr Jesus, gütig und selbstlos von Herzen,<br>
+A. bilde unser Herz nach deinem Herzen.</p>
+<p>V. Gott der Langmut und Liebe, in der Hingabe deines Sohnes am Kreuz umarmst du die ganze Menschheit. Wir danken dir für deine Barmherzigkeit, die du uns schenkst, in der wir angenommen und geborgen sind als deine Töchter und Söhne, als Schwestern und Brüder Jesu Christi, der mit dir und dem Heiligen Geist lebt und wirkt in Ewigkeit.<br>
+A. Amen.</p>
+
+<h3>Eucharistischer Segen</h3>
+<table>
+<tr><td class="lat">V. Panem de caelo praestitisti eis.<br>A. Omne delectamentum in se habentem.</td>
+<td>V. Brot vom Himmel hast du ihnen gegeben.<br>A. Das alle Erquickung in sich birgt.</td></tr>
+</table>
+
+<h3>Oration</h3>
+<table>
+<tr><td class="lat">V. Oremus. Deus, qui nobis sub sacramento mirabili passionis tuae memoriam reliquisti: tribue, quaesumus, ita nos corporis et sanguinis tui sacra mysteria venerari, ut redemptionis tuae fructum in nobis jugiter sentiamus. Qui vivis et regnas in saecula saeculorum. Amen.</td>
+<td>V. Lasset uns beten. Herr Jesus Christus, im wunderbaren Sakrament des Altares hast du uns das Gedächtnis deines Leidens und deiner Auferstehung hinterlassen. Gib uns die Gnade, die heiligen Geheimnisse deines Leibes und Blutes so zu verehren, dass uns die Frucht der Erlösung zuteil wird. Der du lebst und herrschest in Ewigkeit. Amen.</td></tr>
+</table>
+<p class="rubric">Der P. oder der Diakon erteilt dann den knienden Gläubigen den Segen mit der Monstranz oder dem Ziborium. Meist läuten dazu Ministranten mit den Altarschellen. Nach dem Segen wird das Allerheiligste wieder in den Tabernakel übertragen.</p>
+`;
+
+// ============================================================
+// ROSENKRANZGEBET
+// ============================================================
+CONTENT.rosenkranz = `
+<h2>Das tägliche Rosenkranzgebet</h2>
+<p>+ Im Namen den Vaters und des Sohnes und des Heiligen Geistes. Amen.</p>
+
+<h3>Apostolisches Glaubensbekenntnis</h3>
+<p>Ich glaube an Gott, den Vater, den Allmächtigen, den Schöpfer des Himmels und der Erde. Und an Jehoschua, seinen eingeborenen Sohn, unsern Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allmächtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten. Ich glaube an den Heiligen Geist, die heilige katholische Kirche, Gemeinschaft der Heiligen, Vergebung der Sünden, Auferstehung der Toten und das ewige Leben. Amen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+
+<h3>an der großen Perle … das Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>an den drei kleinen Perlen …</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jehoschua.</p>
+<p>1. Perle: … der in uns den Glauben vermehre. Heilige Maria …<br>
+2. Perle: … der in uns die Hoffnung stärke. Heilige Maria …<br>
+3. Perle: … der in uns die Liebe entzünde. Heilige Maria …</p>
+<p>Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+
+<p class="rubric">an jeder der folgenden großen Perlen wird ein „Vater Unser" gebetet. An jeder weiteren kleinen Perle wird ein „Ave Maria" gebetet und nach dem Wort „Jehoschua" eines der folgenden Geheimnisse eingefügt …</p>
+
+<h3>Freudenreiche Geheimnisse — Geburt und Kindheit Jehoschuas (Mo. / Sa.)</h3>
+<p>Den du, o Jungfrau, vom heiligen Geist empfangen hast.<br>
+Den du, o Jungfrau, zu Elisabeth getragen hast.<br>
+Den du, o Jungfrau, in Bethlehem geboren hast.<br>
+Den du, o Jungfrau, im Tempel aufgeopfert hast.<br>
+Den du, o Jungfrau, im Tempel wiedergefunden hast.</p>
+
+<h3>Schmerzhafte Geheimnisse — Passion und Tod Jehoschuas (Di. / Fr.)</h3>
+<p>Der für uns Blut geschwitzt hat.<br>
+Der für uns gegeißelt worden ist.<br>
+Der für uns mit Dornen gekrönt worden ist.<br>
+Der für uns das schwere Kreuz getragen hat.<br>
+Der für uns gekreuzigt worden ist.</p>
+
+<h3>Glorreiche Geheimnisse — Auferstehung und Himmelfahrt Jehoschuas (Mi. / So.)</h3>
+<p>Der von den Toten auferstanden ist.<br>
+Der in den Himmel aufgefahren ist.<br>
+Der uns den Heiligen Geist gesandt hat.<br>
+Der dich, o Jungfrau, in den Himmel aufgenommen hat.<br>
+Der dich, o Jungfrau im Himmel gekrönt hat.</p>
+
+<h3>Lichtreiche Geheimnisse — das Wirken Jehoschuas der Welt (Do.)</h3>
+<p>Der von Johannes getauft worden ist.<br>
+Der sich bei der Hochzeit in Kanaan offenbart hat.<br>
+Der uns das Reich Gottes verkündet hat.<br>
+Der auf dem Berg verklärt worden ist.<br>
+Der uns die Eucharistie geschenkt hat.</p>
+
+<p class="rubric">Am Ende eines Gesätzes das „Ehre sei dem Vater", das „Fatimagebet", und „Maria, Königin des Friedens ..".</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Jehoschua, verzeih uns unsere Sünden, bewahre uns vor dem Feuer der Hölle, führe alle Seelen in den Himmel, besonders jene, die deiner Barmherzigkeit am meisten bedürfen.</p>
+<p>Maria, Königin des Friedens, bitte für uns.</p>
+
+<h3>Abschluss des Rosenkranzes</h3>
+<p class="rubric">Hier + nehmen wir Veniam (Kuss des Kreuzes / Medaille des Rosenkranzes).</p>
+<p>Sei gegrüßt, o Königin, Mutter der Barmherzigkeit, + unser Leben, unsre Wonne und unsere Hoffnung, sei gegrüßt.</p>
+<p>Zu dir rufen wir verbannte Kinder Evas, zu dir seufzen wir, trauernd und weinend, in diesem Tal der Tränen. Wohl an denn, unsere Fürsprecherin, wende deine barmherzigen Augen uns zu, und nach diesem Elend zeige uns Jehoschua, die gebenedeite Frucht deines Leibes als gnädigen Heiland. Amen.</p>
+<p>O gütige, o milde, o süße Jungfrau Maria. In aller Trübsal und Angst komm uns zu Hilfe, o allerseeligste Jungfrau Maria! Amen.</p>
+
+<h3>Gebet für unsere Priester</h3>
+<p>Jehoschua, Du wurdest geboren, um von der Wahrheit Zeugnis zu geben, und Du liebst jene bis ans Ende, die Du erwählt hast. Erhöre gnädig unser Gebet für unsere Hirten. Du, der Du alles weißt, weißt ja auch, dass sie Dich lieben und dass sie alles vermögen in Dir, der sie stärkt. Heilige sie in der Wahrheit und erfülle sie mit demselben Geist, den Du Deinen Aposteln verliehen hast, damit Er sie in allem Dir gleich gestalte.</p>
+<p>Nimm an das Zeugnis ihrer Liebe, so wie Du das dreifache Bekenntnis des Petrus angenommen hast. Und damit der Heiligsten Dreifaltigkeit überall und ohne Unterlass ein reines Opfer dargebracht werde, vermehre ihre Zahl und bewahre sie in Deiner Liebe. Der Du lebst und herrschest mit Gott dem Vater in der Einheit des Heiligen Geistes, Gott von Ewigkeit zu Ewigkeit. Amen.</p>
+`;
+
+// ============================================================
+// TODESSTUNDE
+// ============================================================
+CONTENT.todesstunde = `
+<h2>Kleines Gebet zur Todesstunde unseres Herrn Jehoschua</h2>
+<p class="rubric">15 Uhr</p>
+<p>Jehoschua, wir versammeln uns mit Maria und dem Jünger, den du liebst, unter deinem Kreuz. Wir bitten dich um Verzeihung für unsere Sünden, sowie die Sünden der ganzen Welt, die deinen Tod verschuldet haben.</p>
+<p>Wir danken dir, das du in dieser Stunde des Heiles an uns gedacht, uns Maria zur Mutter gegeben hast.</p>
+<p>Heilige Jungfrau Maria, nimm uns unter deinen Schutz und öffne unsere Herzen für das Wirken des Heiligen Geistes.</p>
+<p>Heiliger Johannes, erbitte für uns die Gnade, Maria so in unser Leben aufzunehmen, wie du es getan hast, um sie in ihrer Sendung zu unterstützen.</p>
+<p>+ Der Vater, der Sohn und der Heilige Geist mögen überall verherrlicht werden durch die Unbefleckte Jungfrau Maria. Amen.</p>
+
+<h2>Großes Gebet zur Todesstunde unseres Herrn Jehoschua</h2>
+<p>Es sind Finsternisse entstanden, als dein Sohn Jehoschua, für uns gekreuzigt wurde. Um die neunte Stunde rief er zu dir mit lauter Stimme:</p>
+<p>„Mein Gott, mein Gott! Warum hast du mich verlassen?"</p>
+<p>Und mit geneigtem Haupt gab er seinen Geist auf.</p>
+<p>Wir beten dich an, Jehoschua, und preisen dich. Denn durch dein heiliges Kreuz hast du die Welt erlöst.</p>
+<p>Heiliger Gott, du hast deinen Sohn Jehoschua der Schmach des Kreuzes unterworfen, um uns aus der Gewalt des Bösen zu befreien. Gib uns die Gnade, dass wir deinem Willen gehorchen und einst in Herrlichkeit zu dir auferstehen. Darum bitten wir dich durch ihn, Jehoschua, unsern Herrn.</p>
+<p>Wir danken dir, Jehoschua, das du für uns gestorben bist. Lass uns durch deinen Kreuzestod und die Schmerzen, die du für uns erlitten hast, nicht verloren sein. Amen.</p>
+
+<h3>Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Ave Maria</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+
+<h3>Apostolisches Glaubensbekenntnis</h3>
+<p>Ich glaube an Gott, den Vater, den Allmächtigen, den Schöpfer des Himmels und der Erde, und an Jehoschua, seinen eingeborenen Sohn, unsern Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allmächtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten. Ich glaube an den Heiligen Geist, die heilige Katholische Kirche, Gemeinschaft der Heiligen, Vergebung der Sünden, Auferstehung der Toten und das ewige Leben. Amen.</p>
+
+<h3>Wir beten den Barmherzigkeitsrosenkranz …</h3>
+<p><strong>bei jeder großen Perle</strong><br>
+Ewiger Vater, ich opfere Dir auf den Leib und das Blut, die Seele und die Gottheit Deines über alles geliebten Sohnes, unseres Herrn Jehoschua, um Verzeihung zu erlangen, für unsere Sünden und die Sünden der ganzen Welt.</p>
+<p><strong>bei jeder kleinen Perle</strong><br>
+Durch sein schmerzhaftes Leiden, habe Erbarmen mit uns und mit der ganzen Welt.</p>
+
+<h3>Abschluss</h3>
+<p>Heiliger Gott, heiliger starker Gott, heiliger unsterblicher Gott, habe Erbarmen mit uns und mit der ganzen Welt.<br>
+Heiliger Gott, heiliger starker Gott, heiliger unsterblicher Gott, habe Erbarmen mit uns und mit der ganzen Welt.<br>
+Heiliger Gott, heiliger starker Gott, heiliger unsterblicher Gott, habe Erbarmen mit uns und mit der ganzen Welt.</p>
+<p>O Blut und Wasser, aus dem Herzen Jehoschuas, als Quelle der Barmherzigkeit für uns entströmt, Jehoschua, ich vertraue auf Dich!</p>
+<p>Barmherziger Jehoschua, im Augenblick Deines Kreuzestodes für uns, bete ich Dich an, lobpreise Dich und bitte dich; umfasse mit Deiner unerschöpflichen Barmherzigkeit die ganze Menschheit, insbesondere alle Sünder, insbesondere die, welche heute noch vor dein Angesicht treten werden. Amen.</p>
+
+<h3>Gebet um Ermutigung</h3>
+<p>Erfülle mich, erfülle uns, geliebter Vater, mit den Gaben des Heiligen Geistes, damit Dein Heiliges Wort durch uns, zu den Brüdern und Schwestern getragen wird, die wir in Deinem Namen und Auftrag unterstützen und begleiten dürfen. Hilf mir, hilf uns, sie durch unsere Gebete mit Deinem kostbaren Blut zu berühren, damit sie mit Deinem Heiligen Herzen verbunden werden. Gib mir, gib uns, die Unterstützung des Heiligen Geistes, damit durch unsere Hilfe und Begleitung, sie in Deinem Paradies frohlocken dürfen. Amen.</p>
+
+<h3>Gebet um Barmherzigkeit</h3>
+<p>O ewiger Gott, in dem die Barmherzigkeit unendlich und der Schatz des Mitleids unerschöpflich ist, richte Deinen liebevollen Blick auf uns alle, steigere das Erleben Deiner Barmherzigkeit in uns, damit wir in allen schwierigen Augenblicken, weder verzweifeln noch entmutigt werden mögen, sondern uns mit großem Vertrauen Deinem heiligen Willen unterwerfen, der uns unendliche Liebe und Barmherzigkeit ist.</p>
+<p>Umfasse mit Deiner unerschöpflichen Barmherzigkeit alle Menschen, insbesondere alle Sünder, sowie diejenigen, welche heute vor dein Angesicht treten werden. Amen.</p>
+<p>† Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+`;
+
+// ============================================================
+// KOMPLET
+// ============================================================
+CONTENT.komplet = `
+<h2>Vor dem Offizium</h2>
+<p>Öffne, Herr, meinen Mund, Deinen heiligen Namen zu preisen, und läutere mein Herz von allen nichtigen, verkehrten und fremden Gedanken! Erleuchte meinen Verstand und entzünde mein Gemüt, auf dass ich würdig, aufmerksam und andächtig dieses Offizium zu verrichten vermag und vor dem Angesicht Deiner göttlichen Majestät erhört zu werden verdiene. Darum bitten wir durch Jesus Christus, deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit.</p>
+<p class="response">℟. Amen.</p>
+<p>Herr, in Vereinigung mit jener göttlichen Absicht, mit der Du selbst auf Erden Gott Lob erwiesen hast, will ich Dir diese Hore (oder: diese Horen) verrichten.</p>
+<p class="response">℟. Amen.</p>
+
+<h3>anschließend das Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Ave Maria</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+
+<h3>Das Apostolische Glaubensbekenntnis</h3>
+<p>Ich glaube an Gott, den Vater, den Allmächtigen, den Schöpfer des Himmels und der Erde, und an Jesus Christus, seinen eingeborenen Sohn, unseren Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allmächtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten.</p>
+<p>Ich glaube an den Heiligen Geist, die heilig machende Gnade, meine Gemeinschaft und Freundschaft mit Gott, meinem Vater, sowie meine Teilhabe an seinem Leben.</p>
+<p>An die heilende Kraft der Gemeinschaft aller Gläubigen, an die Unterstützung und Begleitung heiliger Menschen im Leben und über deren Tod hinaus, die Vergebung meiner Sünden, die Auferstehung von den Toten und das Ewige Leben. Amen.</p>
+
+<h3>Gebet der Versöhnung / Gebet des Dankes</h3>
+<p class="rubric">(am Monatsende / in der Monatsmitte / dann keine Komplet) — ansonsten die Komplet / Nachtgebet</p>
+
+<h2>Komplet (Nachtgebet)</h2>
+<p class="rubric">Stilles Gebet – dreimal das Ave Maria, anschließend</p>
+<p>† Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+<p>Herr, öffne meine Lippen, † damit mein Mund dein Lob verkünde.</p>
+<p>O Gott, komm mir zu Hilfe! Herr, eile mir zu helfen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen. Alleluja.</p>
+<p class="rubric">In der 40-tägigen Fastenzeit bis zum Karsamstag aber wird anstelle des Alleluja das … Lob sei Dir, Herr, König der ewigen Herrlichkeit gebetet.</p>
+
+<h3>Confiteor (Schuldbekenntnis)</h3>
+<p>Ich bekenne Gott, dem Allmächtigen, und allen Brüdern und Schwestern, dass ich Gutes unterlassen und Böses getan habe – ich habe gesündigt in Gedanken, Worten und Werken durch meine Schuld, durch meine Schuld, durch meine große Schuld.</p>
+<p>Darum bitte ich die selige Jungfrau Maria, alle Engel und Heiligen und euch, Brüder und Schwestern, für mich zu beten bei Gott, unserm Herrn.</p>
+<p>† Der allmächtige Gott erbarme sich meiner, er lasse mir die Sünden nach und führe mich zum ewigen Leben. Amen.</p>
+
+<h3>Hymnus</h3>
+<p>Sei eingedenk, Heilbringer Jehoschua; vom Himmel Du gestiegen bist, hast angenommen unser Fleisch aus einer Jungfrau rein und keusch.</p>
+<p>O Mutter der Barmherzigkeit, die Gnadenhände öffne weit; beschirme uns vor der Hölle Wut, nimm uns im Tod in deine Hut!</p>
+<p>Maria, Mutter unseres Herrn, der ist gezeugt vorm Morgenstern, sieh, deine Kinder zu dir fliehen: sei allen milde Helferin.</p>
+<p>Der Höchste auf dem Himmelsthron gewähre uns durch deinen Sohn, dass sterbend wir an deiner Hand hinübergehen ins Vaterland.</p>
+<p>O Sohn der Jungfrau, Jehoschua, das Lied mit Deinem Lobpreis schließt. Dem Vater und dem Geist geweiht sei gleiches Lob in Ewigkeit. Amen.</p>
+
+<h3>Antiphon (Genesis 3,14a.15a.c)</h3>
+<p class="rubric">In der Fastenzeit unterbleibt das Alleluja.</p>
+<p>Es sprach * der Herr Gott zu der Schlange: „Feindschaft will ich setzen zwischen dir und der Frau; sie wird deinen Kopf zertreten". Alleluja.</p>
+
+<h3>aus Psalm 4 (Neues Leben Bibel)</h3>
+<p>Antworte mir, wenn ich rufe mein Gott, der du mich von Schuld freisprichst. Du hast mich aus bedrängter Lage befreit. Sei mir gnädig und höre mein Gebet!</p>
+<p>Ihr mächtigen Herren, wie lange wollt ihr noch meinen Ruf in den Dreck ziehen? Wie lange wollt ihr noch diese haltlosen Anklagen vorbringen? Wie lange wollt ihr noch Lügen verbreiten?</p>
+<p>Eines dürft ihr ganz sicher wissen: Der Herr hat die Gottesfürchtigen erwählt. Der Herr wird mir antworten, wenn ich zu ihm rufe.</p>
+<p>Sündigt nicht, wenn ihr zornig seid. Nehmt euch eine Nacht Zeit, um darüber nachzudenken und verhaltet euch ruhig.</p>
+<p>Bringt die vorgeschriebenen Opfer dar und vertraut auf den Herrn.</p>
+<p>Viele Menschen fragen: „Wer wird uns bessere Zeiten bringen?" Lass das Licht deines Angesichts über uns leuchten, Herr!</p>
+<p>Du hast mir größere Freude geschenkt als denen, die viel Wein und Korn ernten.</p>
+<p>Ich will mich in Frieden hinlegen und schlafen, denn du allein, Herr, gibst mir Geborgenheit.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Genesis 3,14a.15a.c): Es sprach * der Herr Gott zu der Schlange: „Feindschaft will ich setzen zwischen dir und der Frau; sie wird deinen Kopf zertreten". Alleluja.</p>
+
+<h3>aus Psalm 31 (Neues Leben Bibel)</h3>
+<p>Herr, bei dir suche ich Schutz, lass mich nicht zugrunde gehen. Hilf mir durch deine Gerechtigkeit!</p>
+<p>Wende dich zu mir und höre mich. Rette mich schnell! Sei für mich ein schützender Fels, eine Festung, in der meine Feinde mich nicht erreichen können.</p>
+<p>Du bist mein schützender Fels und meine Festung. Führe und leite mich um der Ehre deines Namens willen.</p>
+<p>Zieh mich aus der Falle heraus, die meine Feinde mir gestellt haben, denn bei dir allein finde ich Schutz.</p>
+<p>Ich lege meinen Geist in deine Hände. Du hast mich gerettet, Herr, du treuer Gott.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Genesis 3,14a.15a.c): Es sprach * der Herr Gott zu der Schlange: „Feindschaft will ich setzen zwischen dir und der Frau; sie wird deinen Kopf zertreten". Alleluja.</p>
+
+<h3>aus Psalm 133 (Neues Leben Bibel)</h3>
+<p>Lobt den Herrn, all ihr Diener des Herrn, die ihr nachts im Hause des Herrn steht.</p>
+<p>Erhebt eure Hände im Heiligtum und lobt den Herrn!</p>
+<p>Der Herr, der Himmel und Erde gemacht hat, segne euch von Jerusalem aus.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Genesis 3,14a.15a.c): Es sprach * der Herr Gott zu der Schlange: „Feindschaft will ich setzen zwischen dir und der Frau; sie wird deinen Kopf zertreten". Alleluja.</p>
+
+<h3>Kapitel</h3>
+<p>Ein großes Zeichen erschien am Himmel: eine Frau, mit der Sonne bekleidet, und der Mond unter ihren Füßen und auf ihrem Haupt eine Krone von zwölf Sternen. Dank sei Gott, dem Herrn.</p>
+
+<h3>Versikel</h3>
+<p>Gott will ihr helfen vor seinem Angesicht. Gott ist in ihrer Mitte, sie wird nicht wanken.</p>
+
+<h3>Antiphon (Lukas 1,35)</h3>
+<p>Der Heilige Geist wird über dich kommen, und die Macht des Allerhöchsten wird dich überschatten.</p>
+
+<h3>Lobgesang des Simeon</h3>
+<p>Nun entlässt Du, † Herr, Deinen Knecht * nach Deinem Wort in Frieden.</p>
+<p>Denn meine Augen * haben Dein Heil gesehen, das Du bereitet hast * vor dem Angesicht aller Völker.</p>
+<p>Ein Licht zur Erleuchtung der Heiden * und zur Verherrlichung Deines Volkes Israel.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Lukas 1,35): Der Heilige Geist wird über dich kommen, und die Macht des Allerhöchsten wird dich überschatten.</p>
+
+<h3>Lasset uns beten</h3>
+<p>O Herr, verzeihe die Vergehen Deiner Diener; da wir mit unseren Werken Dir nicht gefallen können, lass uns das Heil erlangen auf die Fürsprache der Mutter Deines Sohnes, unseres Herrn und Gottes.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>Versikel</h3>
+<p>Herr, erhöre mein Gebet. Und lass mein Rufen zu dir kommen.</p>
+<p>Lasset uns preisen den Herrn. Dank sei Gott.</p>
+<p>Antiphon (Lukas 1,35): Der Heilige Geist wird über dich kommen, und die Macht des Allerhöchsten wird dich überschatten.</p>
+
+<h3>Marianische Antiphon</h3>
+<p class="rubric">Hier † nehmen wir Veniam (Kuss des Kreuzes / Medaille des Rosenkranzes).</p>
+<p>Heilige Maria, † eile den Elenden zu Hilfe, unterstütze die Kleinmütigen, erquicke die Beklagenswerten, bitte für das Volk, hilf dem Klerus, tritt ein für das gottgeweihte, weibliche Geschlecht!</p>
+<p>Es mögen alle deine Hilfe erfahren, die dein Gedächtnis begehen. Würdige mich, dich zu loben, heilige Jungfrau! Gib mir Kraft gegen deine Feinde! Amen.</p>
+
+<h3>Lasset uns beten</h3>
+<p>Verleihe uns, Deinen Dienern, wir bitten Dich, o Gott, dass wir uns des Glückes der Seele und des Leibes erfreuen und auf die glorreiche Fürsprache der seligen, immerwährenden Jungfrau Maria von der gegenwärtigen Trübsal befreit werden und ewige Freude genießen.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>stilles Gebet – unmittelbar darauf folgt dreimal</h3>
+<p><strong>Ave Maria</strong><br>
+Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p><strong>Vater unser</strong><br>
+Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+<p class="rubric">(Ave Maria und Vater unser werden dreimal im Wechsel gebetet)</p>
+
+<h3>Das Schluss-Evangelium — der Prolog des heiligen Johannes-Evangeliums</h3>
+<p>† Anfang des heiligen Evangeliums nach Johannes. Ehre sei Dir, o Herr.</p>
+<p>Im Anfang war das Wort, und das Wort war bei Gott, und Gott war das Wort. Dieses war im Anfang bei Gott. Alles ist durch Ihn geworden; und ohne Ihn ist nichts geworden, was geworden ist.</p>
+<p>In Ihm war das Leben, und das Leben war das Licht der Menschen und das Licht leuchtet in der Finsternis, und die Finsternis hat es nicht ergriffen.</p>
+<p>Es ward ein Mensch gesandt von Gott, sein Name war Johannes; dieser kam zum Zeugnis, damit er Zeugnis gebe vom Licht, damit alle zum Glauben kämen durch ihn. Nicht war er das Licht, sondern damit er Zeugnis gebe vom Licht. Es war das wahre Licht, das jeden Menschen erleuchtet, der in diese Welt kommt. Es war in der Welt, und die Welt ist durch IHN geworden, und die Welt hat IHN nicht erkannt.</p>
+<p>Es kam in das Seine, doch die Seinen nahmen IHN nicht auf. Die IHN aber aufnahmen: ihnen gab ER Vollmacht, Kinder Gottes zu werden, denen, die an Seinen Namen glauben, die nicht aus dem Geblüt, auch nicht aus dem Willen des Fleisches, auch nicht aus dem Willen des Mannes, sondern aus Gott geboren sind.</p>
+<p class="rubric">Hier † nehmen wir Veniam (Kuss des Kreuzes / Medaille des Rosenkranzes).</p>
+<p>Und das Wort ist Fleisch geworden und hat unter uns gewohnt; † und wir haben Seine Herrlichkeit gesehen, die Herrlichkeit als des Eingeborenen vom Vater, voll Gnade und Wahrheit. Amen.</p>
+
+<h3>Lobpreis der Dreifaltigkeit</h3>
+<p>Dir gebührt Lob, Dir gebührt Gesang; Dir sei Ehre; Gott-Vater und Sohn mit dem Heiligen Geist in die Ewigkeiten der Ewigkeiten. Amen.</p>
+<p class="rubric">Eines der folgenden Gebete wird angefügt:</p>
+
+<h3>Montag / Dienstag</h3>
+<p>Lasset uns beten; gewähre, wir bitten Dich, allmächtiger Gott, dass Deines Eingeborenen neue Geburt im Fleisch uns befreie, welche jetzt die alte Knechtschaft unter dem Joch der Sünde hält.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>Mittwoch / Donnerstag</h3>
+<p>Lasset uns beten; O Gott, Du Erleuchter aller, gib Deinen Völkern das sie sich des dauerhaften Friedens erfreuen können, gieße jenes strahlende Licht in unsere Herzen ein, das Du den Herzen der drei Weisen eingehaucht hast, unseren Herrn Jehoschua.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>Freitag / Samstag / Sonntag</h3>
+<p>Lasset uns beten; Beschützer all derer, die auf Dich, o Gott, vertrauen. Nichts ist gesund, nichts heilig ohne Dich; vermehre über uns Deine Barmherzigkeit, damit unter Deiner Leitung und Führung wir so durch die zeitlichen Güter hindurchgehen, auf dass wir die ewigen nicht verlieren werden. Amen.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>Versikel für die armen Seelen im Fegefeuer</h3>
+<p>Die Seelen aller verstorbenen Gläubigen mögen durch die Barmherzigkeit Gottes ruhen in Frieden. Amen.</p>
+
+<h3>Marianische Antiphon</h3>
+<p class="rubric">Hier † nehmen wir Veniam (Kuss des Kreuzes / Medaille des Rosenkranzes).</p>
+<p>Sei gegrüßt, o Königin, Mutter der Barmherzigkeit, † des Lebens Wonne und unsere Hoffnung, sei gegrüßt. Zu dir rufen wir verbannte Kinder Evas, zu dir seufzen wir, trauernd und weinend in diesem Tal der Tränen. Wohl an denn, unsere Fürsprecherin, wende deine barmherzigen Augen uns zu und nach diesem Elend zeige uns Jehoschua, die gebenedeite Frucht deines Leibes, als gnädigen Heiland.</p>
+<p>O gütige, o milde, o süße Jungfrau Maria! Amen. In aller Trübsal und Angst komm uns zu Hilfe, o allerseeligste Jungfrau Maria. Amen.</p>
+<p class="rubric">Nach der Antiphon „Sei gegrüßt, o Königin" kann angefügt werden:</p>
+
+<h3>Versikel</h3>
+<p>Gegrüßet seist du, voll der Gnade! Der Herr ist mit dir.</p>
+<p class="rubric">Eines der folgenden Gebete wird angefügt:</p>
+
+<h3>Montag / Dienstag</h3>
+<p>Lasset uns beten; O Herr, verzeihe die Vergehen Deiner Diener; da wir mit unseren Werken Dir nicht gefallen können, lass uns das Heil erlangen auf die Fürsprache der Mutter Deines Sohnes, unseres Herrn und Gottes. Amen.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>Mittwoch / Donnerstag</h3>
+<p>Lasset uns beten; die Gebete Deiner Kirche, o Herr, nimm versöhnt an, damit nach Vernichtung aller Widerstände und Irrtümer sie Dir in gesicherter Freiheit diene. Amen.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>Freitag / Samstag / Sonntag</h3>
+<p>Lasset uns beten; Deine unaussprechliche Barmherzigkeit, o Herr, erzeuge uns milde, auf dass Du uns zugleich der Sünden entledigen und den Strafen und Trübsalen, die wir für diese verdienen, entreißen wolltest; und gewähre unseren Zeiten Deinen Frieden und bewahre uns, Deine Diener, vor jeglicher Widerwärtigkeit und Sünde. Amen.</p>
+<p>Darum bitten wir durch (ihn), Jehoschua, Deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit. Amen.</p>
+
+<h3>Abschluss</h3>
+<p>Abba*, segne meine Augen, die heute viel gesehen haben, und diese Bilder nun entlassen möchten.</p>
+<p>Segne meine Ohren, die nach dem Lärm des Tages, sich nach dir und Stille sehnen.</p>
+<p>Segne meine Lippen, die nach dem vielem Reden heute, den Tag in dir beenden möchten.</p>
+<p>Bilde mein Herz nach deinem Herzen, das es die Menschen versteht und sie lieben lernt, und bleibe du in mir, so wie ich in dir bleiben möchte.</p>
+<p>Segne mich und meine abwesenden Brüder und Schwestern, gewähre uns eine ruhige Nacht und ein gutes Ende. Amen.</p>
+<p class="rubric">* der du mir auch Mutter bist</p>
+
+<h3>Gebet für unsere Verstorbenen</h3>
+<p>Vater, gib all unseren Verstorbenen die ewige Ruhe. Das ewige Licht leuchte ihnen. Lass sie ruhen in deinem Frieden. Amen.</p>
+<hr>
+<p>† Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+
+<h2>Nach dem Offizium</h2>
+<p>Der hochheiligen und ungeteilten Dreifaltigkeit, der Menschheit unseres gekreuzigten Herrn Jesus Christus, der fruchtbaren Unversehrtheit der allerseligsten und glorreichsten Jungfrau Maria und der Gesamtheit aller Heiligen sei ewig Lob, Ehre, Kraft und Ruhm von aller Kreatur, und uns sei Nachlass aller Sünden durch alle Ewigkeit.</p>
+<p class="response">℟. Amen.</p>
+<p>℣. Selig der Schoß der Jungfrau Maria, der den Sohn des ewigen Vaters getragen.</p>
+<p class="response">℟. Und selig die Brust, die Christus, den Herrn, genährt hat.<br>℟. Amen.</p>
+
+<h3>anschließend das Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Ave Maria</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+`;
+
+// ============================================================
+// VESPER
+// ============================================================
+CONTENT.vesper = `
+<h2>Vor dem Offizium</h2>
+<p>Öffne, Herr, meinen Mund, Deinen heiligen Namen zu preisen, und läutere mein Herz von allen nichtigen, verkehrten und fremden Gedanken! Erleuchte meinen Verstand und entzünde mein Gemüt, auf dass ich würdig, aufmerksam und andächtig dieses Offizium zu verrichten vermag und vor dem Angesicht Deiner göttlichen Majestät erhört zu werden verdiene. Darum bitten wir durch Jesus Christus, deinen Sohn, unseren Herrn und Gott, der in der Einheit des Heiligen Geistes mit dir lebt und herrscht in alle Ewigkeit.</p>
+<p class="response">℟. Amen.</p>
+<p>Herr, in Vereinigung mit jener göttlichen Absicht, mit der Du selbst auf Erden Gott Lob erwiesen hast, will ich Dir diese Hore (oder: diese Horen) verrichten.</p>
+<p class="response">℟. Amen.</p>
+
+<h3>anschließend das Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Ave Maria</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+
+<h3>Das Apostolische Glaubensbekenntnis</h3>
+<p>Ich glaube an Gott, den Vater, den Allmächtigen, den Schöpfer des Himmels und der Erde, und an Jesus Christus, seinen eingeborenen Sohn, unseren Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allmächtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten.</p>
+<p>Ich glaube an den Heiligen Geist, die heilig machende Gnade, meine Gemeinschaft und Freundschaft mit Gott, meinem Vater, sowie meine Teilhabe an seinem Leben.</p>
+<p>An die heilende Kraft der Gemeinschaft aller Gläubigen, an die Unterstützung und Begleitung heiliger Menschen im Leben und über deren Tod hinaus, die Vergebung meiner Sünden, die Auferstehung von den Toten und das Ewige Leben. Amen.</p>
+
+<h2>Vesper (Abendlob)</h2>
+<p class="rubric">Stilles Gebet – dreimal das Ave Maria, anschließend</p>
+<p>† Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+<p>Herr, öffne meine Lippen, † damit mein Mund dein Lob verkünde.</p>
+<p>O Gott, komm mir zu Hilfe! Herr, eile mir zu helfen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen. Alleluja.</p>
+<p class="rubric">In der 40-tägigen Fastenzeit bis zum Karsamstag aber wird anstelle des Alleluja das … Lob sei Dir, Herr, König der ewigen Herrlichkeit gebetet.</p>
+
+<h3>Confiteor (Schuldbekenntnis)</h3>
+<p>Ich bekenne Gott, dem Allmächtigen, und allen Brüdern und Schwestern, dass ich Gutes unterlassen und Böses getan habe – ich habe gesündigt in Gedanken, Worten und Werken durch meine Schuld, durch meine Schuld, durch meine große Schuld.</p>
+<p>Darum bitte ich die selige Jungfrau Maria, alle Engel und Heiligen und euch, Brüder und Schwestern, für mich zu beten bei Gott, unserm Herrn.</p>
+<p>† Der allmächtige Gott erbarme sich meiner, er lasse mir die Sünden nach und führe mich zum ewigen Leben. Amen.</p>
+
+<h3>Hymnus</h3>
+<p>Meerstern, ich dich grüße, Gottesmutter süße, allzeit Jungfrau reine, Himmelspforte alleine.</p>
+<p>«AVE», klang die Kunde aus des Engels Munde; uns den Frieden spende, «EVA»'s Namen wende!</p>
+<p>Lös das Band der Sünden, spende Licht den Blinden; allem Bösen wehre, alles Gut begehre!</p>
+<p>Dich als Mutter zeige, das durch dich sich neige unserm Flehen auf Erden, der dein Sohn wollt werden.</p>
+<p>Jungfrau, auserkoren, mild und rein geboren, uns von Schuld befreie, Keuschheit uns verleihe!</p>
+<p>Gib ein reines Leben, mach den Weg uns eben, dass in Himmelshöhen froh wir Jehoschua sehen.</p>
+<p>Gott auf Seinem Throne, Jehoschua, dem höchsten Sohne, und dem Geist (den Dreien), wir den Lobpreis weihen. Amen.</p>
+
+<h3>Antiphon (Hoheslied 2,2)</h3>
+<p>Wie eine Lilie * unter Dornen, so ist meine Freundin unter den Töchtern.</p>
+
+<h3>aus Psalm 110 (Neues Leben Bibel)</h3>
+<p>Der Herr sprach zu meinem Herrn: Setze dich auf den Ehrenplatz zu meiner Rechten, bis ich deine Feinde demütige und sie zum Schemel unter deinen Füßen mache.</p>
+<p>Der Herr wird deine Macht ausweiten über Jerusalem hinaus, du wirst über deine Feinde herrschen.</p>
+<p>Am Tage der Schlacht wird dein Volk dir freudig dienen, festlich gekleidet in heilige Gewänder. Wie der Morgentau wird deine Lebenskraft erneuert, Tag für Tag.</p>
+<p>Der Herr hat einen Eid geschworen und wird ihn nicht brechen: „Du bist für immer Priester nach der Ordnung Melchisedeks."</p>
+<p>Der Herr steht an deiner rechten Seite und beschützt dich. Am Tag seines Zorns wirft er viele Könige vor dir nieder.</p>
+<p>Er wird die Völker richten und Berge von Leichen zurücklassen, er wird Fürsten überall auf der ganzen Erde vernichten.</p>
+<p>Er selbst aber wird sich unterwegs am Bach erfrischen, darum wird er siegen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hoheslied 2,2): Wie eine Lilie * unter Dornen, so ist meine Freundin unter den Töchtern.</p>
+
+<h3>aus Psalm 113 (Neues Leben Bibel)</h3>
+<p>Halleluja! Lobt ihn, ihr Diener des Herrn. Lobt den Namen des Herrn!</p>
+<p>Gelobt sei der Name des Herrn in alle Ewigkeit.</p>
+<p>Vom Aufgang der Sonne bis zu ihrem Niedergang sei der Name des Herrn gelobt.</p>
+<p>Denn der Herr steht hoch über den Völkern, sein Ruhm reicht höher als der Himmel.</p>
+<p>Wer ist wie der Herr, unser Gott, der hoch oben thront in der Höhe, der in die Tiefe hinabschaut auf den Himmel und auf die Erde?</p>
+<p>Er holt die Armen aus dem Staub heraus und die Hilflosen aus dem Schmutz.</p>
+<p>Er gibt ihnen einen Platz neben Fürsten, ja, neben den Fürsten seines Volkes!</p>
+<p>Der unfruchtbaren Frau schenkt er Kinder, damit sie eine glückliche Mutter wird. Halleluja!</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hoheslied 2,2): Wie eine Lilie * unter Dornen, so ist meine Freundin unter den Töchtern.</p>
+
+<h3>aus Psalm 122 (Neues Leben Bibel)</h3>
+<p>Ich freute mich, als sie zu mir sagten: »Wir wollen zum Haus des Herrn gehen!«</p>
+<p>Nun stehen wir hier in deinen Toren, Jerusalem. Jerusalem ist eine herrliche Stadt, in wunderbarer Schönheit angelegt.</p>
+<p>Alle Stämme Israels – die Stämme des Herrn – kommen als Pilger hierher. Sie kommen, um den Namen des Herrn zu loben, wie das Gesetz es vorschreibt.</p>
+<p>Hier stehen die Throne, von denen Recht gesprochen wird, die Throne des Königshauses David.</p>
+<p>Betet um Frieden für Jerusalem! Gut gehen soll es allen, die dich lieben.</p>
+<p>Friede herrsche in deinen Mauern, Jerusalem, und Wohlstand in deinen Palästen.</p>
+<p>Um meiner Familie und meiner Freunde willen, sage ich: »Friede sei mit dir.«</p>
+<p>Um des Hauses des Herrn willen, unseres Gottes, will ich dein Bestes suchen, Jerusalem.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hoheslied 2,2): Wie eine Lilie * unter Dornen, so ist meine Freundin unter den Töchtern.</p>
+
+<h3>aus Psalm 127 (Neues Leben Bibel)</h3>
+<p>Wenn der Herr nicht das Haus baut, ist die Arbeit der Bauleute vergeblich. Wenn der Herr die Stadt nicht beschützt, ist es vergeblich, sie mit Wachen zu umgeben.</p>
+<p>Es ist vergeblich, vom frühen Morgen bis in die späte Nacht hart zu arbeiten, immer in Sorge, ob ihr genug zu essen habt, denn denen, die Gott lieben, gibt er es im Schlaf.</p>
+<p>Kinder sind ein Geschenk des Herrn, sie sind ein Lohn aus seiner Hand.</p>
+<p>Kinder, die einem jungen Mann geboren werden, sind wie scharfe Pfeile in der Hand eines Kriegers.</p>
+<p>Glücklich ist der Mann, dessen Köcher voll ist! Sie werden nicht zugrunde gehen, wenn sie sich an den Toren der Stadt ihren Feinden stellen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hoheslied 2,2): Wie eine Lilie * unter Dornen, so ist meine Freundin unter den Töchtern.</p>
+
+<h3>aus Psalm 147 (Neues Leben Bibel)</h3>
+<p>Lobe den Herrn, Jerusalem! Lobe deinen Gott, Zion!</p>
+<p>Denn er hat die Riegel deiner Tore fest gemacht und die Kinder in deiner Mitte gesegnet.</p>
+<p>Er hat deinem Volk Frieden geschenkt und dich mit bestem Weizen gesättigt.</p>
+<p>Er erlässt seine Befehle über die ganze Erde – schnell verbreitet sich sein Wort!</p>
+<p>Er schickt Schnee wie weiße Wolle und streut auf den Boden Reif wie Asche aus.</p>
+<p>Er schleudert Hagel wie Steine. Wer kann in dieser Kälte überleben?</p>
+<p>Doch auf sein Wort hin schmilzt alles wieder. Er schickt seine Winde, und das Eis taut.</p>
+<p>Er hat Jakob sein Wort offenbart und Israel seine Gebote und Gesetze verkündet.</p>
+<p>Keinem anderen Volk hat er sie gegeben; und sie kennen seine Gesetze nicht. Halleluja!</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hoheslied 2,2): Wie eine Lilie * unter Dornen, so ist meine Freundin unter den Töchtern.</p>
+
+<h3>Kapitel</h3>
+<p>Wie eine Zeder auf dem Libanon wuchs ich empor und wie eine Zypresse auf dem Berge Sion: wie eine Palme in Kades wuchs ich empor und wie ein Rosenstock in Jericho. Dank sei Gott.</p>
+
+<h3>Versikel</h3>
+<p>Gegrüßet seist du, Maria, voll der Gnade. Der Herr ist mit dir.</p>
+
+<h3>Lobgesang aus dem Evangelium — Lobgesang der allerseligsten Jungfrau Maria</h3>
+<p>Antiphon (Hoheslied 4,7): Ganz schön bist du, * meine Freundin, und kein Makel haftet an dir.</p>
+<p>Hochpreist * meine Seele † den Herrn. Und mein Geist jubelt * in Gott, meinem Heiland.</p>
+<p>Denn geschaut hat er auf die Demut seiner Magd, * denn siehe, von nun an werden mich selig preisen alle Geschlechter.</p>
+<p>Denn Großes hat an mir getan der mächtig ist; * und heilig ist sein Name.</p>
+<p>Und seine Barmherzigkeit gilt von Geschlecht zu Geschlecht * denen, die ihn fürchten.</p>
+<p>Machtvolles hat er getan mit seinem Arm, * zerstreut hat er, die hochmütig sind in ihres Herzens Sinn.</p>
+<p>Mächtige hat er vom Thron gestürzt * und Demütige erhöht.</p>
+<p>Hungrige hat er gesättigt mit Gütern * und Reiche leer fortgeschickt.</p>
+<p>Angenommen hat er Israel, seinen Knecht, * eingedenk seiner Barmherzigkeit.</p>
+<p>Wie er zu unseren Vätern gesprochen hat, * zu Abraham und seinen Nachkommen auf ewig.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+<p>Antiphon (Hoheslied 4,7): Ganz schön bist du, * meine Freundin, und kein Makel haftet an dir.</p>
+
+<h3>Lasset uns beten</h3>
+<p>O Gott, durch die fruchtbare Jungfrauschaft der seligen Maria, hast Du dem Menschengeschlecht die Güter des ewigen Heiles geschenkt; lass uns, wir bitten Dich, erfahren, dass sie selber für uns Fürsprache einlegt, durch die wir den Urheber des Lebens empfangen durften, unseren Herrn Jehoschua, Deinen Sohn, Der mit Dir lebt und regiert in der Einheit des Heiligen Geistes, Gott von Ewigkeit zu Ewigkeit. Amen.</p>
+
+<h3>Versikel</h3>
+<p>Herr, erhöre mein Gebet. Und lass mein Rufen zu dir kommen.</p>
+<p>Lasset uns preisen den Herrn. Dank sei Gott. Amen.</p>
+
+<h3>Marianische Antiphon</h3>
+<p class="rubric">Hier † nehmen wir Veniam (Kuss des Kreuzes / Medaille des Rosenkranzes).</p>
+<p>Sei gegrüßt, o Königin, Mutter der Barmherzigkeit, † des Lebens Wonne und unsere Hoffnung, sei gegrüßt. Zu dir rufen wir verbannte Kinder Evas, zu dir seufzen wir trauernd und weinend in diesem Tal der Tränen. Wohl an denn, unsere Fürsprecherin, wende deine barmherzigen Augen uns zu, und nach diesem Elend zeige uns Jehoschua, die gebenedeite Frucht deines Leibes, als gnädigen Heiland.</p>
+<p>O gütige, o milde, o süße Jungfrau Maria! In aller Trübsal und Angst komm uns zu Hilfe, o allerseeligste Jungfrau Maria. Amen.</p>
+
+<h3>Angelus — der Engel des Herrn</h3>
+<p class="rubric">Morgens, mittags und abends wird (beim Geläut der Glocken) das Angelus Gebet gesprochen. Es erinnert an die Verkündigung des Engels Gabriel an Maria und an die Geheimnisse der Menschwerdung Gottes.</p>
+<p>Der Engel des Herrn, brachte Maria die Botschaft, und sie empfing vom Heiligen Geist ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Maria sprach, siehe ich bin die Magd des Herrn, mir geschehe nach deinem Wort ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Und das Wort ist Fleisch geworden, und hat unter uns gewohnt ..</p>
+<p>Gegrüßet seist du, Maria, voll der Gnade, der Herr ist mit dir. Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+<p>Bitte für uns heilige Gottesmutter, auf das wir würdig werden der Verheißungen Jehoschuas.</p>
+<p>Lasset uns beten; Allmächtiger Gott, gieße Deine Gnade in unsere Herzen ein. Durch die Botschaft des Engels haben wir die Menschwerdung Jehoschuas, Deines Sohnes erkannt. Lass uns durch sein Leiden und Kreuz zur Herrlichkeit der Auferstehung gelangen. Darum bitten wir dich, durch Jehoschua, unsern Herrn. Amen.</p>
+<p class="rubric">In der Osterzeit betet die Kirche anstelle des Angelus das „Regina caeli".</p>
+<p>Freu dich, du Himmelskönigin, Halleluja! Den du zu tragen würdig warst, Halleluja, er ist auferstanden, wie er gesagt, Halleluja. Bitte Gott für uns, Halleluja.</p>
+<p>Freu dich und frohlocke, Jungfrau Maria, Halleluja, denn der Herr ist wahrhaft auferstanden, Halleluja.</p>
+<p>Lasset uns beten. Allmächtiger Gott, durch die Auferstehung deines Sohnes, unseres Herrn Jehoschua, hast du die Welt mit Jubel erfüllt. Lass uns durch seine jungfräuliche Mutter Maria zur unvergänglichen Osterfreude gelangen. Darum bitten wir dich durch Jehoschua, unseren Herrn. Amen.</p>
+
+<h3>Gebet für unsere Verstorbenen</h3>
+<p>Vater, gib unseren Verstorbenen die ewige Ruhe. Das ewige Licht leuchte ihnen. Lass sie ruhen in deinem Frieden. Amen.</p>
+
+<h3>Skapuliergebet</h3>
+<p>O Maria, im Skapulier mit Dir und Deinen treuen Kindern vereint, weihe ich mich Dir aufs Neue!</p>
+<p>O Mutter, zu Dir nehme ich meine Zuflucht und bitte Dich, bewahre und beschütze mich und alle Deine Kinder vor jedem Unheil und jeder Gefahr.</p>
+<p>Ich widersage dem Bösen in jeder Gestalt und verspreche den Glauben in Hoffnung und Liebe zu leben.</p>
+<p>O Königin, gewähre uns durch Deine Fürsprache Anteil an den Gnadenschätzen Deines Sohnes Jehoschua und seinen Verdiensten.</p>
+<p>Im Gebet mit der Karmelfamilie vereint schenke uns Vertrauen in die Liebe und Treue des ewigen Vaters. Führe uns und alle Menschen den Weg Deines Sohnes Jehoschua zur Ewigen Gemeinschaft und Freude. Amen.</p>
+
+<h3>Allgemeine Fürbitten</h3>
+<p><em>für alle, für die ich bete</em><br>
+Abba*, gedenke aller, für die ich bete. Halte deine barmherzige und liebende Hand über sie, gib ihnen die Hilfe und Unterstützung, die sie erbitten, oder dringend benötigen. Erbarme dich in besonderer Weise derer, die niemand mehr haben, der für sie betet, oder an sie denkt. Amen.</p>
+<p><em>für meine Familie</em><br>
+Abba*, schütze meine Familie vor allem Bösen und hilf ihnen, den Anforderungen Ihres Lebens, in deinem Sinne gerecht zu werden. Mögen sie deine große Liebe und Barmherzigkeit erfahren und sich ihrer würdig erweisen. Amen.</p>
+<p><em>für mich</em><br>
+Abba*, verzeih mir meine Unvollkommenheit und vergib mir meine heutigen Fehler und Unzulänglichkeiten. Sehe mir meine Sünden nach und sei barmherzig meiner Seele gegenüber. Nimm mich auf in dein Reich wenn meine Zeit gekommen ist. Amen.</p>
+<p class="rubric">* der du mir auch Mutter bist</p>
+<hr>
+<p>† Im Namen des Vaters, des Sohnes und des Heiligen Geistes. Amen.</p>
+
+<h2>Nach dem Offizium</h2>
+<p>Der hochheiligen und ungeteilten Dreifaltigkeit, der Menschheit unseres gekreuzigten Herrn Jesus Christus, der fruchtbaren Unversehrtheit der allerseligsten und glorreichsten Jungfrau Maria und der Gesamtheit aller Heiligen sei ewig Lob, Ehre, Kraft und Ruhm von aller Kreatur, und uns sei Nachlass aller Sünden durch alle Ewigkeit.</p>
+<p class="response">℟. Amen.</p>
+<p>℣. Selig der Schoß der Jungfrau Maria, der den Sohn des ewigen Vaters getragen.</p>
+<p class="response">℟. Und selig die Brust, die Christus, den Herrn, genährt hat.<br>℟. Amen.</p>
+
+<h3>anschließend das Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unsern Schuldigern. Und führe (lass) uns nicht in (der) Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.</p>
+
+<h3>Ave Maria</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jesus. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+`;
+
+// ============================================================
+// BARMHERZIGKEITSROSENKRANZ
+// ============================================================
+CONTENT.barmherzigkeitsrosenkranz = `
+<h2>Der Barmherzigkeitsrosenkranz</h2>
+<p class="rubric">„Sollte es auch der starrsinnigste Sünder sein, falls er nur einmal diesen Rosenkranz betet, wird ihm die Gnade Meiner unendlichen Barmherzigkeit zuteil."</p>
+<p>† Im Namen des Vaters und des Sohnes und des Heiligen Geistes. Amen.</p>
+
+<h3>Apostolisches Glaubensbekenntnis</h3>
+<p>Ich glaube an Gott, den Vater, den Allmächtigen, den Schöpfer des Himmels und der Erde. Und an Jehoschua, seinen eingeborenen Sohn, unsern Herrn, empfangen durch den Heiligen Geist, geboren von der Jungfrau Maria, gelitten unter Pontius Pilatus, gekreuzigt, gestorben und begraben, hinabgestiegen in das Reich des Todes, am dritten Tage auferstanden von den Toten, aufgefahren in den Himmel; er sitzt zur Rechten Gottes, des allmächtigen Vaters; von dort wird er kommen, zu richten die Lebenden und die Toten. Ich glaube an den Heiligen Geist, die heilige katholische Kirche, Gemeinschaft der Heiligen, Vergebung der Sünden, Auferstehung der Toten und das ewige Leben. Amen.</p>
+<p>Ehre sei dem Vater und dem Sohn, * und dem Heiligen Geist. Wie es war im Anfang so auch jetzt und allezeit, * und in Ewigkeit. Amen.</p>
+
+<h3>Vater unser</h3>
+<p>Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme, dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute und vergib uns unsere Schuld wie auch wir vergeben unseren Schuldigern. Und führe uns nicht in Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit, in Ewigkeit. Amen.</p>
+
+<h3>Gegrüßet seist Du, Maria …</h3>
+<p>Gegrüßet seist Du, Maria, voll der Gnade, der Herr ist mit Dir, Du bist gebenedeit unter den Frauen, und gebenedeit ist die Frucht Deines Leibes, Jehoschua. Heilige Maria, Mutter Gottes, bitte für uns Sünder jetzt und in der Stunde unseres Todes. Amen.</p>
+
+<h3>Gebetstext (an jeder großen Perle)</h3>
+<p>Ewiger Vater, ich opfere Dir auf den Leib und das Blut, die Seele und die Gottheit Deines über alles geliebten Sohnes, unseres Herrn Jehoschua, um Verzeihung zu erlangen, für unsere Sünden und die Sünden der ganzen Welt.</p>
+<p class="rubric">dann (jeweils zehnmal an jeder kleinen Perle)</p>
+<p>Durch Sein schmerzhaftes Leiden habe Erbarmen mit uns und mit der ganzen Welt.</p>
+<p class="rubric">nach fünf Gesätzen …</p>
+<p>Heiliger Gott, heiliger starker Gott, heiliger unsterblicher Gott, habe Erbarmen mit uns und mit der ganzen Welt.<br>
+Heiliger Gott, heiliger starker Gott, heiliger unsterblicher Gott, habe Erbarmen mit uns und mit der ganzen Welt.<br>
+Heiliger Gott, heiliger starker Gott, heiliger unsterblicher Gott, habe Erbarmen mit uns und mit der ganzen Welt.</p>
+<p>O Blut und Wasser, aus dem Herzen Jehoschuas, als Quelle der Barmherzigkeit, für uns entströmt, Jehoschua, ich vertraue auf Dich!</p>
+
+<h3>Abschluss — Gebet um Ermutigung</h3>
+<p>Erfülle mich, erfülle uns, geliebter Vater, mit den Gaben des Heiligen Geistes, damit Dein Heiliges Wort durch uns, zu den Brüdern und Schwestern getragen wird, die wir in Deinem Namen und Auftrag unterstützen und begleiten dürfen. Hilf mir, hilf uns, sie durch unsere Gebete mit Deinem kostbaren Blut zu berühren, damit sie mit Deinem Heiligen Herzen verbunden werden. Gib mir, gib uns, die Unterstützung des Heiligen Geistes, damit durch unsere Hilfe und Begleitung, sie in Deinem Paradies frohlocken dürfen. Amen.</p>
+
+<h3>Gebet um Barmherzigkeit</h3>
+<p>O ewiger Gott, in dem die Barmherzigkeit unendlich und der Schatz des Mitleids unerschöpflich ist, richte Deinen liebevollen Blick auf uns alle, steigere das Erleben Deiner Barmherzigkeit in uns, damit wir in allen schwierigen Augenblicken, weder verzweifeln noch entmutigt werden mögen, sondern uns mit großem Vertrauen Deinem heiligen Willen unterwerfen, der uns unendliche Liebe und Barmherzigkeit ist.</p>
+<p>Umfasse mit Deiner unerschöpflichen Barmherzigkeit alle Menschen, insbesondere alle Sünder, sowie diejenigen, welche heute vor dein Angesicht treten werden. Amen.</p>
+`;
+
+// ============================================================
+// App logic
+// ============================================================
+const menu = document.getElementById('menu');
+const reader = document.getElementById('reader');
+const readerBody = document.getElementById('reader-body');
+const readerTitle = document.getElementById('reader-title');
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.getAttribute('data-target');
+    readerTitle.textContent = TITLES[key];
+    readerBody.innerHTML = CONTENT[key];
+    menu.classList.add('hidden');
+    reader.classList.add('active');
+    readerBody.scrollTop = 0;
+  });
+});
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  reader.classList.remove('active');
+  menu.classList.remove('hidden');
+});
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+ALLTAGSSCHRANK VERSION 3.0
+
+Neu:
+- vollständiger Andachtsschrank
+- Lectio Divina A, B und C
+- Bibellesepläne 2026–2028 und 2028–2030
+- Tagesgebete und Dankgebete
+- Stundenbuch: Laudes, Vesper, Komplet
+- Rosenkranz und Barmherzigkeitsrosenkranz
+- Kreuzweg
+- direkte spirituelle Einstiege auf der Hauptseite
+- zentrale Sicherung weiterhin vorhanden
+- alle Apps an die nicht-destruktive Speicherbrücke angebunden
+
+Wichtig:
+Die bisherigen LocalStorage-Schlüssel bleiben erhalten. Es werden keine vorhandenen Einträge absichtlich gelöscht.
+Den kompletten Ordner zusammenlassen und über index.html öffnen.
+
+NEU IN VERSION 3.1
+- Eigenes Kartäuser-Stundenbuch im Andachtsschrank.
+- Matutin für alle sieben Wochentage.
+- Vollständiges Tagesoffizium für Dienstag, Donnerstag und Freitag.
+- Automatische Hervorhebung des aktuellen Wochentags und der passenden Gebetszeit.
+- Alle Dateien an die gemeinsame, nicht-destruktive Datensicherung angebunden.
+
+NEU IN VERSION 4.0 – TABLET-SYSTEM
+- Feste untere Navigation: Start, Heute, Gesundheit, Bibliothek, Mehr
+- Persönliche Startseite mit Favoriten
+- App-Schublade mit allen Anwendungen
+- Tagesansicht mit zeitabhängigen spirituellen Empfehlungen
+- Eigene Bereiche für Gesundheit, Bewegung & Entspannung, Bibliothek und Alltag
+- Favoriten werden lokal gespeichert
+- Gesamtsicherung und Import bleiben erhalten
+- Installierbarer Vollbild-App-Rahmen
+- Alle bisherigen Dateien und Speicherbereiche bleiben bestehen
+
+WICHTIG
+Dies ist kein Ersatz für Android, sondern eine installierbare Vollbild-App im Stil eines persönlichen Tablet-Betriebssystems.
+
+NEU IN VERSION 4.1
+- Kartäuser-Tagesoffizien jetzt für Montag bis Sonntag vollständig.
+- Matutin und Tagesoffizium für jeden Wochentag direkt anwählbar.
+- Automatische Auswahl des aktuellen Wochentags bleibt erhalten.
+- Offline-Cache und zentrale Datensicherung aktualisiert.
+
+NEU IN VERSION 4.2
+- Wecker und Timer vollständig eingebaut.
+- Farbschema an Alltagsschrank angepasst: warme Erdfarben, Gold, Weinrot und Marineblau.
+- Direkter Zugriff auf Startseite, Heute-Ansicht, App-Schublade und Bereich „Mehr“.
+- Wecker-Daten an die gemeinsame, nicht-destruktive Speicherbrücke angebunden.
+- Hinweis bleibt technisch gültig: Alarm und Timer funktionieren zuverlässig, solange die Seite bzw. App geöffnet bleibt.
+
+NEU IN VERSION 4.3
+- Klangschalen-App kehrt über einen festen Link sauber zur Hauptseite zurück.
+- Browser-History-Rücksprung entfernt, da er auf Android unzuverlässig sein kann.
+- Nach abgeschlossener Meditation stehen „Zum Alltagsschrank“ und „Neue Sitzung“ bereit.
+- Zwischen 06:00–11:59 Uhr und 20:00–23:59 Uhr erscheint zusätzlich „Zu Gebete & Lebensregeln“.
+- Gebete & Lebensregeln besitzt einen festen manuellen Startseitenknopf.
+- Offline-Cache aktualisiert.
+
+NEU IN VERSION 4.4
+- Wecker & Timer jetzt sichtbar auf der Startseite.
+- Eigene Schnellzugriffskachel „Uhr & Wecker“.
+- Direkter Weckerknopf oben rechts.
+- Wecker in der Heute-Ansicht.
+- Wecker unter Alltag & Werkzeuge.
+- Wecker in der App-Schublade.
+- Anzeige der nächsten Weckzeit, sofern sie im Browser gespeichert ist.
+- Fester Rückweg vom Wecker zum Alltagsschrank.
+
+NEU IN VERSION 4.5
+- Wecker als feste große Startseitenkachel, unabhängig von JavaScript.
+- Wecker als schwebender, dauerhaft sichtbarer ⏰-Knopf.
+- Neuer Offline-Cache, damit keine alte Startseite angezeigt wird.
+
+DIGITALES KLOSTER – VERSION 5.0
+- neue Kloster-Startseite mit Tagesrhythmus
+- Kapelle, Bibliothek, Klosterhof, Krankenstation, Skriptorium, Refektorium und Werkstatt
+- neues lokales Skriptorium mit Tagebuch und Export
+- neues Refektorium mit Trinkmenge, Fastenfenster und Ernährungsnotizen
+- bisherige Tablet-System-Oberfläche weiterhin unter index-system.html erreichbar
+- sämtliche bisherigen Apps und LocalStorage-Daten bleiben erhalten
+
+DIGITALES KLOSTER – VERSION 5.1
+- Bereich „Krankenstation“ wurde in „Vorsorge“ umbenannt.
+- Bereich „Werkstatt“ wurde in „Tools“ umbenannt.
+- Beschreibungen, Überschriften, Navigation und Sprungmarken wurden angepasst.
+- Alle bisherigen Apps, Inhalte und gespeicherten Daten bleiben unverändert erhalten.
+
+DIGITALES KLOSTER – VERSION 6.0
+- erste zusammengefasste Gesamtfassung
+- neue zentrale Heute-Seite mit zeitabhängigen Vorschlägen
+- neue globale Suche über Apps und Klosterbereiche
+- Kapelle, Bibliothek, Klosterhof, Vorsorge, Skriptorium, Refektorium und Tools
+- vollständige Kartäuser-Tagesoffizien
+- Wecker, Sicherung und Offline-Nutzung
+- alle bisherigen Apps und LocalStorage-Daten bleiben erhalten
+
+DIGITALES KLOSTER – VERSION 7.0
+- neue Kreuzgang-Startseite
+- täglicher ruhiger Impuls
+- Morgen- und Abendritual mit täglicher Erledigt-Markierung
+- persönliche Regel des Lebens
+- Schatzkammer für Lieblingsstellen, Gebete, Zitate und Notizen
+- Version 6.0 bleibt unter index-v6.html erhalten
+- alle bisherigen Apps und LocalStorage-Daten bleiben erhalten
+
+DIGITALES KLOSTER 10 – CORE / PHASE 1
+- neue dynamische Klosteroberfläche
+- Kreuzgang als zentrale Navigation
+- lebendige Kapelle mit dauerhaft speicherbarem Ewigem Licht und Widmung
+- Klosterkompass mit vier Tagesfragen
+- automatischer Tageszeitenmodus
+- automatische Frühlings-, Sommer-, Herbst- und Winteratmosphäre
+- Version 7 bleibt unter index-v7.html erhalten
+- alle bisherigen Apps und LocalStorage-Daten bleiben erhalten
+
+DIGITALES KLOSTER 10 – PHASE 2
+- Bibliothek 2.0 mit Regalen und Suche
+- Lebensbuch für Meilensteine und persönliche Chronik
+- Schatzkammer 2.0
+- Pilgerarchiv für Klöster, Kirchen, Wege und Retreats
+- Phase-1-Startseite bleibt unter index-phase1.html erhalten
+- alle bisherigen Apps und gespeicherten Daten bleiben erhalten
+
+DIGITALES KLOSTER 10 – PHASE 3
+- neues Vorsorgezentrum
+- Medikamentenplan
+- Arzttermine
+- Laborwerte
+- Impfungen
+- Notfallpass
+- Phase-2-Startseite bleibt unter index-phase2.html erhalten
+- alle bisherigen Apps und gespeicherten Daten bleiben erhalten
+
+DIGITALES KLOSTER 10 – PHASE 4
+- Komfortzentrum
+- verschlüsselte Gesamtsicherung mit AES-GCM und Passwort
+- Jahresbuch mit Druck- und PDF-Funktion
+- Spracheingabe in Skriptorium, Lebensbuch, Schatzkammer, Pilgerarchiv und Refektorium
+- Phase-3-Startseite bleibt unter index-phase3.html erhalten
+- alle bisherigen Apps und Daten bleiben erhalten
+
+WICHTIG:
+Die Spracheingabe hängt von der Unterstützung und Mikrofonfreigabe des Browsers ab.
+Das Jahresbuch wird über die Druckfunktion von Chrome als PDF gespeichert.
+
+ALLTAGSBEGLEITER MASTER 10.1 – SCHRITT 1
+- App auf Tablet und Handy in „Alltagsbegleiter“ umbenannt.
+- neue responsive Startseite für Tablet und Smartphone.
+- Reiter Start und Heute ergänzt; Kreuzgang, Kompass, Kapelle und Tools erhalten.
+- konstanter Klangschalen-Schnellzugriff.
+- Jetzt-passend-Bereich mit Stundengebet, Lectio-Zyklus A/B/C, Bibelleseplan, Medikamenten, Routinen, Terminen, Geburtstagen, Aufgaben, Trinkziel und Reiki.
+- Medikamentenbestätigung und In-App-Erinnerung ab einer Stunde nach Einnahmezeit.
+- wiederkehrende Termine und Aufgaben.
+- Geburtstage mit Altersberechnung.
+- bestehende Datenstrukturen bleiben erhalten; neue Daten werden ergänzend gespeichert.
+
+HINWEIS ZU ERINNERUNGEN:
+Browser-/PWA-Benachrichtigungen funktionieren zuverlässig, solange die App geöffnet oder vom System aktiv gehalten wird. Vollständig zuverlässige Erinnerungen bei geschlossener App erfordern später eine native Android-Alarmfunktion.
+
+ALLTAGSBEGLEITER MASTER 10.2
+- „Heute im Detail“ zum Tagescockpit ausgebaut
+- aktuelles Wetter über Open-Meteo
+- Geräteposition oder frei wählbarer Ort
+- Radevormwald als Standardstandort
+- Offline-Anzeige der zuletzt gespeicherten Wetterdaten
+- Temperatur, gefühlte Temperatur, Luftfeuchtigkeit, Wind, Niederschlag, UV-Index und Tageswerte
+- Sonnenaufgang und Sonnenuntergang
+- Kalenderwoche, Jahreszeit, Kirchenjahreszeit und Mondphase
+- Tagesstatus für Medikamente, Routinen, Termine/Aufgaben und Trinken
+- automatische, unaufdringliche Tagesempfehlungen
+
+ALLTAGSBEGLEITER VERSION 11
+- Tablet-Version vollständig erhalten: Start, Heute, Kreuzgang, Kompass, Kapelle, Bibliothek und Tools
+- Handyansicht im selben Paket unter mobile.html
+- gemeinsame Datenstruktur für Tablet und Handy
+- neues Synchronisationszentrum
+- ein Gesamtexport für sämtliche localStorage-Daten aller Apps
+- Import wahlweise Zusammenführen oder vollständig Ersetzen
+- automatische lokale Sicherung täglich und vor jedem Import
+- bis zu sieben lokale Rücksicherungen
+- Ewiges Licht und Moment der Stille in der Tablet-Kapelle
+- dauerhafter Klangschalen-Zugriff
+- Solingen als Standard-Wetterstandort
+- vorhandene Daten bleiben kompatibel
+
+HINWEIS:
+Tablet und Handy besitzen technisch getrennte Browser-Speicher. Der Austausch erfolgt deshalb über die eine exportierte .abg-Datei.
+
+ALLTAGSBEGLEITER VERSION 12
+- gemeinsame Gesamtfassung für Tablet und Handy
+- automatische Geräteerkennung beim Start
+- manueller Wechsel zwischen Tablet- und Handyansicht
+- Tablet-Version unter tablet.html
+- Handy-Version unter handy.html
+- alle bestehenden Apps, Daten und Synchronisationsfunktionen erhalten
+- Motorola-G55-Optimierung in der Handyansicht
+- gemeinsame localStorage-Datenbasis innerhalb derselben Installation
+- Gesamtexport und Gesamtimport weiterhin über synchronisation.html

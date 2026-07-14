@@ -1,0 +1,71 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bibliothek 2.0</title><script src="shared-store.js"></script><style>
+:root{
+ --parch:#eee3cb;--parch2:#e5d4b1;--paper:#f8f1e2;--ink:#30271d;--muted:#6c5f50;
+ --wine:#67202d;--wine2:#46131d;--gold:#b58a3d;--gold2:#d4b36c;--sage:#617058;
+ --wood:#5d3d2a;--night:#172033;--line:#d6c39c;--cream:#fffaf0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--parch);color:var(--ink);font-family:Georgia,'Times New Roman',serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+header{position:relative;background:linear-gradient(135deg,var(--wine2),#25131a);color:#fff8e8;padding:36px 22px;text-align:center}
+.back{position:absolute;left:18px;top:18px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff20}
+header h1{font-size:42px;margin:0 0 6px}header p{margin:0;color:#eadbc1}
+main{max-width:1050px;margin:auto;padding:24px 18px 60px}
+.search{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:999px;background:var(--cream);font:inherit;font-size:17px;margin-bottom:18px}
+.shelves{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.shelf{background:linear-gradient(180deg,#6a4630,#4a2f21);border-radius:18px;padding:16px;border:4px solid #3a251a;box-shadow:inset 0 -8px 0 #2f1f17}
+.shelf h2{color:#f4e4c2;margin:0 0 12px;font-size:23px}.books{display:grid;gap:9px}
+.book{display:block;background:var(--paper);border-left:8px solid var(--gold);border-radius:7px;padding:11px 12px;color:var(--ink)}
+.book b{display:block;color:var(--wine2)}.book span{font-size:12px;color:var(--muted)}
+.hidden{display:none!important}
+@media(max-width:700px){.shelves{grid-template-columns:1fr}}</style><script src="alltagsbegleiter-sync.js"></script><script src="alltagsbegleiter-view.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body><header><a class="back" href="index.html">←</a><h1>📚 Bibliothek 2.0</h1><p>Schrift, Lesepläne, geistliche Texte und eigene Sammlungen</p></header>
+<main><input class="search" id="q" placeholder="Bibliothek durchsuchen …">
+<div class="shelves" id="shelves">
+<section class="shelf"><h2>Heilige Schrift</h2><div class="books">
+<a class="book" data-search="lectio divina lesejahr a b c" href="spirituelle-bibliothek/index.html"><b>Lectio Divina</b><span>Lesejahr A, B und C</span></a>
+<a class="book" data-search="bibelleseplan 2026 2028" href="bibelleseplan_26-28_tablet.html"><b>Bibelleseplan 2026–2028</b><span>Tägliche Schriftlesung</span></a>
+<a class="book" data-search="bibelleseplan 2028 2030" href="bibelleseplan_28-30_tablet.html"><b>Bibelleseplan 2028–2030</b><span>Fortsetzung</span></a>
+</div></section>
+
+<section class="shelf"><h2>Liturgie & Gebet</h2><div class="books">
+<a class="book" data-search="kartäuser stundenbuch matutin laudes vesper komplet" href="kartaeuser-stundenbuch/index.html"><b>Kartäuser-Stundenbuch</b><span>Matutin und Tagesoffizien</span></a>
+<a class="book" data-search="stundenbuch laudes vesper komplet" href="stundenbuch_tablet.html"><b>Stundenbuch</b><span>Laudes, Vesper und Komplet</span></a>
+<a class="book" data-search="rosenkranz" href="Rosenkranz-Tablet.html"><b>Rosenkranz</b><span>Geführtes Gebet</span></a>
+<a class="book" data-search="barmherzigkeitsrosenkranz" href="Barmherzigkeitsrosenkranz-Tablet.html"><b>Barmherzigkeitsrosenkranz</b><span>Gebet zur Barmherzigkeit</span></a>
+</div></section>
+
+<section class="shelf"><h2>Betrachtung</h2><div class="books">
+<a class="book" data-search="kreuzweg" href="Kreuzweg_App_tablet.html"><b>Kreuzweg</b><span>Stationen und Meditationen</span></a>
+<a class="book" data-search="tagesgebete" href="Tagesgebete.html"><b>Tagesgebete</b><span>Gebete für den Tageslauf</span></a>
+<a class="book" data-search="dankgebete" href="Dankgebete.html"><b>Dankgebete</b><span>Dank, Vergebung und Fürbitte</span></a>
+<a class="book" data-search="gebete lebensregeln" href="Gebete-und-Lebensregeln.html"><b>Gebete & Lebensregeln</b><span>Persönliche Gebetspraxis</span></a>
+</div></section>
+
+<section class="shelf"><h2>Eigene Sammlung</h2><div class="books">
+<a class="book" data-search="schatzkammer lieblingsstellen zitate" href="schatzkammer.html"><b>Schatzkammer</b><span>Lieblingsstellen, Zitate und Gebete</span></a>
+<a class="book" data-search="skriptorium tagebuch notizen" href="skriptorium.html"><b>Skriptorium</b><span>Eigene Texte und Notizen</span></a>
+<a class="book" data-search="lebensbuch chronik jahresbuch" href="lebensbuch.html"><b>Lebensbuch</b><span>Chronik deines Weges</span></a>
+<a class="book" data-search="pilgerarchiv kloster kirche wallfahrt" href="pilgerarchiv.html"><b>Pilgerarchiv</b><span>Orte, Wege und Erinnerungen</span></a>
+</div></section>
+</div></main>
+<script>
+const q=document.getElementById('q');
+q.addEventListener('input',()=>{const s=q.value.toLowerCase().trim();document.querySelectorAll('.book').forEach(b=>b.classList.toggle('hidden',s&&!((b.dataset.search+' '+b.textContent).toLowerCase().includes(s))));document.querySelectorAll('.shelf').forEach(sh=>sh.classList.toggle('hidden',[...sh.querySelectorAll('.book')].every(b=>b.classList.contains('hidden'))))});
+</script><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

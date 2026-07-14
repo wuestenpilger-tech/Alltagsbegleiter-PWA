@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Apnoe-Tracker (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE7D9;
+    --panel:#FAF6EC;
+    --panel2:#F1EBDD;
+    --border:#D9D0BC;
+    --text:#24211B;
+    --muted:#5B564C;
+    --good:#3F5C34; --good-bg:#D7E4CE;
+    --warn:#8A6200; --warn-bg:#F0DDA0;
+    --bad:#8C3B3B; --bad-bg:#E8C2C2;
+    --accent:#7B2E3B;
+    --accent-soft:#E8D9DC;
+    --font-display:'Fraunces', serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    padding:0 0 40px 0;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  header{
+    padding:28px 30px 22px 30px;
+    position:relative;
+    overflow:hidden;
+    border-bottom:1px solid var(--border);
+  }
+  header::before{
+    content:"";
+    position:absolute; top:-60px; right:-60px;
+    width:180px; height:180px;
+    background:radial-gradient(circle, rgba(123,46,59,0.10) 0%, transparent 70%);
+  }
+  .pulse-row{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .pulse-dot{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--good);
+    box-shadow:0 0 0 0 rgba(63,92,52,0.5);
+    animation:breathe 4.2s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%{box-shadow:0 0 0 0 rgba(63,92,52,0.45); transform:scale(1);}
+    50%{box-shadow:0 0 0 10px rgba(63,92,52,0); transform:scale(1.15);}
+    100%{box-shadow:0 0 0 0 rgba(63,92,52,0); transform:scale(1);}
+  }
+  .eyebrow{font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted);}
+  h1{
+    font-family:var(--font-display);
+    margin:4px 0 4px 0; font-size:30px; font-weight:700; letter-spacing:.2px;
+    color:var(--accent);
+  }
+  .sub{color:var(--muted); font-size:14.5px; margin:0;}
+
+  main{padding:24px 20px; max-width:680px; margin:0 auto;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:20px 22px 22px;
+    margin-bottom:20px;
+  }
+  .card h2{
+    font-size:15px; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--accent); margin:0 0 16px 0; font-weight:700;
+  }
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  label{display:block; font-size:13px; color:var(--muted); margin-bottom:5px;}
+  input[type=date], input[type=number], input[type=text], textarea{
+    width:100%; background:var(--panel2); border:1.5px solid var(--border);
+    color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px;
+    font-family:inherit;
+  }
+  input:focus, textarea:focus{outline:none; border-color:var(--accent);}
+  .field{margin-bottom:13px;}
+  .field.full{grid-column:1 / -1;}
+  textarea{resize:vertical; min-height:52px;}
+
+  button{
+    font-family:inherit; font-size:16px; font-weight:700;
+    border:none; border-radius:14px; padding:14px 16px; cursor:pointer;
+  }
+  .btn-primary{background:var(--accent); color:#fff; width:100%; margin-top:4px;}
+  .btn-primary:active{opacity:0.85;}
+  .btn-row{display:flex; gap:10px; margin-top:10px;}
+  .btn-ghost{
+    background:var(--accent-soft); border:none; color:var(--accent);
+    flex:1; font-size:14.5px; font-weight:700;
+  }
+  .btn-danger-ghost{
+    background:transparent; border:1.5px solid var(--bad-bg); color:var(--bad);
+    flex:1; font-size:14.5px; font-weight:700;
+  }
+
+  canvas{width:100%; display:block;}
+
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:13px; color:var(--muted);}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .dot{width:8px; height:8px; border-radius:50%; display:inline-block;}
+
+  .entry{
+    border:1px solid var(--border); border-radius:14px; padding:13px 16px; margin-bottom:11px;
+    background:var(--panel2);
+  }
+  .entry-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .entry-date{font-weight:700; font-size:15px; color:var(--accent);}
+  .badge{
+    font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px;
+  }
+  .badge-good{background:var(--good-bg); color:var(--good);}
+  .badge-warn{background:var(--warn-bg); color:var(--warn);}
+  .badge-bad{background:var(--bad-bg); color:var(--bad);}
+  .entry-metrics{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; font-size:13px;}
+  .metric-label{color:var(--muted); font-size:11.5px;}
+  .metric-value{font-size:14.5px; font-weight:700;}
+  .entry-note{margin-top:8px; font-size:13px; color:var(--muted); font-style:italic;}
+  .entry-actions{margin-top:10px; display:flex; gap:8px;}
+  .entry-actions button{font-size:13px; padding:8px 12px;}
+
+  .empty{color:var(--muted); font-size:14.5px; text-align:center; padding:20px 0;}
+
+  .scroll-list{
+    max-height:640px; overflow-y:auto; padding-right:6px; margin-right:-6px;
+  }
+  .scroll-list::-webkit-scrollbar{width:6px;}
+  .scroll-list::-webkit-scrollbar-thumb{background:var(--border); border-radius:3px;}
+  .list-hint{font-size:12.5px; color:var(--muted); margin:0 0 10px 0;}
+
+  select{
+    width:100%; background:var(--panel2); border:1.5px solid var(--border);
+    color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px;
+    font-family:inherit; appearance:none;
+  }
+  .check-row{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:11px 0; border-bottom:1px solid var(--border);
+  }
+  .check-row:last-child{border-bottom:none;}
+  .check-row input[type=checkbox]{
+    width:20px; height:20px; margin-top:2px; accent-color:var(--accent); flex-shrink:0;
+  }
+  .check-label{font-size:14.5px; line-height:1.4; color:var(--text);}
+  .check-label b{display:block; font-size:14.5px; margin-bottom:1px;}
+  .check-label span{color:var(--muted); font-size:13px;}
+  .score-display{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--panel2); border-radius:14px; padding:15px 17px; margin-top:14px;
+  }
+  .score-display .n{font-size:27px; font-weight:700;}
+  .score-display .l{font-size:12.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;}
+  .risk-pill{font-size:13px; font-weight:700; padding:6px 13px; border-radius:20px;}
+  .ess-question{margin-bottom:13px;}
+  .ess-question label{font-size:14px; color:var(--text); margin-bottom:5px;}
+  .file-input{display:none;}
+  .hint{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.5;}
+  .stat-row{display:flex; justify-content:space-between; margin-bottom:14px;}
+  .stat{text-align:center; flex:1;}
+  .stat .n{font-size:21px; font-weight:700; color:var(--accent);}
+  .stat .l{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;}
+  .backup-banner{
+    background:var(--warn-bg); border:1px solid var(--warn);
+    color:var(--warn); border-radius:12px; padding:12px 16px; font-size:13.5px;
+    margin:0 20px 18px; max-width:680px; margin-left:auto; margin-right:auto;
+  }
+  .backup-banner b{color:var(--text);}
+
+  @media (min-width: 820px){
+    header{padding:40px 40px 32px 40px;}
+    h1{font-size:36px;}
+    .sub{font-size:16px;}
+    main{
+      max-width:1180px;
+      padding:28px 40px 60px 40px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:22px;
+      align-items:start;
+    }
+    .card{margin-bottom:0;}
+    .card.full-width{grid-column:1 / -1;}
+    .card.full-width .grid{grid-template-columns:repeat(3, 1fr);}
+    .entry-metrics{grid-template-columns:repeat(5,1fr) !important;}
+    button{font-size:16.5px;}
+    input[type=date], input[type=number], input[type=text], textarea, select{font-size:16.5px;}
+  }
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+</head>
+<body>
+
+<header>
+  <div class="pulse-row">
+    <span class="pulse-dot"></span>
+    <span class="eyebrow">Schlaf · Atmung · Verlauf</span>
+  </div>
+  <h1>Apnoe-Tracker</h1>
+  <p class="sub">Withings Sleep Analyzer · Garmin Instinct 3 — täglich erfasst, langfristig im Blick</p>
+</header>
+
+<div class="backup-banner" id="backupBanner" style="display:none;"></div>
+
+<main>
+
+  <div class="card full-width">
+    <h2>Neue Nacht erfassen</h2>
+    <form id="entryForm">
+      <div class="field">
+        <label for="datum">Datum</label>
+        <input type="date" id="datum" required>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label for="ahi">AHI (Withings)</label>
+          <input type="number" id="ahi" step="0.1" min="0" placeholder="z. B. 4.2">
+        </div>
+        <div class="field">
+          <label for="schlafStunden">Schlafdauer – Std.</label>
+          <input type="number" id="schlafStunden" step="1" min="0" max="16" placeholder="z. B. 6">
+        </div>
+        <div class="field">
+          <label for="schlafMinuten">Schlafdauer – Min.</label>
+          <input type="number" id="schlafMinuten" step="1" min="0" max="59" placeholder="z. B. 25">
+          <span class="hint" id="schlafdauerPreview" style="display:block; margin-top:4px;"></span>
+        </div>
+        <div class="field">
+          <label for="spo2min">SpO2 min (%)</label>
+          <input type="number" id="spo2min" step="0.1" min="50" max="100" placeholder="z. B. 91">
+        </div>
+        <div class="field">
+          <label for="spo2avg">SpO2 Ø (%)</label>
+          <input type="number" id="spo2avg" step="0.1" min="50" max="100" placeholder="z. B. 96">
+        </div>
+        <div class="field">
+          <label for="atemfreq">Atemfrequenz Ø (/min)</label>
+          <input type="number" id="atemfreq" step="0.1" min="0" placeholder="z. B. 15">
+        </div>
+        <div class="field">
+          <label for="atemfreqmin">Atemfrequenz min (/min)</label>
+          <input type="number" id="atemfreqmin" step="0.1" min="0" placeholder="z. B. 11">
+        </div>
+        <div class="field">
+          <label for="ruhepuls">Ruhepuls (bpm)</label>
+          <input type="number" id="ruhepuls" step="1" min="0" placeholder="z. B. 58">
+        </div>
+        <div class="field">
+          <label for="hrv">HRV nachts (ms)</label>
+          <input type="number" id="hrv" step="1" min="0" placeholder="z. B. 42">
+        </div>
+        <div class="field">
+          <label for="gewicht">Gewicht (kg)</label>
+          <input type="number" id="gewicht" step="0.1" min="0" placeholder="optional">
+        </div>
+        <div class="field full">
+          <label for="notiz">Notiz (Schnarchen, Alkohol, Schlafposition …)</label>
+          <textarea id="notiz" placeholder="optional"></textarea>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--panel2); padding:14px; margin:4px 0 14px 0;">
+        <h2 style="margin-bottom:10px;">Nacht-Kontext</h2>
+        <div class="btn-row" style="margin-top:0;">
+          <button type="button" class="btn-ghost" id="btnFetchWeather">Wetterdaten für Solingen laden</button>
+        </div>
+        <p class="hint" id="weatherStatus" style="margin-top:6px;">Noch nicht abgerufen — lädt Nachtwerte (22–7 Uhr) von Open-Meteo für das gewählte Datum.</p>
+        <div class="grid" style="margin-top:10px;">
+          <div class="field">
+            <label for="aussentemp">Außentemperatur (°C, Nacht-Ø)</label>
+            <input type="number" id="aussentemp" step="0.1" placeholder="auto oder manuell">
+          </div>
+          <div class="field">
+            <label for="luftfeuchtigkeit">Luftfeuchtigkeit (%, Nacht-Ø)</label>
+            <input type="number" id="luftfeuchtigkeit" step="1" min="0" max="100" placeholder="auto oder manuell">
+          </div>
+        </div>
+        <div class="check-row" style="border-bottom:none; padding-top:4px;">
+          <input type="checkbox" id="erkaeltung">
+          <label class="check-label" for="erkaeltung"><b>Erkältung / Infekt in dieser Nacht</b><span>Verstopfte Nase, Schnupfen o. ä.</span></label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Nacht speichern</button>
+    </form>
+  </div>
+
+  <div class="card full-width">
+    <h2>Daten (Export / Import)</h2>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn-ghost" id="btnExport">CSV exportieren</button>
+      <button class="btn-ghost" id="btnImportTrigger">CSV importieren</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn-danger-ghost" id="btnClear">Alle Daten löschen</button>
+    </div>
+    <input type="file" id="fileInput" class="file-input" accept=".csv">
+    <p class="hint">Alle Daten bleiben lokal auf diesem Gerät (localStorage). CSV-Export empfiehlt sich vor App-Updates, Geräte­wechsel oder zum Abgleich zwischen Handy und Tablet. Diese Werte ersetzen keine ärztliche Diagnostik — bei dauerhaft erhöhtem AHI oder niedrigen SpO2-Werten bitte im Schlaflabor abklären lassen.</p>
+  </div>
+
+  <div class="card" id="indicationCard">
+    <h2>Behandlungsindikation (Einschätzung)</h2>
+    <p class="sub" style="margin-bottom:12px;">Verknüpft AHI-Verlauf, Epworth-Wert und STOP-Bang-Bluthochdruck-Angabe nach den Kriterien der Fachgesellschaften (AASM / DGSM S3-Leitlinie).</p>
+    <div class="score-display" style="margin-top:0;">
+      <div>
+        <div class="n" id="indAhiValue">–</div>
+        <div class="l">Ø AHI, 14 Tage</div>
+      </div>
+      <span class="risk-pill" id="indPill">–</span>
+    </div>
+    <p id="indText" class="hint" style="margin-top:10px;"></p>
+  </div>
+
+  <div class="card">
+    <h2>Übersicht</h2>
+    <div class="stat-row">
+      <div class="stat"><div class="n" id="statAvgAhi">–</div><div class="l">Ø AHI (14T)</div></div>
+      <div class="stat"><div class="n" id="statMinSpo2">–</div><div class="l">Min SpO2 (14T)</div></div>
+      <div class="stat"><div class="n" id="statCount">0</div><div class="l">Einträge</div></div>
+    </div>
+    <canvas id="chartAhi" height="150"></canvas>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--good)"></span>AHI &lt; 5 (unauffällig)</span>
+      <span><span class="dot" style="background:var(--warn)"></span>5–15 (leicht/mittel)</span>
+      <span><span class="dot" style="background:var(--bad)"></span>&gt; 15 (schwer)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>SpO2 &amp; Atemfrequenz</h2>
+    <canvas id="chartSpo2" height="150"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Ruhepuls, HRV &amp; Gewicht</h2>
+    <canvas id="chartVitals" height="150"></canvas>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--accent)"></span>Ruhepuls (bpm)</span>
+      <span><span class="dot" style="background:var(--good)"></span>HRV (ms)</span>
+      <span><span class="dot" style="background:var(--warn)"></span>Gewicht (kg)</span>
+    </div>
+  </div>
+
+  <div class="card full-width">
+    <h2>Verlauf</h2>
+    <p class="list-hint" id="entryListHint"></p>
+    <div id="entryList" class="scroll-list"></div>
+  </div>
+
+  <div class="card full-width">
+    <h2>STOP-Bang-Profil</h2>
+    <p class="sub" style="margin-bottom:12px;">Screening-Fragebogen für OSA-Risiko. Die meisten Kriterien ändern sich selten — nur bei Bedarf aktualisieren (z. B. nach Gewichtsveränderung).</p>
+    <div class="check-row">
+      <input type="checkbox" id="sb_s">
+      <label class="check-label" for="sb_s"><b>Snoring — Schnarchen</b><span>Lautes Schnarchen (durch Tür hörbar oder Partner stört sich daran)</span></label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sb_t">
+      <label class="check-label" for="sb_t"><b>Tiredness — Tagesmüdigkeit</b><span>Häufig müde/erschöpft/schläfrig tagsüber</span></label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sb_o">
+      <label class="check-label" for="sb_o"><b>Observed apnea — beobachtete Aussetzer</b><span>Jemand hat Atemaussetzer im Schlaf bei dir bemerkt</span></label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sb_p">
+      <label class="check-label" for="sb_p"><b>Pressure — Bluthochdruck</b><span>Bekannter/behandelter Bluthochdruck</span></label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sb_b">
+      <label class="check-label" for="sb_b"><b>BMI &gt; 35</b><span>Body-Mass-Index über 35 kg/m²</span></label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sb_a">
+      <label class="check-label" for="sb_a"><b>Age — Alter &gt; 50</b><span>Älter als 50 Jahre</span></label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sb_n">
+      <label class="check-label" for="sb_n"><b>Neck — Halsumfang &gt; 40 cm</b><span>Hemdkragenweite über 40 cm</span></label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="sb_g">
+      <label class="check-label" for="sb_g"><b>Gender — männlich</b><span></span></label>
+    </div>
+    <div class="score-display">
+      <div>
+        <div class="n" id="sbScore">0</div>
+        <div class="l">von 8 Punkten</div>
+      </div>
+      <span class="risk-pill" id="sbRiskPill">–</span>
+    </div>
+    <p class="hint">Anhaltspunkt (nach Chung et al. 2008 / Farney et al. 2011): 0–2 = geringes Risiko · 3–4 = mittleres Risiko · 5–8 = hohes Risiko für OSA. Kein Diagnoseersatz — bei mittlerem/hohem Risiko ärztlich abklären lassen.</p>
+  </div>
+
+  <div class="card full-width">
+    <h2>Epworth-Schläfrigkeitsskala</h2>
+    <p class="sub" style="margin-bottom:12px;">Subjektive Tagesschläfrigkeit — sinnvoll monatlich statt täglich erfassen, als Ergänzung zum objektiven AHI-Verlauf.</p>
+    <form id="essForm">
+      <div class="field">
+        <label for="essDatum">Datum</label>
+        <input type="date" id="essDatum" required>
+      </div>
+      <div class="ess-question">
+        <label>Lesen im Sitzen</label>
+        <select id="ess1">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <div class="ess-question">
+        <label>Fernsehen</label>
+        <select id="ess2">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <div class="ess-question">
+        <label>Passives Sitzen in der Öffentlichkeit (Meeting, Kino, Kirche)</label>
+        <select id="ess3">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <div class="ess-question">
+        <label>Als Beifahrer, 1 Stunde ohne Pause</label>
+        <select id="ess4">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <div class="ess-question">
+        <label>Nachmittags hinlegen, um auszuruhen</label>
+        <select id="ess5">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <div class="ess-question">
+        <label>Sitzen und sich mit jemandem unterhalten</label>
+        <select id="ess6">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <div class="ess-question">
+        <label>Ruhig sitzen nach dem Mittagessen (ohne Alkohol)</label>
+        <select id="ess7">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <div class="ess-question">
+        <label>Im Auto, kurzer Halt im Verkehr (als Fahrer)</label>
+        <select id="ess8">
+          <option value="0">0 – würde nie einnicken</option>
+          <option value="1">1 – geringe Wahrscheinlichkeit</option>
+          <option value="2">2 – mäßige Wahrscheinlichkeit</option>
+          <option value="3">3 – hohe Wahrscheinlichkeit</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">ESS-Wert speichern</button>
+    </form>
+    <div class="score-display">
+      <div>
+        <div class="n" id="essLastScore">–</div>
+        <div class="l">letzter Wert (0–24)</div>
+      </div>
+      <span class="risk-pill" id="essRiskPill">–</span>
+    </div>
+    <canvas id="chartEss" height="130" style="margin-top:14px;"></canvas>
+    <div id="essList" class="scroll-list" style="margin-top:12px; max-height:420px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Blutdruck-Korrelation</h2>
+    <p class="sub" style="margin-bottom:12px;">Optionaler CSV-Import aus deiner Blutdruck-App — zeigt Morgens-Werte neben dem AHI-Verlauf, um mögliche Zusammenhänge zu erkennen.</p>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn-ghost" id="btnImportBp">Blutdruck-CSV importieren</button>
+      <button class="btn-danger-ghost" id="btnClearBp">Blutdruckdaten entfernen</button>
+    </div>
+    <canvas id="chartCorrelation" height="150" style="margin-top:14px;"></canvas>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--bad)"></span>AHI (rel. Skala)</span>
+      <span><span class="dot" style="background:var(--warn)"></span>Blutdruck morgens, systolisch (rel. Skala)</span>
+    </div>
+    <input type="file" id="fileInputBp" class="file-input" accept=".csv">
+    <p class="hint">Beide Reihen werden unabhängig voneinander normiert dargestellt (reine Verlaufsform, keine gemeinsame Skala) — es handelt sich um eine visuelle Gegenüberstellung, keine statistische Korrelationsberechnung. „Blutdruckdaten entfernen" löscht nur die hier importierten Blutdruckwerte, nicht deine Apnoe-Daten.</p>
+  </div>
+
+  <div class="card">
+    <h2>Wetter-Einfluss (Auswertung)</h2>
+    <p class="sub" style="margin-bottom:12px;">Rein deskriptiver Vergleich: Ø AHI an Nächten über bzw. unter deinen gewählten Schwellenwerten. Verändert nicht die Behandlungsindikation oben — nur zur eigenen Einordnung, ob bei dir ein Muster erkennbar ist.</p>
+    <div class="grid">
+      <div class="field">
+        <label for="wxTempThreshold">Temperatur-Schwelle (°C)</label>
+        <input type="number" id="wxTempThreshold" step="1" value="20">
+      </div>
+      <div class="field">
+        <label for="wxHumThreshold">Luftfeuchte-Schwelle (%)</label>
+        <input type="number" id="wxHumThreshold" step="1" value="70">
+      </div>
+    </div>
+    <div id="wxComparisonResult" style="margin-top:6px;"></div>
+    <p class="hint">Basierend auf allen Nächten mit erfasstem AHI und Außentemperatur/Luftfeuchte (kein Zeitlimit). Kleine Gruppengrößen (wenige Nächte) sind statistisch wenig belastbar — die Anzahl wird je Gruppe mit angezeigt.</p>
+  </div>
+
+  <div class="card">
+    <h2>Arztbericht (PDF)</h2>
+    <p class="sub" style="margin-bottom:12px;">Erstellt einen druckfertigen Bericht über einen Zeitraum — als PDF speicherbar über den Systemdruckdialog, z. B. für Hausarzt oder Schlaflabor.</p>
+    <div class="field">
+      <label for="reportName">Name (optional, erscheint im Bericht)</label>
+      <input type="text" id="reportName" placeholder="optional">
+    </div>
+    <div class="grid">
+      <div class="field">
+        <label for="reportVon">Von</label>
+        <input type="date" id="reportVon">
+      </div>
+      <div class="field">
+        <label for="reportBis">Bis</label>
+        <input type="date" id="reportBis">
+      </div>
+    </div>
+    <button class="btn-primary" id="btnCreateReport">Bericht erstellen &amp; drucken</button>
+    <p class="hint">Öffnet eine druckfertige Ansicht in einem neuen Tab/Fenster. Dort über den Systemdruckdialog als PDF sichern ("Drucken" → "Als PDF speichern"). Funktioniert auf Handy (Chrome) und MacBook (Safari/Chrome) gleichermaßen.</p>
+  </div>
+
+</main>
+
+<script>
+const STORAGE_KEY = 'apnoe_tracker_entries_v1';
+
+/* ---------- Backup-Erinnerung ---------- */
+const BACKUP_TS_KEY = 'apnoe_tracker_last_backup';
+const BACKUP_REMINDER_DAYS = 30;
+
+function markBackupDone(){
+  try{ localStorage.setItem(BACKUP_TS_KEY, new Date().toISOString()); }catch(e){}
+  renderBackupReminder();
+}
+function daysSinceBackup(){
+  let raw;
+  try{ raw = localStorage.getItem(BACKUP_TS_KEY); }catch(e){ raw = null; }
+  if(!raw) return null;
+  const then = new Date(raw);
+  if(isNaN(then.getTime())) return null;
+  return Math.floor((Date.now() - then.getTime()) / 86400000);
+}
+function renderBackupReminder(){
+  const el = document.getElementById('backupBanner');
+  if(!el) return;
+  const days = daysSinceBackup();
+  if(days === null){
+    el.style.display = 'block';
+    el.innerHTML = '⚠️ <b>Noch keine Sicherung erstellt.</b> Bitte regelmäßig „CSV exportieren“ nutzen, damit deine Nächte nicht verloren gehen.';
+  } else if(days >= BACKUP_REMINDER_DAYS){
+    el.style.display = 'block';
+    el.innerHTML = '⚠️ <b>Letzte Sicherung vor ' + days + ' Tagen.</b> Zeit für ein neues CSV-Backup.';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveEntries(entries){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+let entries = loadEntries();
+let essEntries = [];
+try{
+  const rawEss = localStorage.getItem('apnoe_tracker_ess_v1');
+  essEntries = rawEss ? JSON.parse(rawEss) : [];
+}catch(e){ essEntries = []; }
+
+function ahiSeverity(ahi){
+  if(ahi === null || ahi === undefined || isNaN(ahi)) return null;
+  if(ahi < 5) return 'good';
+  if(ahi <= 15) return 'warn';
+  return 'bad';
+}
+function severityColor(sev){
+  if(sev === 'good') return getCSS('--good');
+  if(sev === 'warn') return getCSS('--warn');
+  if(sev === 'bad') return getCSS('--bad');
+  return getCSS('--muted');
+}
+function getCSS(varName){
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+function fmt(n, digits){
+  if(n === null || n === undefined || n === '' || isNaN(n)) return '–';
+  return Number(n).toFixed(digits !== undefined ? digits : 1);
+}
+function todayISO(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+document.getElementById('datum').value = todayISO();
+
+// --- Automatischer Wetterabruf (Open-Meteo, kein API-Key nötig) ---
+
+const WEATHER_LAT = 51.1652;
+const WEATHER_LON = 7.0822;
+
+function addDaysISO(iso, delta){
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + delta);
+  return d.toISOString().slice(0,10);
+}
+
+async function fetchNightWeather(dateISO){
+  const prevDay = addDaysISO(dateISO, -1);
+  const daysSince = Math.floor((new Date(dateISO) - new Date(todayISO())) / 86400000);
+  let url;
+  if(daysSince >= -90){
+    // Forecast-API deckt aktuelle + letzte ~90 Tage über past_days ab
+    const pastDays = Math.min(92, Math.max(1, -daysSince + 1));
+    url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&hourly=temperature_2m,relative_humidity_2m&past_days=${pastDays}&forecast_days=1&timezone=Europe%2FBerlin`;
+  } else {
+    // ältere Daten über die Historical-Weather-API (ERA5)
+    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&start_date=${prevDay}&end_date=${dateISO}&hourly=temperature_2m,relative_humidity_2m&timezone=Europe%2FBerlin`;
+  }
+
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if(!data.hourly || !data.hourly.time) throw new Error('Keine Wetterdaten in der Antwort');
+
+  const times = data.hourly.time;
+  const temps = data.hourly.temperature_2m;
+  const hums = data.hourly.relative_humidity_2m;
+
+  const nightStart = prevDay + 'T22:00';
+  const nightEnd = dateISO + 'T07:00';
+  const tVals = [], hVals = [];
+  for(let i=0; i<times.length; i++){
+    if(times[i] >= nightStart && times[i] <= nightEnd){
+      if(temps[i] !== null && temps[i] !== undefined) tVals.push(temps[i]);
+      if(hums[i] !== null && hums[i] !== undefined) hVals.push(hums[i]);
+    }
+  }
+  if(tVals.length === 0) throw new Error('Keine Nachtstunden im Datensatz gefunden');
+  return {
+    temp: avg(tVals),
+    hum: hVals.length ? avg(hVals) : null
+  };
+}
+
+document.getElementById('btnFetchWeather').addEventListener('click', async function(){
+  const dateISO = document.getElementById('datum').value;
+  const statusEl = document.getElementById('weatherStatus');
+  if(!dateISO){ statusEl.textContent = 'Bitte zuerst ein Datum wählen.'; return; }
+  statusEl.textContent = 'Lädt Wetterdaten …';
+  try{
+    const w = await fetchNightWeather(dateISO);
+    document.getElementById('aussentemp').value = w.temp.toFixed(1);
+    if(w.hum !== null) document.getElementById('luftfeuchtigkeit').value = Math.round(w.hum);
+    statusEl.textContent = `Geladen für Solingen, Nacht ${formatDateDisplay(addDaysISO(dateISO,-1))}–${formatDateDisplay(dateISO)}: Ø ${w.temp.toFixed(1)}°C${w.hum!==null ? ', Ø '+Math.round(w.hum)+'% Luftfeuchte' : ''}. Werte sind editierbar.`;
+  }catch(err){
+    statusEl.textContent = 'Wetterdaten konnten nicht geladen werden (Internetverbindung nötig). Werte können manuell eingetragen werden.';
+  }
+});
+
+// Verhindert, dass die "Weiter/Fertig"-Taste der Bildschirmtastatur das Formular
+// vorzeitig absendet, wenn man von Feld zu Feld springt (nur echter Button-Klick sendet ab).
+['entryForm','essForm'].forEach(function(formId){
+  const formEl = document.getElementById(formId);
+  if(!formEl) return;
+  formEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA'){
+      e.preventDefault();
+    }
+  });
+});
+
+function computeSchlafdauer(){
+  const sh = parseFloatOrNull(document.getElementById('schlafStunden').value);
+  const sm = parseFloatOrNull(document.getElementById('schlafMinuten').value);
+  if(sh === null && sm === null) return null;
+  const total = (sh || 0) + (sm || 0) / 60;
+  return Math.round(total * 100) / 100;
+}
+
+function updateSchlafdauerPreview(){
+  const preview = document.getElementById('schlafdauerPreview');
+  if(!preview) return;
+  const val = computeSchlafdauer();
+  preview.textContent = val !== null ? `≈ ${fmt(val,2)} Std.` : '';
+}
+
+['schlafStunden','schlafMinuten'].forEach(function(id){
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', updateSchlafdauerPreview);
+});
+
+document.getElementById('entryForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const entry = {
+    datum: document.getElementById('datum').value,
+    ahi: parseFloatOrNull(document.getElementById('ahi').value),
+    schlafdauer: computeSchlafdauer(),
+    atemfreqmin: parseFloatOrNull(document.getElementById('atemfreqmin').value),
+    spo2min: parseFloatOrNull(document.getElementById('spo2min').value),
+    spo2avg: parseFloatOrNull(document.getElementById('spo2avg').value),
+    atemfreq: parseFloatOrNull(document.getElementById('atemfreq').value),
+    ruhepuls: parseFloatOrNull(document.getElementById('ruhepuls').value),
+    hrv: parseFloatOrNull(document.getElementById('hrv').value),
+    gewicht: parseFloatOrNull(document.getElementById('gewicht').value),
+    aussentemp: parseFloatOrNull(document.getElementById('aussentemp').value),
+    luftfeuchtigkeit: parseFloatOrNull(document.getElementById('luftfeuchtigkeit').value),
+    erkaeltung: document.getElementById('erkaeltung').checked,
+    notiz: document.getElementById('notiz').value.trim()
+  };
+  if(!entry.datum){ return; }
+  // replace existing entry for same date if present
+  entries = entries.filter(x => x.datum !== entry.datum);
+  entries.push(entry);
+  entries.sort((a,b) => a.datum.localeCompare(b.datum));
+  saveEntries(entries);
+  this.reset();
+  document.getElementById('datum').value = todayISO();
+  updateSchlafdauerPreview();
+  renderAll();
+});
+
+function parseFloatOrNull(v){
+  if(v === '' || v === null || v === undefined) return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function deleteEntry(datum){
+  entries = entries.filter(x => x.datum !== datum);
+  saveEntries(entries);
+  renderAll();
+}
+
+function renderList(){
+  const container = document.getElementById('entryList');
+  const hint = document.getElementById('entryListHint');
+  container.innerHTML = '';
+  if(entries.length === 0){
+    if(hint) hint.textContent = '';
+    container.innerHTML = '<div class="empty">Noch keine Einträge. Erfasse oben deine erste Nacht.</div>';
+    return;
+  }
+  if(hint) hint.textContent = entries.length + ' Nächte erfasst — Liste ist scrollbar.';
+  const sorted = [...entries].sort((a,b) => b.datum.localeCompare(a.datum));
+  sorted.forEach(e => {
+    try{
+    const sev = ahiSeverity(e.ahi);
+    const badgeClass = sev === 'good' ? 'badge-good' : sev === 'warn' ? 'badge-warn' : sev === 'bad' ? 'badge-bad' : 'badge-good';
+    const badgeText = e.ahi !== null ? 'AHI ' + fmt(e.ahi,1) : 'kein AHI';
+    const div = document.createElement('div');
+    div.className = 'entry';
+    div.innerHTML = `
+      <div class="entry-top">
+        <span class="entry-date">${formatDateDisplay(e.datum)}</span>
+        <span class="badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="entry-metrics">
+        <div><div class="metric-label">Schlafdauer</div><div class="metric-value">${fmt(e.schlafdauer,1)}${e.schlafdauer!==null?' Std.':''}</div></div>
+        <div><div class="metric-label">SpO2 min</div><div class="metric-value">${fmt(e.spo2min,1)}${e.spo2min!==null?'%':''}</div></div>
+        <div><div class="metric-label">Atemfreq.</div><div class="metric-value">${fmt(e.atemfreq,1)}${e.atemfreq!==null?'/min':''}</div></div>
+        <div><div class="metric-label">Ruhepuls</div><div class="metric-value">${fmt(e.ruhepuls,0)}${e.ruhepuls!==null?' bpm':''}</div></div>
+        <div><div class="metric-label">HRV</div><div class="metric-value">${fmt(e.hrv,0)}${e.hrv!==null?' ms':''}</div></div>
+        <div><div class="metric-label">Atemfreq. min</div><div class="metric-value">${fmt(e.atemfreqmin,1)}${e.atemfreqmin!==null?'/min':''}</div></div>
+        <div><div class="metric-label">Gewicht</div><div class="metric-value">${fmt(e.gewicht,1)}${e.gewicht!==null?' kg':''}</div></div>
+        <div><div class="metric-label">Außentemp.</div><div class="metric-value">${e.aussentemp!==null&&e.aussentemp!==undefined?fmt(e.aussentemp,1)+'°C':'–'}</div></div>
+        <div><div class="metric-label">Luftfeuchte</div><div class="metric-value">${e.luftfeuchtigkeit!==null&&e.luftfeuchtigkeit!==undefined?fmt(e.luftfeuchtigkeit,0)+'%':'–'}</div></div>
+        <div><div class="metric-label">Infekt</div><div class="metric-value">${e.erkaeltung?'Ja':'Nein'}</div></div>
+      </div>
+      ${e.notiz ? `<div class="entry-note">${escapeHtml(e.notiz)}</div>` : ''}
+      <div class="entry-actions">
+        <button class="btn-ghost" onclick="editEntry('${e.datum}')">Bearbeiten</button>
+        <button class="btn-danger-ghost" onclick="deleteEntry('${e.datum}')">Löschen</button>
+      </div>
+    `;
+    container.appendChild(div);
+    }catch(err){ console.error('Fehler beim Rendern eines Eintrags:', e, err); }
+  });
+}
+
+function editEntry(datum){
+  const e = entries.find(x => x.datum === datum);
+  if(!e) return;
+  document.getElementById('datum').value = e.datum;
+  document.getElementById('ahi').value = e.ahi ?? '';
+  if(e.schlafdauer !== null && e.schlafdauer !== undefined){
+    const totalMinutes = Math.round(e.schlafdauer * 60);
+    document.getElementById('schlafStunden').value = Math.floor(totalMinutes / 60);
+    document.getElementById('schlafMinuten').value = totalMinutes % 60;
+  } else {
+    document.getElementById('schlafStunden').value = '';
+    document.getElementById('schlafMinuten').value = '';
+  }
+  updateSchlafdauerPreview();
+  document.getElementById('atemfreqmin').value = e.atemfreqmin ?? '';
+  document.getElementById('spo2min').value = e.spo2min ?? '';
+  document.getElementById('spo2avg').value = e.spo2avg ?? '';
+  document.getElementById('atemfreq').value = e.atemfreq ?? '';
+  document.getElementById('ruhepuls').value = e.ruhepuls ?? '';
+  document.getElementById('hrv').value = e.hrv ?? '';
+  document.getElementById('gewicht').value = e.gewicht ?? '';
+  document.getElementById('aussentemp').value = e.aussentemp ?? '';
+  document.getElementById('luftfeuchtigkeit').value = e.luftfeuchtigkeit ?? '';
+  document.getElementById('erkaeltung').checked = !!e.erkaeltung;
+  document.getElementById('notiz').value = e.notiz ?? '';
+  window.scrollTo({top: document.getElementById('entryForm').offsetTop - 20, behavior:'smooth'});
+}
+
+function formatDateDisplay(iso){
+  const parts = iso.split('-');
+  if(parts.length !== 3) return iso;
+  return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function renderStats(){
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 14);
+  const cutoffISO = cutoff.toISOString().slice(0,10);
+  const recent = entries.filter(e => e.datum >= cutoffISO);
+
+  const ahiVals = recent.map(e => e.ahi).filter(v => v !== null);
+  const spo2Vals = recent.map(e => e.spo2min).filter(v => v !== null);
+
+  document.getElementById('statAvgAhi').textContent = ahiVals.length ? fmt(avg(ahiVals),1) : '–';
+  document.getElementById('statMinSpo2').textContent = spo2Vals.length ? fmt(Math.min(...spo2Vals),0) + '%' : '–';
+  document.getElementById('statCount').textContent = entries.length;
+}
+function avg(arr){ return arr.reduce((a,b)=>a+b,0) / arr.length; }
+
+function renderIndication(){
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 14);
+  const cutoffISO = cutoff.toISOString().slice(0,10);
+  const ahiVals = entries.filter(e => e.datum >= cutoffISO).map(e => e.ahi).filter(v => v !== null);
+  const avgAhi = ahiVals.length ? avg(ahiVals) : null;
+
+  const lastEss = essEntries.length ? [...essEntries].sort((a,b) => b.datum.localeCompare(a.datum))[0] : null;
+  const essScore = lastEss ? lastEss.sum : null;
+
+  const sb = loadStopBang();
+  const hypertonie = !!sb['sb_p'];
+
+  const valueEl = document.getElementById('indAhiValue');
+  const pill = document.getElementById('indPill');
+  const text = document.getElementById('indText');
+
+  valueEl.textContent = avgAhi !== null ? fmt(avgAhi,1) : '–';
+
+  if(avgAhi === null){
+    pill.textContent = 'Keine Daten';
+    pill.style.background = 'transparent';
+    pill.style.color = getCSS('--muted');
+    text.textContent = 'Noch keine AHI-Werte in den letzten 14 Tagen erfasst — Einschätzung wird berechnet, sobald Nächte vorliegen.';
+    return;
+  }
+
+  let level, label, color, explanation;
+
+  if(avgAhi >= 30){
+    level = 'clear';
+    label = 'Eindeutige Indikation';
+    color = getCSS('--bad');
+    explanation = 'Ø AHI ≥ 30/h (schwere OSA) — nach AASM/DGSM gilt die Behandlungsindikation unabhängig von Tagesschläfrigkeit oder Begleiterkrankungen als gesichert.';
+  } else if(avgAhi >= 5){
+    const hasSymptom = essScore !== null && essScore > 10;
+    const hasComorbidity = hypertonie;
+    if(hasSymptom || hasComorbidity){
+      level = 'clear';
+      label = 'Eindeutige Indikation';
+      color = getCSS('--bad');
+      const reasons = [];
+      if(hasSymptom) reasons.push('ESS > 10 (relevante Tagesschläfrigkeit)');
+      if(hasComorbidity) reasons.push('Bluthochdruck (STOP-Bang: P)');
+      explanation = `Ø AHI im Bereich 5–30/h (leicht bis mittelschwer) plus ${reasons.join(' und ')} — nach AASM-Kriterien gilt dies als klinisch behandlungsbedürftige OSA.`;
+    } else {
+      level = 'gray';
+      label = 'Graubereich';
+      color = getCSS('--warn');
+      explanation = 'Ø AHI im Bereich 5–30/h, aber weder ein ESS-Wert über 10 noch Bluthochdruck erfasst. Hier wird meist individuell abgewogen — oft zunächst mit konservativen Maßnahmen (Gewicht, Lagerungstherapie, Alkoholkarenz). Hinweis: Andere Komorbiditäten wie KHK, Schlaganfall, Vorhofflimmern oder Diabetes werden von dieser Einschätzung nicht erfasst.';
+    }
+  } else {
+    level = 'none';
+    label = 'Kein AHI-Hinweis';
+    color = getCSS('--good');
+    explanation = 'Ø AHI unter 5/h — nach diesen Kriterien aktuell kein Hinweis auf eine behandlungsbedürftige OSA.';
+  }
+
+  pill.textContent = label;
+  pill.style.background = color + '22';
+  pill.style.color = color;
+  text.textContent = explanation + ' Dies ist eine informelle Einschätzung auf Basis deiner eigenen Aufzeichnungen, kein Diagnoseersatz — die endgültige Einordnung erfolgt schlafmedizinisch, in der Regel per Polysomnographie.';
+}
+
+// --- Canvas chart drawing (no external dependencies) ---
+
+function setupCanvas(canvas){
+  const ratio = window.devicePixelRatio || 1;
+  const cssWidth = canvas.clientWidth || canvas.parentElement.clientWidth;
+  // WICHTIG: canvas.width/canvas.height sind "reflektierte" IDL-Eigenschaften — wer
+  // canvas.height = X setzt, schreibt X automatisch auch in das HTML-Attribut "height"
+  // zurück. Läse man die gewünschte CSS-Höhe bei jedem Neuzeichnen erneut per
+  // getAttribute('height') aus, bekäme man ab dem zweiten Aufruf nicht mehr die
+  // ursprüngliche HTML-Höhe (150), sondern die bereits mit devicePixelRatio
+  // multiplizierte Bitmap-Höhe des VORHERIGEN Aufrufs zurück — und multipliziert sie
+  // erneut. Bei jedem Redraw (Resize, CSV-Import, ESS-Eintrag, Scroll-getriggertes
+  // ResizeObserver-Update, …) wuchs die Höhe dadurch exponentiell (150 → 300 → 600 →
+  // 1200 → …), was die beobachtete zunehmende Verzerrung verursacht hat. Fix: die
+  // gewünschte CSS-Höhe wird einmalig in einem eigenen data-Attribut zwischengespeichert,
+  // das nie überschrieben wird, und danach immer von dort gelesen.
+  if(!canvas.dataset.cssHeight){
+    canvas.dataset.cssHeight = canvas.getAttribute('height') || '150';
+  }
+  const cssHeight = parseInt(canvas.dataset.cssHeight) || 150;
+  canvas.width = cssWidth * ratio;
+  canvas.height = cssHeight * ratio;
+  canvas.style.height = cssHeight + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(ratio, ratio);
+  return { ctx, w: cssWidth, h: cssHeight };
+}
+
+function drawEmptyMessage(ctx, w, h, text){
+  ctx.fillStyle = getCSS('--muted');
+  ctx.font = '13px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, w/2, h/2);
+}
+
+function getRecentEntriesSorted(days){
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffISO = cutoff.toISOString().slice(0,10);
+  return [...entries].filter(e => e.datum >= cutoffISO).sort((a,b) => a.datum.localeCompare(b.datum));
+}
+
+function drawAhiChart(){
+  const canvas = document.getElementById('chartAhi');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0,0,w,h);
+  const data = getRecentEntriesSorted(30);
+  if(data.length === 0){ drawEmptyMessage(ctx, w, h, 'Noch keine AHI-Werte erfasst'); return; }
+
+  const padL = 30, padR = 10, padT = 14, padB = 22;
+  const chartW = w - padL - padR;
+  const chartH = h - padT - padB;
+  const ahiVals = data.map(d => d.ahi).filter(v => v !== null);
+  const maxVal = Math.max(20, ...ahiVals) * 1.1;
+
+  // gridlines at 5 and 15 (clinical thresholds)
+  [0,5,15].forEach(threshold => {
+    const y = padT + chartH - (threshold/maxVal)*chartH;
+    ctx.strokeStyle = 'rgba(36,33,27,0.10)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(w-padR, y);
+    ctx.stroke();
+  });
+
+  const barWidth = Math.min(22, chartW / data.length * 0.6);
+  const step = chartW / data.length;
+
+  data.forEach((d, i) => {
+    if(d.ahi === null || d.ahi === undefined) return; // Nacht ohne AHI-Wert: Lücke statt falscher Verschiebung
+    const x = padL + step*i + step/2 - barWidth/2;
+    const barH = (d.ahi/maxVal)*chartH;
+    const y = padT + chartH - barH;
+    const sev = ahiSeverity(d.ahi);
+    ctx.fillStyle = severityColor(sev);
+    roundRect(ctx, x, y, barWidth, Math.max(barH, 2), 4);
+    ctx.fill();
+  });
+
+  // x-axis labels (first, middle, last)
+  ctx.fillStyle = getCSS('--muted');
+  ctx.font = '10.5px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  [0, Math.floor(data.length/2), data.length-1].forEach(idx => {
+    if(idx < 0 || idx >= data.length) return;
+    const x = padL + step*idx + step/2;
+    ctx.fillText(formatDateDisplay(data[idx].datum).slice(0,5), x, h-6);
+  });
+}
+
+function drawSpo2Chart(){
+  const canvas = document.getElementById('chartSpo2');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0,0,w,h);
+  const data = getRecentEntriesSorted(30).filter(e => e.spo2min !== null || e.atemfreq !== null || e.atemfreqmin !== null);
+  if(data.length === 0){ drawEmptyMessage(ctx, w, h, 'Noch keine SpO2-Werte erfasst'); return; }
+
+  const padL = 32, padR = 32, padT = 14, padB = 22;
+  const chartW = w - padL - padR;
+  const chartH = h - padT - padB;
+
+  drawLineSeries(ctx, data, 'spo2min', 85, 100, padL, padT, chartW, chartH, getCSS('--good'), true);
+  drawLineSeries(ctx, data, 'atemfreq', 5, 30, padL, padT, chartW, chartH, getCSS('--accent'), false);
+  drawLineSeries(ctx, data, 'atemfreqmin', 5, 30, padL, padT, chartW, chartH, getCSS('--warn'), false);
+
+  ctx.fillStyle = getCSS('--muted');
+  ctx.font = '10.5px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  [0, Math.floor(data.length/2), data.length-1].forEach(idx => {
+    if(idx < 0 || idx >= data.length) return;
+    const step = chartW / data.length;
+    const x = padL + step*idx + step/2;
+    ctx.fillText(formatDateDisplay(data[idx].datum).slice(0,5), x, h-6);
+  });
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = getCSS('--good');
+  ctx.fillText('SpO2 min %', padL, 12);
+  ctx.fillStyle = getCSS('--accent');
+  ctx.fillText('Atemfreq. Ø', padL + 78, 12);
+  ctx.fillStyle = getCSS('--warn');
+  ctx.fillText('Atemfreq. min', padL + 150, 12);
+}
+
+function drawVitalsChart(){
+  const canvas = document.getElementById('chartVitals');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0,0,w,h);
+  const data = getRecentEntriesSorted(60).filter(e => e.ruhepuls !== null || e.hrv !== null || e.gewicht !== null);
+  if(data.length === 0){ drawEmptyMessage(ctx, w, h, 'Noch keine Werte erfasst'); return; }
+
+  const padL = 30, padR = 30, padT = 14, padB = 22;
+  const chartW = w - padL - padR;
+  const chartH = h - padT - padB;
+
+  drawLineSeries(ctx, data, 'ruhepuls', 40, 100, padL, padT, chartW, chartH, getCSS('--accent'), false);
+  drawLineSeries(ctx, data, 'hrv', 10, 100, padL, padT, chartW, chartH, getCSS('--good'), false);
+  drawLineSeries(ctx, data, 'gewicht', null, null, padL, padT, chartW, chartH, getCSS('--warn'), false);
+
+  ctx.fillStyle = getCSS('--muted');
+  ctx.font = '10.5px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  [0, Math.floor(data.length/2), data.length-1].forEach(idx => {
+    if(idx < 0 || idx >= data.length) return;
+    const step = chartW / data.length;
+    const x = padL + step*idx + step/2;
+    ctx.fillText(formatDateDisplay(data[idx].datum).slice(0,5), x, h-6);
+  });
+}
+
+function drawLineSeries(ctx, data, key, fixedMin, fixedMax, padL, padT, chartW, chartH, color, fillBelow){
+  const points = data.map((d,i) => ({ i, v: d[key] })).filter(p => p.v !== null && p.v !== undefined);
+  if(points.length < 1) return;
+  const vals = points.map(p => p.v);
+  const min = fixedMin !== null && fixedMin !== undefined ? fixedMin : Math.min(...vals) * 0.95;
+  const max = fixedMax !== null && fixedMax !== undefined ? fixedMax : Math.max(...vals) * 1.05;
+  const range = (max - min) || 1;
+  const step = chartW / data.length;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  points.forEach((p, idx) => {
+    const x = padL + step*p.i + step/2;
+    const y = padT + chartH - ((p.v - min)/range)*chartH;
+    if(idx === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  ctx.fillStyle = color;
+  points.forEach(p => {
+    const x = padL + step*p.i + step/2;
+    const y = padT + chartH - ((p.v - min)/range)*chartH;
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+function roundRect(ctx, x, y, width, height, radius){
+  if(height < 0){ y = y + height; height = Math.abs(height); }
+  ctx.beginPath();
+  ctx.moveTo(x+radius, y);
+  ctx.arcTo(x+width, y, x+width, y+height, radius);
+  ctx.arcTo(x+width, y+height, x, y+height, radius);
+  ctx.arcTo(x, y+height, x, y, radius);
+  ctx.arcTo(x, y, x+width, y, radius);
+  ctx.closePath();
+}
+
+function renderCharts(){
+  drawAhiChart();
+  drawSpo2Chart();
+  drawVitalsChart();
+}
+
+function renderAll(){
+  try{ renderStats(); }catch(e){ console.error('renderStats:', e); }
+  try{ renderList(); }catch(e){ console.error('renderList:', e); }
+  try{ renderCharts(); }catch(e){ console.error('renderCharts:', e); }
+  try{ renderIndication(); }catch(e){ console.error('renderIndication:', e); }
+  try{ if(typeof drawCorrelationChart === 'function') drawCorrelationChart(); }catch(e){ console.error('drawCorrelationChart:', e); }
+  try{ if(typeof renderWeatherComparison === 'function') renderWeatherComparison(); }catch(e){ console.error('renderWeatherComparison:', e); }
+  try{ renderBackupReminder(); }catch(e){ console.error('renderBackupReminder:', e); }
+}
+
+// --- CSV export / import ---
+
+const CSV_HEADER = ['datum','ahi','schlafdauer','atemfreqmin','spo2min','spo2avg','atemfreq','ruhepuls','hrv','gewicht','aussentemp','luftfeuchtigkeit','erkaeltung','notiz'];
+
+document.getElementById('btnExport').addEventListener('click', function(){
+  if(entries.length === 0){ alert('Keine Daten zum Exportieren vorhanden.'); return; }
+  const sorted = [...entries].sort((a,b) => a.datum.localeCompare(b.datum));
+  const rows = [CSV_HEADER.join(';')];
+  sorted.forEach(e => {
+    const row = CSV_HEADER.map(key => {
+      let v = e[key];
+      if(v === null || v === undefined) v = '';
+      v = String(v).replace(/;/g, ',').replace(/\n/g, ' ');
+      return v;
+    });
+    rows.push(row.join(';'));
+  });
+  const csv = rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'apnoe-tracker_' + todayISO() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  markBackupDone();
+});
+
+document.getElementById('btnImportTrigger').addEventListener('click', function(){
+  document.getElementById('fileInput').click();
+});
+
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const text = evt.target.result;
+      const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+      if(lines.length < 2){ alert('CSV enthält keine Daten.'); return; }
+      const header = lines[0].split(';').map(h => h.trim());
+      const imported = [];
+      for(let i=1; i<lines.length; i++){
+        const cols = lines[i].split(';');
+        const obj = {};
+        header.forEach((h, idx) => {
+          let v = cols[idx] !== undefined ? cols[idx] : '';
+          if(h === 'erkaeltung'){
+            obj[h] = (v === 'true' || v === '1');
+          } else if(h !== 'datum' && h !== 'notiz'){
+            obj[h] = v === '' ? null : parseFloat(v.replace(',', '.'));
+          } else {
+            obj[h] = v;
+          }
+        });
+        if(obj.datum) imported.push(obj);
+      }
+      // merge: imported overwrites existing entries with same date
+      const importedDates = new Set(imported.map(x => x.datum));
+      entries = entries.filter(x => !importedDates.has(x.datum));
+      entries = entries.concat(imported);
+      entries.sort((a,b) => a.datum.localeCompare(b.datum));
+      saveEntries(entries);
+      // Siehe Kommentar beim Blutdruck-CSV-Import: direkt nach der Rückkehr aus der
+      // nativen Dateiauswahl kann die gemessene Seitenbreite kurzzeitig falsch sein,
+      // was die Diagramme verzerrt. Erst den Hinweis zeigen, dann nach zwei
+      // requestAnimationFrame-Zyklen (Layout ist dann sicher final) neu zeichnen.
+      alert(imported.length + ' Einträge importiert.');
+      requestAnimationFrame(function(){ requestAnimationFrame(renderAll); });
+    }catch(err){
+      alert('Fehler beim Einlesen der CSV-Datei.');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+  e.target.value = '';
+});
+
+document.getElementById('btnClear').addEventListener('click', function(){
+  if(confirm('Wirklich alle Einträge unwiderruflich löschen?')){
+    entries = [];
+    saveEntries(entries);
+    renderAll();
+  }
+});
+
+// --- STOP-Bang ---
+
+const SB_KEY = 'apnoe_tracker_stopbang_v1';
+const sbFields = ['sb_s','sb_t','sb_o','sb_p','sb_b','sb_a','sb_n','sb_g'];
+
+function loadStopBang(){
+  try{
+    const raw = localStorage.getItem(SB_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveStopBang(obj){
+  localStorage.setItem(SB_KEY, JSON.stringify(obj));
+}
+
+(function initStopBang(){
+  const saved = loadStopBang();
+  sbFields.forEach(id => {
+    const el = document.getElementById(id);
+    if(saved[id]) el.checked = true;
+    el.addEventListener('change', updateStopBang);
+  });
+  updateStopBang();
+})();
+
+function updateStopBang(){
+  const state = {};
+  let score = 0;
+  sbFields.forEach(id => {
+    const checked = document.getElementById(id).checked;
+    state[id] = checked;
+    if(checked) score++;
+  });
+  saveStopBang(state);
+  document.getElementById('sbScore').textContent = score;
+  const pill = document.getElementById('sbRiskPill');
+  if(score <= 2){
+    pill.textContent = 'Geringes Risiko';
+    pill.style.background = getCSS('--good-bg');
+    pill.style.color = getCSS('--good');
+  } else if(score <= 4){
+    pill.textContent = 'Mittleres Risiko';
+    pill.style.background = getCSS('--warn-bg');
+    pill.style.color = getCSS('--warn');
+  } else {
+    pill.textContent = 'Hohes Risiko';
+    pill.style.background = getCSS('--bad-bg');
+    pill.style.color = getCSS('--bad');
+  }
+  if(typeof renderIndication === 'function' && typeof entries !== 'undefined') renderIndication();
+}
+
+// --- Epworth Sleepiness Scale ---
+
+const ESS_KEY = 'apnoe_tracker_ess_v1';
+const essFields = ['ess1','ess2','ess3','ess4','ess5','ess6','ess7','ess8'];
+
+function loadEss(){
+  try{
+    const raw = localStorage.getItem(ESS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveEss(arr){
+  localStorage.setItem(ESS_KEY, JSON.stringify(arr));
+}
+essEntries = loadEss();
+
+document.getElementById('essDatum').value = todayISO();
+
+document.getElementById('essForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const datum = document.getElementById('essDatum').value;
+  if(!datum) return;
+  let sum = 0;
+  const answers = {};
+  essFields.forEach(id => {
+    const v = parseInt(document.getElementById(id).value, 10);
+    answers[id] = v;
+    sum += v;
+  });
+  essEntries = essEntries.filter(x => x.datum !== datum);
+  essEntries.push({ datum, sum, ...answers });
+  essEntries.sort((a,b) => a.datum.localeCompare(b.datum));
+  saveEss(essEntries);
+  renderEss();
+});
+
+function deleteEss(datum){
+  essEntries = essEntries.filter(x => x.datum !== datum);
+  saveEss(essEntries);
+  renderEss();
+}
+
+function essRiskLabel(sum){
+  if(sum <= 10) return { text:'Normal', color: getCSS('--good') };
+  if(sum <= 15) return { text:'Erhöht', color: getCSS('--warn') };
+  return { text:'Deutlich erhöht', color: getCSS('--bad') };
+}
+
+function renderEssList(){
+  const container = document.getElementById('essList');
+  container.innerHTML = '';
+  if(essEntries.length === 0){
+    container.innerHTML = '<div class="empty">Noch keine ESS-Werte erfasst.</div>';
+    return;
+  }
+  const sorted = [...essEntries].sort((a,b) => b.datum.localeCompare(a.datum));
+  sorted.forEach(e => {
+    const risk = essRiskLabel(e.sum);
+    const div = document.createElement('div');
+    div.className = 'entry';
+    div.innerHTML = `
+      <div class="entry-top">
+        <span class="entry-date">${formatDateDisplay(e.datum)}</span>
+        <span class="badge" style="background:${risk.color}22; color:${risk.color};">ESS ${e.sum}</span>
+      </div>
+      <div class="entry-actions">
+        <button class="btn-danger-ghost" onclick="deleteEss('${e.datum}')">Löschen</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function drawEssChart(){
+  const canvas = document.getElementById('chartEss');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0,0,w,h);
+  const data = [...essEntries].sort((a,b) => a.datum.localeCompare(b.datum));
+  if(data.length === 0){ drawEmptyMessage(ctx, w, h, 'Noch keine ESS-Werte erfasst'); return; }
+
+  const padL = 26, padR = 10, padT = 14, padB = 22;
+  const chartW = w - padL - padR;
+  const chartH = h - padT - padB;
+  const maxVal = 24;
+
+  [10, 15].forEach(threshold => {
+    const y = padT + chartH - (threshold/maxVal)*chartH;
+    ctx.strokeStyle = 'rgba(36,33,27,0.10)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(w-padR, y);
+    ctx.stroke();
+  });
+
+  const step = chartW / data.length;
+  ctx.strokeStyle = getCSS('--accent');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = padL + step*i + step/2;
+    const y = padT + chartH - (d.sum/maxVal)*chartH;
+    if(i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  data.forEach((d, i) => {
+    const x = padL + step*i + step/2;
+    const y = padT + chartH - (d.sum/maxVal)*chartH;
+    const risk = essRiskLabel(d.sum);
+    ctx.fillStyle = risk.color;
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = getCSS('--muted');
+  ctx.font = '10.5px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  [0, Math.floor(data.length/2), data.length-1].forEach(idx => {
+    if(idx < 0 || idx >= data.length) return;
+    const x = padL + step*idx + step/2;
+    ctx.fillText(formatDateDisplay(data[idx].datum).slice(0,5), x, h-6);
+  });
+}
+
+function renderEss(){
+  if(essEntries.length > 0){
+    const last = [...essEntries].sort((a,b) => b.datum.localeCompare(a.datum))[0];
+    document.getElementById('essLastScore').textContent = last.sum;
+    const risk = essRiskLabel(last.sum);
+    const pill = document.getElementById('essRiskPill');
+    pill.textContent = risk.text;
+    pill.style.background = risk.color + '22';
+    pill.style.color = risk.color;
+  } else {
+    document.getElementById('essLastScore').textContent = '–';
+    const pill = document.getElementById('essRiskPill');
+    pill.textContent = '–';
+    pill.style.background = 'transparent';
+    pill.style.color = getCSS('--muted');
+  }
+  renderEssList();
+  drawEssChart();
+  renderIndication();
+}
+
+renderEss();
+
+// --- Blutdruck-Korrelation (optionaler Import aus der Blutdruck-App) ---
+
+const BP_KEY = 'apnoe_tracker_bp_import_v1';
+
+function loadBp(){
+  try{
+    const raw = localStorage.getItem(BP_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveBp(arr){
+  localStorage.setItem(BP_KEY, JSON.stringify(arr));
+}
+let bpEntries = loadBp();
+
+function parseDateFlexible(str){
+  str = (str || '').trim();
+  if(!str) return null;
+  if(str.indexOf('.') !== -1){
+    const parts = str.split('.');
+    if(parts.length === 3){
+      const d = parts[0].padStart(2,'0'), m = parts[1].padStart(2,'0'), y = parts[2];
+      return `${y}-${m}-${d}`;
+    }
+    return null;
+  }
+  if(/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  return null;
+}
+
+document.getElementById('btnImportBp').addEventListener('click', function(){
+  document.getElementById('fileInputBp').click();
+});
+
+document.getElementById('fileInputBp').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const text = evt.target.result;
+      const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+      if(lines.length < 2){ alert('CSV enthält keine Daten.'); return; }
+      const delim = lines[0].indexOf(';') !== -1 ? ';' : ',';
+      const header = lines[0].split(delim).map(h => h.trim());
+      const idxDatum = header.indexOf('Datum');
+      const idxSys = header.indexOf('Morgens_Sys');
+      const idxDia = header.indexOf('Morgens_Dia');
+      if(idxDatum === -1 || idxSys === -1){
+        alert('CSV-Format nicht erkannt — erwartet Spalten "Datum" und "Morgens_Sys" wie aus der Blutdruck-App.');
+        return;
+      }
+      const imported = [];
+      for(let i=1; i<lines.length; i++){
+        const cols = lines[i].split(delim);
+        const isoDatum = parseDateFlexible(cols[idxDatum]);
+        if(!isoDatum) continue;
+        const sys = cols[idxSys] !== undefined && cols[idxSys] !== '' ? parseFloat(cols[idxSys].replace(',','.')) : null;
+        const dia = idxDia !== -1 && cols[idxDia] !== undefined && cols[idxDia] !== '' ? parseFloat(cols[idxDia].replace(',','.')) : null;
+        if(sys === null || isNaN(sys)) continue;
+        imported.push({ datum: isoDatum, sys, dia: (dia !== null && !isNaN(dia)) ? dia : null });
+      }
+      if(imported.length === 0){
+        alert('Keine gültigen Morgenwerte in der Datei gefunden.');
+        return;
+      }
+      const importedDates = new Set(imported.map(x => x.datum));
+      bpEntries = bpEntries.filter(x => !importedDates.has(x.datum));
+      bpEntries = bpEntries.concat(imported);
+      bpEntries.sort((a,b) => a.datum.localeCompare(b.datum));
+      saveBp(bpEntries);
+      // Direkt nach der Rückkehr aus der nativen Android-Dateiauswahl ist die Seitenbreite
+      // manchmal noch nicht final (System-UI-Übergang läuft noch), sodass die Canvas-Breite
+      // an dieser Stelle falsch gemessen und der Chart verzerrt gezeichnet würde. alert()
+      // zuerst zeigen lässt den Übergang abschließen; zwei verschachtelte
+      // requestAnimationFrame-Aufrufe warten danach zusätzlich auf einen abgeschlossenen
+      // Layout-/Paint-Zyklus, bevor neu gezeichnet wird.
+      alert(imported.length + ' Blutdruck-Tageswerte importiert.');
+      requestAnimationFrame(function(){ requestAnimationFrame(drawCorrelationChart); });
+    }catch(err){
+      alert('Fehler beim Einlesen der Blutdruck-CSV.');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+  e.target.value = '';
+});
+
+document.getElementById('btnClearBp').addEventListener('click', function(){
+  if(bpEntries.length === 0){ alert('Es sind keine Blutdruckdaten zum Entfernen vorhanden.'); return; }
+  if(!confirm('Wirklich alle importierten Blutdruckwerte entfernen? Deine Apnoe-Daten bleiben davon unberührt.')) return;
+  bpEntries = [];
+  saveBp(bpEntries);
+  drawCorrelationChart();
+  alert('Blutdruckdaten entfernt — du kannst die CSV jetzt erneut importieren.');
+});
+
+function drawCorrelationChart(){
+  const canvas = document.getElementById('chartCorrelation');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0,0,w,h);
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  const cutoffISO = cutoff.toISOString().slice(0,10);
+
+  const ahiData = [...entries].filter(e => e.datum >= cutoffISO && e.ahi !== null).sort((a,b) => a.datum.localeCompare(b.datum));
+  const bpData = [...bpEntries].filter(e => e.datum >= cutoffISO).sort((a,b) => a.datum.localeCompare(b.datum));
+
+  if(ahiData.length === 0 && bpData.length === 0){
+    drawEmptyMessage(ctx, w, h, 'Noch keine AHI- oder Blutdruckdaten (30 Tage)');
+    return;
+  }
+  if(bpData.length === 0){
+    drawEmptyMessage(ctx, w, h, 'Noch keine Blutdruck-CSV importiert');
+    return;
+  }
+
+  const allDates = Array.from(new Set([...ahiData.map(d=>d.datum), ...bpData.map(d=>d.datum)])).sort();
+  const padL = 10, padR = 10, padT = 14, padB = 22;
+  const chartW = w - padL - padR;
+  const chartH = h - padT - padB;
+  const step = chartW / Math.max(allDates.length,1);
+
+  function plotSeries(dataArr, valueKey, color){
+    const points = dataArr.map(d => ({ idx: allDates.indexOf(d.datum), v: d[valueKey] })).filter(p => p.idx !== -1 && p.v !== null && p.v !== undefined);
+    if(points.length === 0) return;
+    const vals = points.map(p => p.v);
+    const min = Math.min(...vals) * 0.95;
+    const max = Math.max(...vals) * 1.05;
+    const range = (max - min) || 1;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = padL + step*p.idx + step/2;
+      const y = padT + chartH - ((p.v - min)/range)*chartH;
+      if(i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.fillStyle = color;
+    points.forEach(p => {
+      const x = padL + step*p.idx + step/2;
+      const y = padT + chartH - ((p.v - min)/range)*chartH;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.8, 0, Math.PI*2);
+      ctx.fill();
+    });
+  }
+
+  plotSeries(ahiData, 'ahi', getCSS('--bad'));
+  plotSeries(bpData, 'sys', getCSS('--warn'));
+
+  ctx.fillStyle = getCSS('--muted');
+  ctx.font = '10.5px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  [0, Math.floor(allDates.length/2), allDates.length-1].forEach(idx => {
+    if(idx < 0 || idx >= allDates.length) return;
+    const x = padL + step*idx + step/2;
+    ctx.fillText(formatDateDisplay(allDates[idx]).slice(0,5), x, h-6);
+  });
+}
+
+drawCorrelationChart();
+
+// --- Wetter-Einfluss (deskriptiver Vergleich, keine Korrektur der Indikation) ---
+
+function renderWeatherComparison(){
+  const el = document.getElementById('wxComparisonResult');
+  if(!el) return;
+  const tempThreshold = parseFloat(document.getElementById('wxTempThreshold').value);
+  const humThreshold = parseFloat(document.getElementById('wxHumThreshold').value);
+
+  function buildGroupHtml(label, unit, threshold, key){
+    const withVal = entries.filter(e => e.ahi !== null && e[key] !== null && e[key] !== undefined);
+    if(withVal.length === 0 || isNaN(threshold)){
+      return `<div class="hint" style="margin-top:10px;">Noch keine Nächte mit AHI + ${label} erfasst.</div>`;
+    }
+    const above = withVal.filter(e => e[key] > threshold);
+    const belowEq = withVal.filter(e => e[key] <= threshold);
+    const avgAbove = above.length ? avg(above.map(e => e.ahi)) : null;
+    const avgBelow = belowEq.length ? avg(belowEq.map(e => e.ahi)) : null;
+    return `
+      <div style="margin-top:12px;">
+        <div style="font-size:12.5px; color:var(--muted); margin-bottom:6px;">${label} — Schwelle ${threshold}${unit}</div>
+        <div class="stat-row">
+          <div class="stat">
+            <div class="n" style="color:${avgAbove!==null && avgBelow!==null && avgAbove>avgBelow ? getCSS('--bad') : getCSS('--text')}">${avgAbove!==null?fmt(avgAbove,1):'–'}</div>
+            <div class="l">Ø AHI, &gt; ${threshold}${unit} (${above.length} Nächte)</div>
+          </div>
+          <div class="stat">
+            <div class="n">${avgBelow!==null?fmt(avgBelow,1):'–'}</div>
+            <div class="l">Ø AHI, ≤ ${threshold}${unit} (${belowEq.length} Nächte)</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  el.innerHTML =
+    buildGroupHtml('Außentemperatur', '°C', tempThreshold, 'aussentemp') +
+    buildGroupHtml('Luftfeuchtigkeit', '%', humThreshold, 'luftfeuchtigkeit');
+}
+
+['wxTempThreshold','wxHumThreshold'].forEach(function(id){
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('change', renderWeatherComparison);
+});
+
+renderWeatherComparison();
+
+// --- Arztbericht (druckbare Ansicht, PDF via Systemdruckdialog) ---
+
+const REPORT_NAME_KEY = 'apnoe_tracker_report_name_v1';
+
+(function initReportDefaults(){
+  const von = document.getElementById('reportVon');
+  const bis = document.getElementById('reportBis');
+  const nameInput = document.getElementById('reportName');
+  const d30 = new Date();
+  d30.setDate(d30.getDate() - 30);
+  von.value = d30.toISOString().slice(0,10);
+  bis.value = todayISO();
+  try{
+    const savedName = localStorage.getItem(REPORT_NAME_KEY);
+    if(savedName) nameInput.value = savedName;
+  }catch(e){}
+  nameInput.addEventListener('change', function(){
+    try{ localStorage.setItem(REPORT_NAME_KEY, nameInput.value); }catch(e){}
+  });
+})();
+
+function sbRiskText(score){
+  if(score <= 2) return 'Geringes Risiko';
+  if(score <= 4) return 'Mittleres Risiko';
+  return 'Hohes Risiko';
+}
+
+function escapeHtmlReport(str){
+  const d = document.createElement('div');
+  d.textContent = str === null || str === undefined ? '' : String(str);
+  return d.innerHTML;
+}
+
+document.getElementById('btnCreateReport').addEventListener('click', function(){
+  const von = document.getElementById('reportVon').value;
+  const bis = document.getElementById('reportBis').value;
+  if(!von || !bis || von > bis){
+    alert('Bitte einen gültigen Zeitraum wählen (Von ≤ Bis).');
+    return;
+  }
+  const name = document.getElementById('reportName').value.trim();
+
+  const nightData = [...entries].filter(e => e.datum >= von && e.datum <= bis).sort((a,b) => a.datum.localeCompare(b.datum));
+  const essData = [...essEntries].filter(e => e.datum >= von && e.datum <= bis).sort((a,b) => a.datum.localeCompare(b.datum));
+  const sb = loadStopBang();
+  const sbScore = sbFields.reduce((sum, id) => sum + (sb[id] ? 1 : 0), 0);
+
+  const ahiVals = nightData.map(e => e.ahi).filter(v => v !== null);
+  const spo2Vals = nightData.map(e => e.spo2min).filter(v => v !== null);
+  const ruhepulsVals = nightData.map(e => e.ruhepuls).filter(v => v !== null);
+  const hrvVals = nightData.map(e => e.hrv).filter(v => v !== null);
+  const gewichtVals = nightData.filter(e => e.gewicht !== null);
+  const schlafdauerVals = nightData.map(e => e.schlafdauer).filter(v => v !== null);
+  const infektNaechte = nightData.filter(e => e.erkaeltung).length;
+  const nAhi15 = ahiVals.filter(v => v >= 15).length;
+  const nAhi30 = ahiVals.filter(v => v >= 30).length;
+
+  const lastEss = essData.length ? essData[essData.length-1] : (essEntries.length ? [...essEntries].sort((a,b)=>b.datum.localeCompare(a.datum))[0] : null);
+
+  const indPillText = document.getElementById('indPill') ? document.getElementById('indPill').textContent : '–';
+  const indDetailText = document.getElementById('indText') ? document.getElementById('indText').textContent : '';
+
+  const rows = nightData.map(e => `
+    <tr>
+      <td>${formatDateDisplay(e.datum)}</td>
+      <td>${fmt(e.ahi,1)}</td>
+      <td>${fmt(e.schlafdauer,1)}</td>
+      <td>${fmt(e.atemfreqmin,1)}</td>
+      <td>${fmt(e.spo2min,1)}</td>
+      <td>${fmt(e.spo2avg,1)}</td>
+      <td>${fmt(e.atemfreq,1)}</td>
+      <td>${fmt(e.ruhepuls,0)}</td>
+      <td>${fmt(e.hrv,0)}</td>
+      <td>${fmt(e.gewicht,1)}</td>
+      <td>${e.aussentemp!==null&&e.aussentemp!==undefined?fmt(e.aussentemp,1):'–'}</td>
+      <td>${e.luftfeuchtigkeit!==null&&e.luftfeuchtigkeit!==undefined?fmt(e.luftfeuchtigkeit,0):'–'}</td>
+      <td>${e.erkaeltung?'Ja':'–'}</td>
+      <td>${escapeHtmlReport(e.notiz)}</td>
+    </tr>`).join('');
+
+  const essRows = essData.map(e => {
+    const r = essRiskLabel(e.sum);
+    return `<tr><td>${formatDateDisplay(e.datum)}</td><td>${e.sum}</td><td>${r.text}</td></tr>`;
+  }).join('');
+
+  const reportHtml = `
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Schlafapnoe-Verlaufsbericht</title>
+<style>
+  body{ font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; margin:24px; font-size:12.5px; }
+  h1{ font-size:20px; margin:0 0 4px 0; }
+  h2{ font-size:14px; margin:22px 0 8px 0; border-bottom:1px solid #999; padding-bottom:4px; }
+  .meta{ color:#444; font-size:12px; margin-bottom:2px; }
+  .summary-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px 20px; margin-top:8px; }
+  .summary-item{ border:1px solid #ccc; border-radius:4px; padding:8px 10px; }
+  .summary-item .l{ font-size:10.5px; color:#555; text-transform:uppercase; letter-spacing:0.03em; }
+  .summary-item .v{ font-size:15px; font-weight:700; margin-top:2px; }
+  table{ width:100%; border-collapse:collapse; margin-top:6px; font-size:10.5px; }
+  th, td{ border:1px solid #ccc; padding:4px 6px; text-align:left; }
+  th{ background:#f0f0f0; }
+  .disclaimer{ margin-top:24px; font-size:10.5px; color:#444; border-top:1px solid #999; padding-top:10px; }
+  .indication-box{ margin-top:10px; border:1px solid #999; border-radius:4px; padding:10px 12px; background:#fafafa; }
+  @media print{ body{ margin:12mm; } }
+</style>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+  <h1>Schlafapnoe-Verlaufsbericht</h1>
+  ${name ? `<div class="meta"><b>Name:</b> ${escapeHtmlReport(name)}</div>` : ''}
+  <div class="meta"><b>Zeitraum:</b> ${formatDateDisplay(von)} – ${formatDateDisplay(bis)}</div>
+  <div class="meta"><b>Erstellt am:</b> ${formatDateDisplay(todayISO())}</div>
+  <div class="meta"><b>Datenquellen:</b> Withings Sleep Analyzer, Garmin Instinct 3 (Eigenerfassung)</div>
+
+  <h2>Zusammenfassung</h2>
+  <div class="summary-grid">
+    <div class="summary-item"><div class="l">Erfasste Nächte</div><div class="v">${nightData.length}</div></div>
+    <div class="summary-item"><div class="l">Ø Schlafdauer</div><div class="v">${schlafdauerVals.length ? fmt(avg(schlafdauerVals),1)+' Std.' : '–'}</div></div>
+    <div class="summary-item"><div class="l">Ø AHI</div><div class="v">${ahiVals.length ? fmt(avg(ahiVals),1) : '–'}</div></div>
+    <div class="summary-item"><div class="l">Max. AHI</div><div class="v">${ahiVals.length ? fmt(Math.max(...ahiVals),1) : '–'}</div></div>
+    <div class="summary-item"><div class="l">Nächte AHI ≥15</div><div class="v">${nAhi15}</div></div>
+    <div class="summary-item"><div class="l">Nächte AHI ≥30</div><div class="v">${nAhi30}</div></div>
+    <div class="summary-item"><div class="l">Ø SpO2 min</div><div class="v">${spo2Vals.length ? fmt(avg(spo2Vals),1)+'%' : '–'}</div></div>
+    <div class="summary-item"><div class="l">Niedrigster SpO2</div><div class="v">${spo2Vals.length ? fmt(Math.min(...spo2Vals),1)+'%' : '–'}</div></div>
+    <div class="summary-item"><div class="l">Ø Ruhepuls</div><div class="v">${ruhepulsVals.length ? fmt(avg(ruhepulsVals),0)+' bpm' : '–'}</div></div>
+    <div class="summary-item"><div class="l">Ø HRV</div><div class="v">${hrvVals.length ? fmt(avg(hrvVals),0)+' ms' : '–'}</div></div>
+    <div class="summary-item"><div class="l">Gewicht (Beginn → Ende)</div><div class="v">${gewichtVals.length ? fmt(gewichtVals[0].gewicht,1)+' → '+fmt(gewichtVals[gewichtVals.length-1].gewicht,1)+' kg' : '–'}</div></div>
+    <div class="summary-item"><div class="l">Nächte mit Infekt</div><div class="v">${infektNaechte}</div></div>
+    <div class="summary-item"><div class="l">Letzter ESS-Wert</div><div class="v">${lastEss ? lastEss.sum+' ('+formatDateDisplay(lastEss.datum)+')' : '–'}</div></div>
+  </div>
+
+  <h2>STOP-Bang-Profil (aktuell)</h2>
+  <div class="summary-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="summary-item"><div class="l">Punktzahl</div><div class="v">${sbScore} / 8</div></div>
+    <div class="summary-item"><div class="l">Einstufung</div><div class="v">${sbRiskText(sbScore)}</div></div>
+    <div class="summary-item"><div class="l">Schnarchen</div><div class="v">${sb['sb_s']?'Ja':'Nein'}</div></div>
+    <div class="summary-item"><div class="l">Tagesmüdigkeit</div><div class="v">${sb['sb_t']?'Ja':'Nein'}</div></div>
+    <div class="summary-item"><div class="l">Beob. Aussetzer</div><div class="v">${sb['sb_o']?'Ja':'Nein'}</div></div>
+    <div class="summary-item"><div class="l">Bluthochdruck</div><div class="v">${sb['sb_p']?'Ja':'Nein'}</div></div>
+    <div class="summary-item"><div class="l">BMI &gt; 35</div><div class="v">${sb['sb_b']?'Ja':'Nein'}</div></div>
+    <div class="summary-item"><div class="l">Alter &gt; 50</div><div class="v">${sb['sb_a']?'Ja':'Nein'}</div></div>
+    <div class="summary-item"><div class="l">Halsumfang &gt; 40cm</div><div class="v">${sb['sb_n']?'Ja':'Nein'}</div></div>
+    <div class="summary-item"><div class="l">Männlich</div><div class="v">${sb['sb_g']?'Ja':'Nein'}</div></div>
+  </div>
+
+  <div class="indication-box">
+    <b>Einschätzung Behandlungsindikation (Ø AHI, 14 Tage, Stand heute):</b> ${escapeHtmlReport(indPillText)}<br>
+    ${escapeHtmlReport(indDetailText)}
+  </div>
+
+  <h2>Nächte im Zeitraum (${nightData.length})</h2>
+  <table>
+    <thead><tr>
+      <th>Datum</th><th>AHI</th><th>Schlafdauer</th><th>Atemfreq. min</th><th>SpO2 min</th><th>SpO2 Ø</th><th>Atemfreq. Ø</th><th>Ruhepuls</th><th>HRV</th><th>Gewicht</th><th>Außentemp.</th><th>Luftfeuchte</th><th>Infekt</th><th>Notiz</th>
+    </tr></thead>
+    <tbody>${rows || '<tr><td colspan="14">Keine Nächte im gewählten Zeitraum erfasst.</td></tr>'}</tbody>
+  </table>
+
+  <h2>Epworth-Verlauf im Zeitraum</h2>
+  <table>
+    <thead><tr><th>Datum</th><th>ESS-Summe (0–24)</th><th>Einstufung</th></tr></thead>
+    <tbody>${essRows || '<tr><td colspan="3">Keine ESS-Werte im gewählten Zeitraum erfasst.</td></tr>'}</tbody>
+  </table>
+
+  <div class="disclaimer">
+    Dieser Bericht basiert auf Eigenerfassung mittels Consumer-Geräten (Withings Sleep Analyzer, Garmin Instinct 3) und den Fragebögen STOP-Bang sowie Epworth Sleepiness Scale. Er ersetzt keine ärztliche Diagnostik, insbesondere keine Polysomnographie im Schlaflabor, und dient als Gesprächsgrundlage für die behandelnde Ärztin/den behandelnden Arzt.
+  </div>
+
+
+</body>
+</html>`;
+
+  const reportWindow = window.open('', '_blank');
+  if(!reportWindow){
+    alert('Der Bericht konnte nicht geöffnet werden — bitte Pop-up-Blocker für diese Seite deaktivieren und erneut versuchen.');
+    return;
+  }
+  reportWindow.document.open();
+  reportWindow.document.write(reportHtml);
+  reportWindow.document.close();
+  setTimeout(function(){
+    try{ reportWindow.focus(); reportWindow.print(); }catch(e){}
+  }, 350);
+});
+
+function redrawAllCharts(){
+  try{ renderCharts(); }catch(e){ console.error('renderCharts:', e); }
+  try{ drawEssChart(); }catch(e){ console.error('drawEssChart:', e); }
+  try{ drawCorrelationChart(); }catch(e){ console.error('drawCorrelationChart:', e); }
+}
+
+// Canvas-Diagramme haben eine CSS-Breite von 100%, aber eine feste Pixel-Auflösung,
+// die beim Zeichnen anhand der gemessenen Container-Breite gesetzt wird (setupCanvas()).
+// Ändert sich die tatsächliche Breite des Containers — z. B. weil auf dem Tablet beim
+// Scrollen die Adressleiste/Toolbar ein-/ausblendet, eine Scrollbar erscheint/verschwindet,
+// sich Webfonts nachträglich einfügen oder das Grid-Layout beim Breakpoint umschaltet —
+// ohne dass sich exakt window.innerWidth ändert, bleibt der Canvas-Speicher bei der alten
+// Auflösung und der Browser streckt/staucht das feste Pixelbild auf die neue Boxgröße.
+// Das erzeugt genau die beschriebene Verzerrung beim Scrollen.
+// ResizeObserver misst die tatsächliche Containergröße und behebt das zuverlässig,
+// unabhängig von der Ursache der Größenänderung.
+let chartResizeDebounceTimer = null;
+function scheduleChartRedraw(){
+  if(chartResizeDebounceTimer) clearTimeout(chartResizeDebounceTimer);
+  chartResizeDebounceTimer = setTimeout(redrawAllCharts, 120);
+}
+
+if(typeof ResizeObserver !== 'undefined'){
+  let lastObservedWidth = null;
+  const ro = new ResizeObserver(function(entriesList){
+    // Nur bei echter Breitenänderung neu zeichnen (Höhenänderungen z. B. durch die
+    // Bildschirmtastatur sollen die Diagramme nicht anfassen).
+    const w = entriesList[0] && entriesList[0].contentRect ? entriesList[0].contentRect.width : null;
+    if(w === null) { scheduleChartRedraw(); return; }
+    if(lastObservedWidth !== null && Math.abs(w - lastObservedWidth) < 1) return;
+    lastObservedWidth = w;
+    scheduleChartRedraw();
+  });
+  ro.observe(document.querySelector('main'));
+} else {
+  // Fallback für Browser ohne ResizeObserver-Unterstützung.
+  let lastKnownWidth = window.innerWidth;
+  window.addEventListener('resize', function(){
+    if(window.innerWidth === lastKnownWidth) return;
+    lastKnownWidth = window.innerWidth;
+    scheduleChartRedraw();
+  });
+}
+
+// Nach dem vollständigen Laden der Webfonts (Fraunces/Work Sans) neu zeichnen, falls sich
+// dadurch die Kartenbreite minimal verschoben hat (verhindert eine falsche Erstauflösung).
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(function(){ scheduleChartRedraw(); }).catch(function(){});
+}
+
+renderAll();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

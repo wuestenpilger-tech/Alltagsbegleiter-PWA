@@ -1,0 +1,300 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#46131d"><title>Alltagsbegleiter 22 · Heute</title>
+<link rel="manifest" href="manifest.webmanifest"><script src="shared-store.js"></script>
+<style>
+:root{--parch:#eee3cb;--paper:#f8f1e2;--cream:#fffaf0;--ink:#30271d;--muted:#6c5f50;--wine:#67202d;--wine2:#46131d;--gold:#d4b36c;--sage:#617058;--rose:#9b4b4b;--night:#172033;--line:#d6c39c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:linear-gradient(180deg,var(--parch),#dfcba5);color:var(--ink);font-family:Georgia,'Times New Roman',serif}body{padding-bottom:82px}.top{position:sticky;top:0;z-index:40;background:linear-gradient(135deg,var(--wine2),var(--wine));color:#fff8e8;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px #2b101744}.brand{display:flex;gap:11px;align-items:center}.seal{width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--wine2);display:flex;align-items:center;justify-content:center;font-size:25px}.brand h1{margin:0;font-size:25px}.brand small{display:block;color:#eadbc1}.icons a{display:inline-flex;width:42px;height:42px;border-radius:50%;align-items:center;justify-content:center;background:#ffffff18;margin-left:6px;text-decoration:none;color:white;font-size:20px}main{max-width:1200px;margin:auto;padding:22px 18px 46px}.hero{background:linear-gradient(145deg,#5b2730,var(--wine2));color:#fff8e8;border-radius:27px;padding:27px;box-shadow:0 10px 26px #34151c2e}.eyebrow{font:11px monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}.hero h2{font-size:38px;margin:8px 0}.hero p{margin:0;color:#eadbc1;line-height:1.5}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}.hero-actions a{padding:12px 17px;border-radius:999px;font-weight:700;text-decoration:none}.primary{background:var(--gold);color:var(--wine2)}.secondary{background:#ffffff18;color:white}.section{margin-top:25px}.section-head{display:flex;justify-content:space-between;align-items:end;margin:0 4px 12px}.section-head h3{font-size:28px;color:var(--wine2);margin:0}.section-head span{font:10px monospace;color:var(--muted);text-transform:uppercase}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:19px;padding:17px;box-shadow:0 3px 10px #4b382514}.panel h4{font-size:21px;color:var(--wine2);margin:0 0 10px}.item{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:12px;margin:8px 0;color:var(--ink);text-decoration:none}.item b{color:var(--wine2)}.item small{color:var(--muted);display:block;margin-top:3px}.right{display:flex;align-items:center;gap:8px}.badge{font-size:12px;color:var(--muted);white-space:nowrap}.donebtn,.addbtn{border:0;border-radius:999px;padding:8px 11px;background:var(--sage);color:#fff;font-weight:700;cursor:pointer}.water{font-size:32px;color:var(--sage);font-weight:700}.water-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.water-actions button{border:0;border-radius:999px;padding:9px 12px;background:var(--sage);color:white;font-weight:700}.empty{color:var(--muted);font-style:italic;padding:8px 0}.constant{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.quick-card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;text-decoration:none;color:var(--ink);min-height:130px}.quick-card .icon{font-size:30px}.quick-card h4{font-size:20px;color:var(--wine2);margin:8px 0 4px}.quick-card p{font-size:13px;color:var(--muted);margin:0}.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,1200px);height:72px;background:#28131af2;display:grid;grid-template-columns:repeat(6,1fr);z-index:50;border-radius:20px 20px 0 0}.bottom a{color:#d9cbb8;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px}.bottom i{font-style:normal;font-size:20px}.bottom a.active{color:var(--gold)}
+
+.cockpit{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 4px 14px #4b382518}
+.cockpit-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.cockpit-title h3{font-size:27px;color:var(--wine2);margin:0 0 5px}.cockpit-title p{margin:0;color:var(--muted)}
+.location-controls{display:flex;gap:7px;flex-wrap:wrap}.location-controls button{border:0;border-radius:999px;padding:9px 12px;background:var(--parch);color:var(--wine2);font-weight:700;cursor:pointer}
+.weather-grid{display:grid;grid-template-columns:1.3fr repeat(3,1fr);gap:10px;margin-top:15px}
+.weather-main,.weather-stat{background:var(--cream);border:1px solid var(--line);border-radius:15px;padding:14px}
+.weather-main{display:flex;align-items:center;gap:13px}.weather-icon{font-size:45px}.weather-temp{font-size:35px;font-weight:700;color:var(--wine2)}.weather-desc{color:var(--muted);font-size:13px}
+.weather-stat b{display:block;color:var(--wine2);font-size:17px;margin-bottom:4px}.weather-stat span{font-size:12px;color:var(--muted)}
+.day-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:10px}.fact{background:#fffaf0;border:1px solid var(--line);border-radius:13px;padding:11px}.fact b{display:block;color:var(--wine2);font-size:14px}.fact span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.status-wrap{display:grid;grid-template-columns:180px 1fr;gap:15px;margin-top:15px}.status-ring{width:155px;height:155px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;background:conic-gradient(var(--sage) 0deg,var(--sage) 0deg,#e5d8c1 0deg 360deg);position:relative}
+.status-ring:after{content:"";position:absolute;width:112px;height:112px;border-radius:50%;background:var(--paper)}.status-ring-content{position:relative;z-index:2;text-align:center}.status-ring-content strong{display:block;font-size:27px;color:var(--wine2)}.status-ring-content span{font-size:11px;color:var(--muted)}
+.status-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.status-chip{background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:11px;display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:var(--ink)}.status-chip b{color:var(--wine2);font-size:14px}.status-chip span{font-size:11px;color:var(--muted)}
+.recommendation{margin-top:13px;background:linear-gradient(135deg,#edf0df,#f7efd9);border-left:5px solid var(--sage);border-radius:13px;padding:13px;line-height:1.5}.recommendation b{color:var(--wine2)}
+.weather-updated{font-size:11px;color:var(--muted);margin-top:8px}.weather-error{color:#8f3030;font-size:12px;margin-top:8px}
+.location-dialog{display:none;margin-top:10px;background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:10px}.location-dialog.visible{display:flex;gap:7px}.location-dialog input{flex:1;border:1px solid var(--line);border-radius:999px;padding:9px 12px;background:white;font:inherit}.location-dialog button{border:0;border-radius:999px;padding:9px 12px;background:var(--wine);color:white;font-weight:700}
+@media(max-width:900px){.weather-grid{grid-template-columns:repeat(2,1fr)}.weather-main{grid-column:1/-1}.day-facts{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.status-wrap{grid-template-columns:1fr}.status-list{grid-template-columns:1fr}.cockpit{padding:14px}.weather-grid{grid-template-columns:1fr}.weather-main{grid-column:auto}.day-facts{grid-template-columns:1fr 1fr}.location-dialog.visible{display:grid;grid-template-columns:1fr}}
+
+@media(max-width:800px){.constant{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.brand h1{font-size:20px}.brand small{font-size:10px}.hero h2{font-size:31px}.bottom a{font-size:9px}.bottom i{font-size:19px}}
+@media(max-width:420px){main{padding:13px 11px 35px}.hero{padding:20px}.hero-actions{display:grid;grid-template-columns:1fr 1fr}.constant{grid-template-columns:1fr 1fr}.quick-card{min-height:112px;padding:13px}.top{padding:10px}.icons a{width:37px;height:37px}.bottom{height:70px}}
+
+.manage-strip{margin:16px 0 4px;background:#fffaf0;border:2px solid var(--gold);border-radius:18px;padding:14px 16px;box-shadow:0 5px 16px #4b38251c}.manage-title{display:flex;justify-content:space-between;align-items:center;color:var(--wine2);margin-bottom:10px}.manage-title strong{font-size:20px}.manage-title span{font:700 11px system-ui;background:var(--gold);color:var(--wine2);padding:5px 9px;border-radius:999px}.manage-actions{display:flex;gap:9px;flex-wrap:wrap}.manage-actions a{display:inline-flex;align-items:center;min-height:44px;padding:10px 15px;border-radius:999px;background:var(--wine);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 2px 7px #46131d22}.manage-actions a:nth-child(2){background:#3f5c68}.manage-actions a:nth-child(3){background:var(--sage)}@media(max-width:600px){.manage-actions{display:grid;grid-template-columns:1fr}.manage-actions a{justify-content:center}}
+</style><script src="alltagsbegleiter-sync.js"></script><script src="alltagsbegleiter-view.js"></script><script src="native-alarm.js"></script><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<style>
+/* Version 17: direkte, integrierte Eingabedialoge */
+.v17-open{border:0;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border-radius:999px;background:var(--wine);color:#fff;font:700 16px Georgia,serif;cursor:pointer;box-shadow:0 2px 7px #46131d22}.v17-open.term{background:#3f5c68}.v17-open.task{background:var(--sage)}
+.v17-modal[hidden]{display:none}.v17-modal{position:fixed;inset:0;z-index:12000;background:#1d0d12b8;display:flex;align-items:center;justify-content:center;padding:18px}.v17-dialog{width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--paper);border:2px solid var(--gold);border-radius:22px;box-shadow:0 20px 70px #0008;padding:20px}.v17-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.v17-head h3{margin:0;color:var(--wine2);font-size:26px}.v17-close{border:0;background:#67202d;color:white;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer}.v17-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v17-dialog label{display:block;color:var(--muted);font-weight:700;margin:6px 0}.v17-dialog input,.v17-dialog select,.v17-dialog textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--cream);font:inherit}.v17-dialog textarea{min-height:88px;resize:vertical}.v17-save{border:0;border-radius:999px;padding:12px 18px;background:var(--sage);color:white;font-weight:700;font-size:16px;cursor:pointer;margin-top:14px}.v17-sub{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.v17-note{margin-top:9px;color:var(--sage);font-weight:700;min-height:1.2em}.v17-manage-link{display:inline-block;margin-left:8px;color:var(--wine);font-weight:700}
+@media(max-width:620px){.v17-grid{grid-template-columns:1fr}.v17-dialog{padding:15px}.v17-head h3{font-size:22px}}
+</style><link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body>
+<header class="top"><div class="brand"><div class="seal">✦</div><div><h1>Alltagsbegleiter</h1><small>Deine persönliche Steuerzentrale</small></div></div><div class="icons"><a href="suche.html">🔎</a><a href="Wecker-Tablet.html">🔔</a></div></header>
+<main>
+<section class="hero"><div class="eyebrow">Heute</div><h2 id="greeting">Willkommen</h2><p id="dateLine"></p><div class="hero-actions"><a class="primary" href="Klangschale-Tablet.html">🔔 Klangschale starten</a><a class="secondary" href="heute.html">Heute im Detail</a><a class="secondary" href="aufgaben.html">Aufgabe hinzufügen</a></div></section>
+<section class="manage-strip" aria-label="Direkte Eingaben">
+  <div class="manage-title"><strong>Direkt eintragen</strong><span>Version 17</span></div>
+  <div class="manage-actions">
+    <button class="v17-open" data-v17-open="v17MedModal">💊 Medikament</button>
+    <button class="v17-open term" data-v17-open="v17AgendaModal">📅 Termin oder Geburtstag</button>
+    <button class="v17-open task" data-v17-open="v17TaskModal">✅ Aufgabe</button>
+  </div>
+</section>
+
+<section class="cockpit" id="dayCockpit">
+ <div class="cockpit-top">
+  <div class="cockpit-title">
+   <h3>Heute im Detail</h3>
+   <p id="cockpitDate">Tagesinformationen und aktuelles Wetter</p>
+  </div>
+  <div class="location-controls">
+   <button id="useLocation">📍 Mein Standort</button>
+   <button id="changeLocation">✏️ Standort ändern</button>
+  </div>
+ </div>
+ <div class="location-dialog" id="locationDialog">
+  <input id="locationInput" placeholder="Ort eingeben, z. B. Solingen">
+  <button id="saveLocation">Übernehmen</button>
+ </div>
+ <div class="weather-grid">
+  <div class="weather-main">
+   <div class="weather-icon" id="weatherIcon">🌤️</div>
+   <div><div class="weather-temp" id="weatherTemp">– °C</div><div class="weather-desc" id="weatherDesc">Wetter wird geladen …</div></div>
+  </div>
+  <div class="weather-stat"><b id="weatherFeels">– °C</b><span>Gefühlt</span></div>
+  <div class="weather-stat"><b id="weatherHumidity">– %</b><span>Luftfeuchtigkeit</span></div>
+  <div class="weather-stat"><b id="weatherWind">– km/h</b><span>Wind</span></div>
+  <div class="weather-stat"><b id="weatherRain">– %</b><span>Niederschlag</span></div>
+  <div class="weather-stat"><b id="weatherUV">–</b><span>UV-Index</span></div>
+  <div class="weather-stat"><b id="weatherHighLow">– / – °C</b><span>Tageshöchst-/Tiefstwert</span></div>
+  <div class="weather-stat"><b id="weatherLocation">Solingen</b><span>Standort</span></div>
+ </div>
+ <div class="day-facts">
+  <div class="fact"><b>📆 Kalenderwoche</b><span id="calendarWeek">–</span></div>
+  <div class="fact"><b>🌿 Jahreszeit</b><span id="seasonName">–</span></div>
+  <div class="fact"><b>✝️ Kirchenjahr</b><span id="churchSeason">–</span></div>
+  <div class="fact"><b>🌙 Mondphase</b><span id="moonPhase">–</span></div>
+  <div class="fact"><b>🌅 Sonnenaufgang</b><span id="sunrise">–</span></div>
+  <div class="fact"><b>🌇 Sonnenuntergang</b><span id="sunset">–</span></div>
+ </div>
+ <div class="status-wrap">
+  <div class="status-ring" id="statusRing"><div class="status-ring-content"><strong id="statusPercent">0 %</strong><span>Tagesstatus</span></div></div>
+  <div class="status-list" id="statusOverview"></div>
+ </div>
+ <div class="recommendation" id="dayRecommendation"><b>🌿 Tagesempfehlung:</b> Die Empfehlungen werden anhand von Wetter und offenen Punkten zusammengestellt.</div>
+ <div class="weather-updated" id="weatherUpdated"></div>
+ <div class="weather-error" id="weatherError"></div>
+</section>
+<section class="section"><div class="section-head"><h3>Jetzt passend</h3><span>aktuell & fällig</span></div><div class="grid">
+<div class="panel"><h4>🙏 Geistlicher Tagesweg</h4><div id="spiritual"></div></div>
+<div class="panel"><h4>💊 Medikamente</h4><div id="meds"></div><p style="margin:14px 0 0"><button class="v17-open" data-v17-open="v17MedModal">💊 Medikament hinzufügen</button><a class="v17-manage-link" href="medikamente.html">Verwalten →</a></p></div>
+<div class="panel"><h4>❤️ Routine</h4><div id="routines"></div></div>
+<div class="panel"><h4>📅 Termine, Geburtstage & Aufgaben</h4><div id="agenda"></div><p style="margin:14px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="v17-open term" data-v17-open="v17AgendaModal">📅 Termin / Geburtstag</button><button class="v17-open task" data-v17-open="v17TaskModal">✅ Aufgabe</button></p></div>
+<div class="panel"><h4>💧 Trinken</h4><div class="water" id="waterValue">0 / 2000 ml</div><div id="waterRest"></div><div class="water-actions"><button data-water="250">+250 ml</button><button data-water="500">+500 ml</button><button id="waterReset">Zurücksetzen</button></div></div>
+<div class="panel"><h4>🙏 Reiki-Tagesritual</h4><a class="item" href="reiki_tagesritual_tablet.html"><div><b>Reiki-Tagesritual</b><small>Direkt zur heutigen Übung</small></div><span class="badge">Öffnen</span></a></div>
+</div></section>
+<section class="section"><div class="section-head"><h3>Konstante Zugriffe</h3><span>immer erreichbar</span></div><div class="constant">
+<a class="quick-card" href="Klangschale-Tablet.html"><div class="icon">🔔</div><h4>Klangschale</h4><p>Mehrmals täglich direkt meditieren.</p></a>
+<a class="quick-card" href="kapelle-v10.html"><div class="icon">⛪</div><h4>Kapelle</h4><p>Gebet, Stundenbuch und Ewiges Licht.</p></a>
+<a class="quick-card" href="bibliothek-v10.html"><div class="icon">📚</div><h4>Bibliothek</h4><p>Lectio, Bibelleseplan und Sammlungen.</p></a>
+<a class="quick-card" href="aufgaben.html"><div class="icon">✅</div><h4>Aufgaben</h4><p>Einmalige und wiederkehrende Aufgaben.</p></a>
+</div></section>
+</main>
+<nav class="bottom"><a href="index.html"><i>⌂</i>Start</a><a class="active" href="heute.html"><i>◷</i>Heute</a><a href="kreuzgang.html"><i>🏛️</i>Kreuzgang</a><a href="klosterkompass.html"><i>🧭</i>Kompass</a><a href="kapelle-v10.html"><i>⛪</i>Kapelle</a><a href="index-system.html"><i>🛠️</i>Tools</a></nav>
+<!-- Version 17: integrierte Eingaben -->
+<div class="v17-modal" id="v17MedModal" hidden role="dialog" aria-modal="true" aria-labelledby="v17MedTitle">
+ <div class="v17-dialog"><div class="v17-head"><h3 id="v17MedTitle">💊 Medikament eintragen</h3><button class="v17-close" data-v17-close aria-label="Schließen">×</button></div>
+  <div class="v17-grid"><div><label for="v17MedName">Name</label><input id="v17MedName" autocomplete="off" placeholder="z. B. Medikament"></div><div><label for="v17MedDose">Dosierung</label><input id="v17MedDose" placeholder="z. B. 1 Tablette"></div><div><label for="v17MedTime">Uhrzeit</label><input id="v17MedTime" type="time"></div><div><label for="v17MedRhythm">Rhythmus</label><select id="v17MedRhythm"><option>Täglich</option><option>Bei Bedarf</option><option>Morgens</option><option>Mittags</option><option>Abends</option></select></div></div>
+  <label for="v17MedNotes">Notiz</label><textarea id="v17MedNotes" placeholder="Zusätzliche Hinweise"></textarea><button class="v17-save" id="v17SaveMed">Medikament speichern</button><a class="v17-manage-link" href="medikamente.html">Alle Medikamente verwalten →</a><div class="v17-note" id="v17MedNote"></div>
+ </div>
+</div>
+<div class="v17-modal" id="v17AgendaModal" hidden role="dialog" aria-modal="true" aria-labelledby="v17AgendaTitle">
+ <div class="v17-dialog"><div class="v17-head"><h3 id="v17AgendaTitle">📅 Termin oder Geburtstag</h3><button class="v17-close" data-v17-close aria-label="Schließen">×</button></div>
+  <h4>Termin</h4><div class="v17-grid"><div><label for="v17ApptDate">Datum</label><input id="v17ApptDate" type="date"></div><div><label for="v17ApptTime">Uhrzeit</label><input id="v17ApptTime" type="time"></div><div><label for="v17ApptDoctor">Termin / Person / Ort</label><input id="v17ApptDoctor" placeholder="z. B. Hausarzt"></div><div><label for="v17ApptReason">Anlass</label><input id="v17ApptReason" placeholder="z. B. Kontrolle"></div><div><label for="v17ApptRec">Wiederholung</label><select id="v17ApptRec"><option value="none">Einmalig</option><option value="daily">Täglich</option><option value="weekly">Wöchentlich</option><option value="monthly">Monatlich</option><option value="yearly">Jährlich</option></select></div></div><label for="v17ApptNotes">Notiz</label><textarea id="v17ApptNotes"></textarea><button class="v17-save" id="v17SaveAppt">Termin speichern</button>
+  <div class="v17-sub"><h4>Geburtstag</h4><div class="v17-grid"><div><label for="v17BirthName">Name</label><input id="v17BirthName"></div><div><label for="v17BirthDate">Geburtsdatum</label><input id="v17BirthDate" type="date"></div></div><button class="v17-save" id="v17SaveBirth">Geburtstag speichern</button></div>
+  <a class="v17-manage-link" href="arzttermine.html">Alle Termine und Geburtstage verwalten →</a><div class="v17-note" id="v17AgendaNote"></div>
+ </div>
+</div>
+<div class="v17-modal" id="v17TaskModal" hidden role="dialog" aria-modal="true" aria-labelledby="v17TaskTitle">
+ <div class="v17-dialog"><div class="v17-head"><h3 id="v17TaskTitle">✅ Aufgabe eintragen</h3><button class="v17-close" data-v17-close aria-label="Schließen">×</button></div>
+  <div class="v17-grid"><div><label for="v17TaskName">Aufgabe</label><input id="v17TaskName" placeholder="Was ist zu tun?"></div><div><label for="v17TaskDate">Datum</label><input id="v17TaskDate" type="date"></div><div><label for="v17TaskTime">Uhrzeit</label><input id="v17TaskTime" type="time"></div><div><label for="v17TaskRec">Wiederholung</label><select id="v17TaskRec"><option value="none">Einmalig</option><option value="daily">Täglich</option><option value="weekly">Wöchentlich</option><option value="monthly">Monatlich</option><option value="yearly">Jährlich</option></select></div></div><button class="v17-save" id="v17SaveTask">Aufgabe speichern</button><a class="v17-manage-link" href="aufgaben.html">Alle Aufgaben verwalten →</a><div class="v17-note" id="v17TaskNote"></div>
+ </div>
+</div>
+
+<script>
+const TODAY=localDateKey(new Date()),now=new Date();
+function localDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function parseJSON(k,f){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f))}catch(e){return f}}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function item(title,sub,href,action=''){return `<a class="item" href="${href}"><div><b>${title}</b><small>${sub}</small></div><div class="right">${action}</div></a>`}
+document.getElementById('greeting').textContent=now.getHours()<12?'Guten Morgen, Walter':now.getHours()<18?'Guten Tag, Walter':'Guten Abend, Walter';document.getElementById('dateLine').textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+// Spiritual
+function currentOffice(){const h=now.getHours();return h<5?'Matutin':h<9?'Laudes':h<12?'Terz':h<15?'Sext':h<18?'Non':h<21?'Vesper':'Komplet'}
+function lectioInfo(){const year=now.getFullYear(),cycle=['a','b','c'][(year-2026)%3<0?((year-2026)%3+3)%3:(year-2026)%3],label=cycle.toUpperCase();const names=['januar','februar','maerz','april','mai','juni','juli','august','september','oktober','november','dezember'];const m=now.getMonth()+1,d=now.getDate();return {label,href:`spirituelle-bibliothek/${cycle}/${String(m).padStart(2,'0')}-${names[m-1]}.html?day=${d}`}}
+function bibleHref(){const y=now.getFullYear();return y<2028?'bibelleseplan_26-28_tablet.html':'bibelleseplan_28-30_tablet.html'}
+const li=lectioInfo();spiritual.innerHTML=item('Aktuelles Stundengebet: '+currentOffice(),'Direkt zum Kartäuser-Stundenbuch','kartaeuser-stundenbuch/index.html','<span class="badge">Öffnen</span>')+item('Lectio Divina · Lesejahr '+li.label,'Heutiger Tag',li.href,'<span class="badge">Heute</span>')+item('Bibelleseplan','Aktueller Tag im Plan',bibleHref(),'<span class="badge">Heute</span>');
+// Medications
+function medTimes(m){return String(m.time||'').match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g)||[]}
+function completedMap(){return parseJSON('alltagsbegleiter.medikamente.erledigt.v1',{})}
+function medDue(){const arr=parseJSON('digitales_kloster.medikamente.v1',[]),done=completedMap(),mins=now.getHours()*60+now.getMinutes(),out=[];arr.forEach((m,idx)=>medTimes(m).forEach(t=>{const [h,mi]=t.split(':').map(Number),tm=h*60+mi,key=TODAY+'|'+idx+'|'+t;if(done[key])return;let relevant=(h<12)||(h>=12&&h<16)||(h>=18&&h<=22);if(relevant && mins>=tm)out.push({m,idx,t,key,overdue:mins>=tm+60})}));return out}
+function renderMeds(){const due=medDue();meds.innerHTML=due.length?'':'<div class="empty">Derzeit keine fällige Medikation.</div>';due.forEach(x=>{const d=document.createElement('div');d.className='item';d.innerHTML=`<div><b>${esc(x.m.name)}</b><small>${esc(x.m.dose)} · ${x.t}${x.overdue?' · Erinnerung':''}</small></div><button class="donebtn" data-med="${x.key}">Erledigt</button>`;meds.appendChild(d)})}
+document.addEventListener('click',e=>{if(e.target.dataset.med){e.preventDefault();const d=completedMap();d[e.target.dataset.med]=new Date().toISOString();localStorage.setItem('alltagsbegleiter.medikamente.erledigt.v1',JSON.stringify(d));renderMeds();renderAgenda();renderStatus()}});renderMeds();
+// In-app notification while open
+async function notifyDue(){const overdue=medDue().filter(x=>x.overdue);if(!overdue.length||!('Notification'in window))return;const sent=parseJSON('alltagsbegleiter.medikamente.benachrichtigt.v1',{});if(Notification.permission==='default')Notification.requestPermission();if(Notification.permission==='granted')overdue.forEach(x=>{if(!sent[x.key]){new Notification('Medikamentenerinnerung',{body:`${x.m.name} war für ${x.t} Uhr vorgesehen.`});sent[x.key]=Date.now()}});localStorage.setItem('alltagsbegleiter.medikamente.benachrichtigt.v1',JSON.stringify(sent))}notifyDue();setInterval(notifyDue,60000);
+// routines
+function hasBP(){return localStorage.getItem('bp:entry:'+TODAY)!=null}
+function hasTraining(){return localStorage.getItem('trainingscheck_checks:'+TODAY)!=null}
+function hasApnoe(){return parseJSON('apnoe_tracker_entries_v1',[]).some(x=>x.datum===TODAY)}
+function renderRoutines(){const rs=[['🫀 Blutdruck','blutdruck-app-tablet.html',hasBP()],['🧭 Trainingscheck','trainingscheck-tablet.html',hasTraining()],['🌙 Apnoe-App','apnoe-tracker-tablet.html',hasApnoe()]];routines.innerHTML='';const open=rs.filter(x=>!x[2]);if(!open.length)routines.innerHTML='<div class="empty">Alle Routinen für heute eingetragen.</div>';open.forEach(x=>routines.innerHTML+=item(x[0],'Heute noch offen',x[1],'<span class="badge">Eintragen</span>'))}renderRoutines();
+// agenda/tasks/appointments/birthdays
+function occurrenceToday(x){if(x.type==='Geburtstag'){const md=String(x.date||'').slice(5);return md===TODAY.slice(5)}if(x.recurrence==='yearly')return String(x.date||'').slice(5)===TODAY.slice(5);if(x.recurrence==='monthly')return String(x.date||'').slice(8)===TODAY.slice(8);if(x.recurrence==='weekly'){const base=new Date(x.date+'T00:00:00');return base.getDay()===now.getDay()&&x.date<=TODAY}if(x.recurrence==='daily')return x.date<=TODAY;return x.date===TODAY}
+function ageFor(x){if(x.type!=='Geburtstag'||!x.birthYear)return '';return ' · '+(now.getFullYear()-Number(x.birthYear))+'. Geburtstag'}
+function taskDone(){return parseJSON('alltagsbegleiter.erledigt.v1',{})}
+function renderAgenda(){const done=taskDone(),appointments=parseJSON('digitales_kloster.arzttermine.v1',[]),birthdays=parseJSON('alltagsbegleiter.geburtstage.v1',[]),tasks=parseJSON('alltagsbegleiter.aufgaben.v1',[]),all=[];appointments.filter(occurrenceToday).forEach((x,i)=>all.push({kind:'Termin',title:x.doctor||x.reason||'Termin',sub:(x.time||'')+' '+(x.reason||''),key:TODAY+'|appt|'+i,href:'arzttermine.html'}));birthdays.filter(occurrenceToday).forEach((x,i)=>all.push({kind:'Geburtstag',title:x.name,sub:'Geburtstag'+ageFor(x),key:TODAY+'|birth|'+i,href:'arzttermine.html'}));tasks.filter(occurrenceToday).forEach((x,i)=>all.push({kind:'Aufgabe',title:x.title,sub:x.time||x.recurrence||'',key:TODAY+'|task|'+i,href:'aufgaben.html'}));const open=all.filter(x=>!done[x.key]);agenda.innerHTML=open.length?'':'<div class="empty">Keine offenen Termine, Geburtstage oder Aufgaben.</div>';open.forEach(x=>{const d=document.createElement('div');d.className='item';d.innerHTML=`<a href="${x.href}" style="color:inherit;text-decoration:none;flex:1"><b>${esc(x.title)}</b><small>${esc(x.kind)} · ${esc(x.sub)}</small></a><button class="donebtn" data-agenda="${x.key}">Erledigt</button>`;agenda.appendChild(d)})}
+document.addEventListener('click',e=>{if(e.target.dataset.agenda){const d=taskDone();d[e.target.dataset.agenda]=new Date().toISOString();localStorage.setItem('alltagsbegleiter.erledigt.v1',JSON.stringify(d));renderAgenda();renderStatus()}});renderAgenda();
+// water
+const WK='digitales_kloster.water.v1';function waterData(){return parseJSON(WK,{})}function renderWater(){const o=waterData(),v=Number(o[TODAY]||0),rest=Math.max(0,2000-v);waterValue.textContent=v+' / 2000 ml';waterRest.textContent=rest?'Noch '+rest+' ml bis zum Tagesziel.':'Tagesziel erreicht.'}document.querySelectorAll('[data-water]').forEach(b=>b.onclick=()=>{const o=waterData();o[TODAY]=Number(o[TODAY]||0)+Number(b.dataset.water);localStorage.setItem(WK,JSON.stringify(o));renderWater();renderStatus()});waterReset.onclick=()=>{const o=waterData();o[TODAY]=0;localStorage.setItem(WK,JSON.stringify(o));renderWater();renderStatus()};renderWater();
+
+// Tagescockpit, Wetter und Status
+const WEATHER_CACHE='alltagsbegleiter.weather.cache.v1';
+const LOCATION_KEY='alltagsbegleiter.weather.location.v1';
+const DEFAULT_LOCATION={name:'Solingen',latitude:51.1700,longitude:7.0833};
+
+function isoWeek(date){
+ const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+ const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);
+ const start=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+ return Math.ceil((((d-start)/86400000)+1)/7);
+}
+function seasonFor(d){const m=d.getMonth()+1;return m>=3&&m<=5?'Frühling':m>=6&&m<=8?'Sommer':m>=9&&m<=11?'Herbst':'Winter'}
+function easterDate(year){
+ const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
+ return new Date(year,month-1,day);
+}
+function churchSeasonFor(date){
+ const y=date.getFullYear(),e=easterDate(y),ash=new Date(e),palm=new Date(e),pent=new Date(e);
+ ash.setDate(e.getDate()-46);palm.setDate(e.getDate()-7);pent.setDate(e.getDate()+49);
+ const advent=new Date(y,10,27);while(advent.getDay()!==0)advent.setDate(advent.getDate()+1);
+ const christmasStart=new Date(y,11,25),christmasEnd=new Date(y+1,0,13),prevChristmas=new Date(y-1,11,25),prevChristmasEnd=new Date(y,0,13);
+ if((date>=christmasStart&&date<=christmasEnd)||(date>=prevChristmas&&date<=prevChristmasEnd))return 'Weihnachtszeit';
+ if(date>=advent&&date<christmasStart)return 'Advent';
+ if(date>=ash&&date<palm)return 'Fastenzeit';
+ if(date>=palm&&date<e)return 'Karwoche';
+ if(date>=e&&date<=pent)return 'Osterzeit';
+ return 'Zeit im Jahreskreis';
+}
+function moonPhaseFor(date){
+ const synodic=29.53058867,known=new Date(Date.UTC(2000,0,6,18,14)),age=((((date-known)/86400000)%synodic)+synodic)%synodic;
+ if(age<1.85)return 'Neumond';if(age<5.54)return 'Zunehmende Sichel';if(age<9.23)return 'Erstes Viertel';if(age<12.92)return 'Zunehmender Mond';
+ if(age<16.61)return 'Vollmond';if(age<20.30)return 'Abnehmender Mond';if(age<23.99)return 'Letztes Viertel';if(age<27.68)return 'Abnehmende Sichel';return 'Neumond';
+}
+const WMO={0:['☀️','Klar'],1:['🌤️','Überwiegend klar'],2:['⛅','Teilweise bewölkt'],3:['☁️','Bedeckt'],45:['🌫️','Nebel'],48:['🌫️','Reifnebel'],51:['🌦️','Leichter Nieselregen'],53:['🌦️','Nieselregen'],55:['🌧️','Starker Nieselregen'],61:['🌦️','Leichter Regen'],63:['🌧️','Regen'],65:['🌧️','Starker Regen'],66:['🌧️','Gefrierender Regen'],67:['🌧️','Starker gefrierender Regen'],71:['🌨️','Leichter Schneefall'],73:['🌨️','Schneefall'],75:['❄️','Starker Schneefall'],77:['🌨️','Schneegriesel'],80:['🌦️','Leichte Regenschauer'],81:['🌧️','Regenschauer'],82:['⛈️','Starke Regenschauer'],85:['🌨️','Schneeschauer'],86:['❄️','Starke Schneeschauer'],95:['⛈️','Gewitter'],96:['⛈️','Gewitter mit Hagel'],99:['⛈️','Starkes Gewitter mit Hagel']};
+function storedLocation(){return parseJSON(LOCATION_KEY,DEFAULT_LOCATION)}
+function saveStoredLocation(loc){localStorage.setItem(LOCATION_KEY,JSON.stringify(loc))}
+function formatTime(v){if(!v)return '–';const d=new Date(v);return d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}
+function renderWeather(payload,loc,cached=false){
+ const c=payload.current||{},d=payload.daily||{},code=WMO[c.weather_code]||['🌤️','Wechselhaft'];
+ weatherIcon.textContent=code[0];weatherTemp.textContent=Math.round(c.temperature_2m??0)+' °C';weatherDesc.textContent=code[1];
+ weatherFeels.textContent=Math.round(c.apparent_temperature??0)+' °C';weatherHumidity.textContent=Math.round(c.relative_humidity_2m??0)+' %';weatherWind.textContent=Math.round(c.wind_speed_10m??0)+' km/h';
+ weatherRain.textContent=Math.round((d.precipitation_probability_max||[0])[0]??0)+' %';weatherUV.textContent=Number((d.uv_index_max||[0])[0]??0).toFixed(1);
+ weatherHighLow.textContent=Math.round((d.temperature_2m_max||[0])[0]??0)+' / '+Math.round((d.temperature_2m_min||[0])[0]??0)+' °C';
+ weatherLocation.textContent=loc.name||'Aktueller Standort';sunrise.textContent=formatTime((d.sunrise||[])[0]);sunset.textContent=formatTime((d.sunset||[])[0]);
+ weatherUpdated.textContent=(cached?'Zuletzt gespeicherte Wetterdaten · ':'Aktualisiert · ')+new Date(payload.savedAt||Date.now()).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+ weatherError.textContent='';updateRecommendation(payload);
+}
+async function fetchWeather(loc){
+ weatherError.textContent='Wetter wird aktualisiert …';
+ const url='https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(loc.latitude)+'&longitude='+encodeURIComponent(loc.longitude)+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=sunrise,sunset,precipitation_probability_max,uv_index_max,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1';
+ try{
+  const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('Wetterdienst nicht erreichbar');
+  const data=await r.json();data.savedAt=Date.now();localStorage.setItem(WEATHER_CACHE,JSON.stringify({data,loc}));renderWeather(data,loc,false);
+ }catch(e){
+  const cache=parseJSON(WEATHER_CACHE,null);
+  if(cache&&cache.data)renderWeather(cache.data,cache.loc||loc,true);
+  weatherError.textContent=cache?'Offline: Die zuletzt gespeicherten Wetterdaten werden angezeigt.':'Wetterdaten konnten nicht geladen werden.';
+ }
+}
+async function geocodePlace(name){
+ const u='https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(name)+'&count=1&language=de&format=json';
+ const r=await fetch(u);if(!r.ok)throw new Error('Ort nicht gefunden');const j=await r.json();if(!j.results||!j.results.length)throw new Error('Ort nicht gefunden');
+ const x=j.results[0];return {name:x.name+(x.admin1?' · '+x.admin1:''),latitude:x.latitude,longitude:x.longitude};
+}
+changeLocation.onclick=()=>locationDialog.classList.toggle('visible');
+saveLocation.onclick=async()=>{const name=locationInput.value.trim();if(!name)return;try{weatherError.textContent='Ort wird gesucht …';const loc=await geocodePlace(name);saveStoredLocation(loc);locationDialog.classList.remove('visible');fetchWeather(loc)}catch(e){weatherError.textContent=e.message}};
+useLocation.onclick=()=>{if(!navigator.geolocation){weatherError.textContent='Standortbestimmung wird nicht unterstützt.';return}weatherError.textContent='Standort wird ermittelt …';navigator.geolocation.getCurrentPosition(p=>{const loc={name:'Mein Standort',latitude:p.coords.latitude,longitude:p.coords.longitude};saveStoredLocation(loc);fetchWeather(loc)},()=>weatherError.textContent='Standortfreigabe nicht möglich. Der gespeicherte Ort bleibt aktiv.',{enableHighAccuracy:false,timeout:10000,maximumAge:3600000})};
+
+function statusData(){
+ const medsOpen=medDue().length,routineOpen=[hasBP(),hasTraining(),hasApnoe()].filter(x=>!x).length,done=taskDone(),appointments=parseJSON('digitales_kloster.arzttermine.v1',[]),birthdays=parseJSON('alltagsbegleiter.geburtstage.v1',[]),tasks=parseJSON('alltagsbegleiter.aufgaben.v1',[]);
+ let agendaOpen=0;
+ appointments.filter(occurrenceToday).forEach((x,i)=>{if(!done[TODAY+'|appt|'+i])agendaOpen++});
+ birthdays.filter(occurrenceToday).forEach((x,i)=>{if(!done[TODAY+'|birth|'+i])agendaOpen++});
+ tasks.filter(occurrenceToday).forEach((x,i)=>{if(!done[TODAY+'|task|'+i])agendaOpen++});
+ const water=Number(waterData()[TODAY]||0);
+ return [
+  {name:'Medikamente',icon:'💊',open:medsOpen,href:'#meds',label:medsOpen?medsOpen+' offen':'erledigt'},
+  {name:'Routinen',icon:'❤️',open:routineOpen,href:'#routines',label:routineOpen?routineOpen+' offen':'erledigt'},
+  {name:'Termine & Aufgaben',icon:'📋',open:agendaOpen,href:'#agenda',label:agendaOpen?agendaOpen+' offen':'nichts offen'},
+  {name:'Trinken',icon:'💧',open:water>=2000?0:1,href:'#waterValue',label:water+' / 2000 ml'}
+ ];
+}
+function renderStatus(){
+ const arr=statusData(),completed=arr.reduce((s,x)=>s+(x.open===0?1:0),0),percent=Math.round(completed/arr.length*100),deg=percent*3.6;
+ statusRing.style.background='conic-gradient(var(--sage) 0deg,var(--sage) '+deg+'deg,#e5d8c1 '+deg+'deg 360deg)';
+ statusPercent.textContent=percent+' %';statusOverview.innerHTML='';
+ arr.forEach(x=>{const a=document.createElement('a');a.className='status-chip';a.href=x.href;a.innerHTML='<b>'+x.icon+' '+x.name+'</b><span>'+x.label+'</span>';statusOverview.appendChild(a)});
+}
+function updateRecommendation(weather){
+ const d=weather.daily||{},c=weather.current||{},rain=Number((d.precipitation_probability_max||[0])[0]||0),max=Number((d.temperature_2m_max||[0])[0]||0),uv=Number((d.uv_index_max||[0])[0]||0),wind=Number(c.wind_speed_10m||0),st=statusData(),water=Number(waterData()[TODAY]||0),parts=[];
+ if(max>=27)parts.push('Heute wird es warm. Plane zusätzliche Trinkpausen ein.');
+ if(water<1000&&now.getHours()>=12)parts.push('Dein Trinkstand liegt noch unter 1.000 ml.');
+ if(rain>=60)parts.push('Für Bewegung bietet sich heute eher eine Übung im Haus oder eine Meditation an.');
+ else if(wind<25&&max>=8&&max<=26)parts.push('Das Wetter eignet sich voraussichtlich gut für Nordic Walking.');
+ if(uv>=6)parts.push('Achte bei längerem Aufenthalt draußen auf Sonnenschutz.');
+ if(st[0].open>0)parts.push('Es sind Medikamente zur Einnahme offen.');
+ if(st[1].open>0)parts.push('Mindestens eine Vorsorgeroutine ist heute noch offen.');
+ if(!parts.length)parts.push('Der Tag wirkt gut geordnet. Eine kurze Klangschalenmeditation kann einen ruhigen Akzent setzen.');
+ dayRecommendation.innerHTML='<b>🌿 Tagesempfehlung:</b> '+parts.join(' ');
+}
+cockpitDate.textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+' · '+now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+calendarWeek.textContent='KW '+isoWeek(now);seasonName.textContent=seasonFor(now);churchSeason.textContent=churchSeasonFor(now);moonPhase.textContent=moonPhaseFor(now);
+renderStatus();fetchWeather(storedLocation());
+
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+</script>
+<script>
+(() => {
+ 'use strict';
+ const $=id=>document.getElementById(id); const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ const read=(k)=>{try{const v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[]}catch(e){return[]}};
+ const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));window.dispatchEvent(new Event('storage'));};
+ function open(id){const m=$(id);if(!m)return;m.hidden=false;document.body.style.overflow='hidden';const f=m.querySelector('input');if(f)setTimeout(()=>f.focus(),30)}
+ function close(m){m.hidden=true;document.body.style.overflow=''}
+ document.querySelectorAll('[data-v17-open]').forEach(b=>b.addEventListener('click',()=>open(b.dataset.v17Open)));
+ document.querySelectorAll('[data-v17-close]').forEach(b=>b.addEventListener('click',()=>close(b.closest('.v17-modal'))));
+ document.querySelectorAll('.v17-modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)close(m)}));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.v17-modal:not([hidden])').forEach(close)});
+ const td=today(); ['v17ApptDate','v17BirthDate','v17TaskDate'].forEach(id=>{if($(id))$(id).value=td});
+ $('v17SaveMed')?.addEventListener('click',()=>{const name=$('v17MedName').value.trim();if(!name){$('v17MedNote').textContent='Bitte den Namen eintragen.';$('v17MedName').focus();return}const a=read('digitales_kloster.medikamente.v1');a.push({name,dose:$('v17MedDose').value.trim(),time:$('v17MedTime').value,rhythm:$('v17MedRhythm').value,notes:$('v17MedNotes').value.trim(),updatedAt:new Date().toISOString()});write('digitales_kloster.medikamente.v1',a);$('v17MedNote').textContent='Gespeichert.';['v17MedName','v17MedDose','v17MedTime','v17MedNotes'].forEach(id=>$(id).value='');if(typeof renderMeds==='function')renderMeds();setTimeout(()=>close($('v17MedModal')),550)});
+ $('v17SaveAppt')?.addEventListener('click',()=>{const date=$('v17ApptDate').value,doctor=$('v17ApptDoctor').value.trim(),reason=$('v17ApptReason').value.trim();if(!date||(!doctor&&!reason)){$('v17AgendaNote').textContent='Bitte Datum und Termin oder Anlass eintragen.';return}const a=read('digitales_kloster.arzttermine.v1');a.push({date,time:$('v17ApptTime').value,doctor,reason,notes:$('v17ApptNotes').value.trim(),recurrence:$('v17ApptRec').value,type:'Termin',updatedAt:new Date().toISOString()});write('digitales_kloster.arzttermine.v1',a);$('v17AgendaNote').textContent='Termin gespeichert.';if(typeof renderAgenda==='function')renderAgenda();setTimeout(()=>close($('v17AgendaModal')),650)});
+ $('v17SaveBirth')?.addEventListener('click',()=>{const name=$('v17BirthName').value.trim(),date=$('v17BirthDate').value;if(!name||!date){$('v17AgendaNote').textContent='Bitte Name und Geburtsdatum eintragen.';return}const a=read('alltagsbegleiter.geburtstage.v1');a.push({name,date,birthYear:date.slice(0,4),type:'Geburtstag',recurrence:'yearly',updatedAt:new Date().toISOString()});write('alltagsbegleiter.geburtstage.v1',a);$('v17AgendaNote').textContent='Geburtstag gespeichert.';if(typeof renderAgenda==='function')renderAgenda();setTimeout(()=>close($('v17AgendaModal')),650)});
+ $('v17SaveTask')?.addEventListener('click',()=>{const title=$('v17TaskName').value.trim(),date=$('v17TaskDate').value;if(!title||!date){$('v17TaskNote').textContent='Bitte Aufgabe und Datum eintragen.';return}const a=read('alltagsbegleiter.aufgaben.v1');a.push({title,date,time:$('v17TaskTime').value,recurrence:$('v17TaskRec').value,type:'Aufgabe',updatedAt:new Date().toISOString()});write('alltagsbegleiter.aufgaben.v1',a);$('v17TaskNote').textContent='Aufgabe gespeichert.';if(typeof renderAgenda==='function')renderAgenda();setTimeout(()=>close($('v17TaskModal')),550)});
+})();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

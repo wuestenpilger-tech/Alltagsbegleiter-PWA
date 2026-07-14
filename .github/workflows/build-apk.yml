@@ -1,0 +1,70 @@
+name: Android APK erstellen
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+      - hauptsächlich
+    paths:
+      - "android/**"
+      - "www/**"
+      - "package.json"
+      - "package-lock.json"
+      - "capacitor.config.ts"
+      - ".github/workflows/build-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Projekt laden
+        uses: actions/checkout@v4
+
+      - name: Java 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Node.js 22 einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: pnpm einrichten
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Abhängigkeiten installieren
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Capacitor-Version anzeigen
+        run: pnpm exec cap --version
+
+      - name: Capacitor Android synchronisieren
+        run: pnpm exec cap sync android
+
+      - name: Gradle ausführbar machen
+        run: chmod +x android/gradlew
+
+      - name: APK erstellen
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: APK bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: Alltagsbegleiter-Version-22.6.1-STABIL-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

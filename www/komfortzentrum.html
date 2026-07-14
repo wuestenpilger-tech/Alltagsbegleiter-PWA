@@ -1,0 +1,59 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Komfortzentrum</title><script src="shared-store.js"></script><style>
+:root{
+ --parch:#eee3cb;--parch2:#e5d4b1;--paper:#f8f1e2;--ink:#30271d;--muted:#6c5f50;
+ --wine:#67202d;--wine2:#46131d;--gold:#b58a3d;--gold2:#d4b36c;--sage:#617058;
+ --wood:#5d3d2a;--night:#172033;--line:#d6c39c;--cream:#fffaf0;--blue:#3f5c68;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--parch);color:var(--ink);font-family:Georgia,'Times New Roman',serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+header{position:relative;background:linear-gradient(135deg,var(--night),var(--blue));color:#fff8e8;padding:36px 22px;text-align:center}
+.back{position:absolute;left:18px;top:18px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff20}
+header h1{font-size:42px;margin:0 0 6px}header p{margin:0;color:#dce3e8}
+main{max-width:1000px;margin:auto;padding:24px 18px 60px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px}
+.card h2{margin-top:0;color:var(--wine2)}.links{display:grid;gap:10px}
+.link{display:flex;justify-content:space-between;align-items:center;background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:13px}
+.link b{color:var(--wine2)}.link span{font-size:12px;color:var(--muted)}
+.note{background:var(--cream);border-left:4px solid var(--gold);padding:13px;border-radius:10px;line-height:1.5}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}</style><script src="alltagsbegleiter-sync.js"></script><script src="alltagsbegleiter-view.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body><header><a class="back" href="index.html">←</a><h1>🛠️ Komfortzentrum</h1><p>Sicherung, Jahresbuch, Spracheingabe und Systemzugriff</p></header>
+<main><div class="grid">
+<section class="card"><h2>Daten & Sicherung</h2><div class="links">
+<a class="link" href="synchronisation.html"><b>🔄 Tablet ↔ Handy</b><span>Gesamtdaten übertragen</span></a><a class="link" href="sicherung-v10.html"><b>🔐 Verschlüsselte Sicherung</b><span>Export & Import</span></a>
+<a class="link" href="index-system.html"><b>💾 Klassische Gesamtsicherung</b><span>Alle Apps</span></a>
+<a class="link" href="jahresbuch.html"><b>📜 Jahresbuch</b><span>Druck / PDF</span></a>
+</div></section>
+<section class="card"><h2>Eingabe & Bedienung</h2><div class="links">
+<a class="link" href="skriptorium.html"><b>🎤 Skriptorium</b><span>mit Spracheingabe</span></a>
+<a class="link" href="schatzkammer.html"><b>🎤 Schatzkammer</b><span>mit Spracheingabe</span></a>
+<a class="link" href="lebensbuch.html"><b>🎤 Lebensbuch</b><span>mit Spracheingabe</span></a>
+<a class="link" href="suche.html"><b>🔎 Globale Suche</b><span>alle Bereiche</span></a>
+</div></section>
+<section class="card"><h2>Tablet</h2><div class="links">
+<a class="link" href="erinnerungen-native.html"><b>🔔 Native Erinnerungen</b><span>auch bei geschlossener App</span></a><a class="link" href="Wecker-Tablet.html"><b>⏰ Klosterglocke</b><span>Wecker & Timer</span></a>
+<a class="link" href="heute.html"><b>◷ Heute</b><span>Tagesübersicht</span></a>
+<a class="link" href="index-phase3.html"><b>↩ Phase 3</b><span>vorherige Startseite</span></a>
+</div></section>
+<section class="card"><h2>Hinweise</h2><div class="note">
+Die verschlüsselte Sicherung verwendet die Web-Crypto-Funktion des Browsers. Das Passwort wird nicht gespeichert. Ohne das richtige Passwort kann die Sicherung nicht wiederhergestellt werden.
+</div></section>
+</div></main><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

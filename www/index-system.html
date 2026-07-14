@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="theme-color" content="#121A2C">
+<title>Alltagsschrank · Tablet-System 4.5</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,750&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="shared-store.js"></script>
+<style>
+:root{
+  --bg:#E9E3D5;--panel:#F7F2E8;--panel2:#EEE6D7;--ink:#211F1A;--muted:#655F55;--line:#D5CCB9;
+  --nav:#121A2C;--nav2:#1E2A44;--gold:#D8AE58;--wine:#7B2E3B;--sage:#5F7355;--blue:#36566F;--amber:#B8862E;
+  --display:'Fraunces',serif;--body:'Work Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--body)}
+body{padding-bottom:82px}
+.shell{max-width:1200px;margin:0 auto;min-height:100vh}
+.topbar{
+  position:sticky;top:0;z-index:30;background:linear-gradient(135deg,var(--nav),var(--nav2));color:white;
+  padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  box-shadow:0 5px 20px rgba(18,26,44,.16)
+}
+.brand{display:flex;align-items:center;gap:13px}.brand-icon{width:46px;height:46px;border-radius:14px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:25px;color:var(--nav)}
+.brand h1{font-family:var(--display);font-size:26px;margin:0}.brand small{display:block;color:#C8CDD8;font-size:12px;margin-top:2px}
+.top-actions{display:flex;gap:9px}.icon-btn{width:42px;height:42px;border:0;border-radius:12px;background:rgba(255,255,255,.1);color:white;font-size:19px;cursor:pointer}
+main{padding:26px 22px 36px}
+.view{display:none}.view.active{display:block}
+.hero-card{
+  background:linear-gradient(145deg,#263757,var(--nav));color:white;border-radius:26px;padding:28px;position:relative;overflow:hidden;margin-bottom:24px
+}
+.hero-card:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:rgba(216,174,88,.10);right:-80px;top:-100px}
+.hero-card .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.hero-card h2{font-family:var(--display);font-size:36px;margin:7px 0 8px}
+.hero-card p{margin:0;color:#D2D6DE;max-width:700px;line-height:1.5}
+.quick-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.quick-row a,.quick-row button{border:0;border-radius:999px;padding:11px 16px;font-weight:700;text-decoration:none;cursor:pointer}
+.quick-primary{background:var(--gold);color:var(--nav)}.quick-secondary{background:rgba(255,255,255,.1);color:white}
+.section{margin:26px 0}.section-head{display:flex;align-items:end;justify-content:space-between;margin:0 4px 13px}
+.section-head h3{font-family:var(--display);font-size:27px;margin:0;color:var(--nav)}.section-head span{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.tile{
+  --accent:var(--gold);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;text-decoration:none;color:var(--ink);
+  position:relative;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 2px 9px rgba(33,31,26,.04)
+}
+.tile:before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:20px 0 0 20px;background:var(--accent)}
+.tile-icon{font-size:31px}.tile h4{font-family:var(--display);font-size:21px;margin:10px 0 5px}.tile p{margin:0;color:var(--muted);font-size:13px;line-height:1.42}
+.tile .fav{position:absolute;right:10px;top:9px;border:0;background:transparent;font-size:20px;cursor:pointer;color:#B5AD9E}
+.tile .fav.active{color:var(--gold)}
+.wine{--accent:var(--wine)}.sage{--accent:var(--sage)}.blue{--accent:var(--blue)}.amber{--accent:var(--amber)}.navy{--accent:var(--nav2)}
+.today-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:21px}
+.panel h3{font-family:var(--display);font-size:25px;margin:0 0 5px;color:var(--nav)}
+.panel-sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+.status-list{display:grid;gap:10px}.status{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;background:var(--panel2);border-radius:13px}
+.status b{font-size:15px}.status span{font-size:12px;color:var(--muted)}
+.app-drawer{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.app-item{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px 12px;text-align:center;text-decoration:none;color:var(--ink)}
+.app-item .i{font-size:29px}.app-item b{display:block;margin-top:8px;font-size:13px}
+.backup-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:700;cursor:pointer}.primary{background:var(--wine);color:white}.secondary{background:#E8D9DC;color:var(--wine)}.ghost{background:var(--panel2);color:var(--nav)}
+.bottom-nav{
+  position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,1200px);height:76px;background:rgba(18,26,44,.97);
+  display:grid;grid-template-columns:repeat(5,1fr);z-index:40;border-radius:20px 20px 0 0;box-shadow:0 -5px 18px rgba(18,26,44,.18)
+}
+.nav-btn{background:none;border:0;color:#B9C0CF;font-family:var(--body);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+.nav-btn .nicon{font-size:22px}.nav-btn.active{color:var(--gold)}
+.modal{position:fixed;inset:0;background:rgba(18,26,44,.56);display:none;align-items:center;justify-content:center;padding:18px;z-index:60}.modal.open{display:flex}
+.dialog{background:var(--panel);border-radius:22px;padding:22px;width:min(560px,100%);max-height:88vh;overflow:auto}.dialog h3{font-family:var(--display);font-size:26px;margin:0 0 8px}
+input[type=file]{display:none}
+.message{margin-top:12px;padding:11px;border-radius:12px;background:#E4ECD9;color:#405735;display:none}.message.show{display:block}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(2,1fr)}.app-drawer{grid-template-columns:repeat(4,1fr)}.today-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.tiles{grid-template-columns:1fr 1fr}.app-drawer{grid-template-columns:repeat(3,1fr)}.topbar{padding:12px 14px}.brand h1{font-size:21px}.brand small{display:none}.hero-card h2{font-size:30px}}
+
+.floating-alarm{position:fixed;right:18px;bottom:92px;z-index:55;width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:31px;background:#7B2E3B;color:#fff;box-shadow:0 8px 24px rgba(18,26,44,.30);border:3px solid #D8AE58}.floating-alarm:active{transform:scale(.96)}
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div class="brand"><div class="brand-icon">🗄️</div><div><h1>Alltagsschrank</h1><small>Tablet-System · Version 5.1</small></div></div>
+  <div class="top-actions"><button class="icon-btn" id="alarmBtn" title="Wecker &amp; Timer">⏰</button><button class="icon-btn" id="drawerBtn" title="Alle Apps">▦</button><button class="icon-btn" id="settingsBtn" title="Mehr">⚙️</button></div>
+</header>
+
+<main>
+<section class="view active" data-view="home">
+  <div class="hero-card">
+    <div class="eyebrow">Deine persönliche Tablet-Zentrale</div>
+    <h2 id="welcomeTitle">Willkommen</h2>
+    <p>Gesundheit, Bewegung, Spiritualität und Alltag in einem gemeinsamen Systemrahmen – mit festen Wegen statt vieler einzelner Zurück-Schaltflächen.</p>
+    <div class="quick-row"><button class="quick-primary" data-go="today">Heute öffnen</button><a class="quick-secondary" href="andachtsschrank.html">Spirituelle Bibliothek</a><a class="quick-secondary" href="Wecker-Tablet.html">⏰ Wecker</a></div>
+  </div>
+
+  <div class="section" id="weckerFest">
+    <div class="section-head"><h3>⏰ Wecker &amp; Timer</h3><span>Immer sichtbar</span></div>
+    <a href="Wecker-Tablet.html" style="display:flex;align-items:center;gap:18px;background:#7B2E3B;color:white;text-decoration:none;border-radius:22px;padding:22px 24px;box-shadow:0 6px 18px rgba(123,46,59,.20)">
+      <span style="font-size:42px">⏰</span>
+      <span><strong style="font-family:var(--display);font-size:25px;display:block;margin-bottom:4px">Wecker &amp; Timer öffnen</strong><span style="color:#F1DDE1;font-size:14px">Digitale Uhr, Wecker, Timer, Angelusläuten und Hahnenschrei</span></span>
+    </a>
+  </div>
+
+  <div class="section"><div class="section-head"><h3>Favoriten</h3><span>Deine wichtigsten Apps</span></div><div class="tiles" id="favoritesGrid"></div></div>
+
+
+  <div class="section">
+    <div class="section-head"><h3>Uhr &amp; Wecker</h3><span>Schnellzugriff</span></div>
+    <div class="tiles">
+      <a class="tile wine" href="Wecker-Tablet.html">
+        <span class="tile-icon">⏰</span>
+        <span><h4>Wecker &amp; Timer</h4><p id="homeAlarmInfo">Wecker, Timer und digitale Uhr öffnen.</p></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section"><div class="section-head"><h3>Bereiche</h3><span>Direkter Zugriff</span></div>
+    <div class="tiles">
+      <a class="tile wine" href="#" data-go="health"><span class="tile-icon">❤️</span><span><h4>Gesundheit</h4><p>Blutdruck, Apnoe, Gewicht und Trainingscheck.</p></span></a>
+      <a class="tile sage" href="#" data-go="movement"><span class="tile-icon">🧘</span><span><h4>Bewegung & Entspannung</h4><p>Training, Nordic Walking, Reiki, Klangschale und Übungen.</p></span></a>
+      <a class="tile navy" href="#" data-go="library"><span class="tile-icon">📚</span><span><h4>Spirituelle Bibliothek</h4><p>Lectio Divina, Stundenbücher, Bibellesepläne und Gebete.</p></span></a>
+      <a class="tile amber" href="#" data-go="more"><span class="tile-icon">🏠</span><span><h4>Tools</h4><p>Energiezähler, Sicherung, Import und Einstellungen.</p></span></a>
+    </div>
+  </div>
+</section>
+
+<section class="view" data-view="today">
+  <div class="hero-card"><div class="eyebrow">Heute</div><h2 id="todayHeading">Dein Tag</h2><p>Die wichtigsten heutigen Bereiche an einem Ort.</p></div>
+  <div class="today-grid">
+    <div class="panel"><h3>Spiritueller Tageslauf</h3><div class="panel-sub">Passende Inhalte nach Tageszeit.</div><div class="status-list" id="spiritualToday"></div></div>
+    <div class="panel"><h3>Gesundheit & Praxis</h3><div class="panel-sub">Erkannte Einträge und offene Bereiche.</div><div class="status-list" id="healthToday"></div></div><div class="panel"><h3>Uhr &amp; Wecker</h3><div class="panel-sub">Schnellzugriff auf Wecker und Timer.</div>
+<div class="status-list"><a class="status" href="Wecker-Tablet.html"><b>⏰ Wecker &amp; Timer</b><span id="todayAlarmInfo">Öffnen</span></a></div></div>
+  </div>
+</section>
+
+<section class="view" data-view="health">
+  <div class="hero-card"><div class="eyebrow">Gesundheit</div><h2>Werte und Verlauf</h2><p>Deine Gesundheitsprotokolle bleiben eigenständig und teilen sich nur den gemeinsamen Sicherungsrahmen.</p></div>
+  <div class="tiles" id="healthGrid"></div>
+</section>
+
+<section class="view" data-view="movement">
+  <div class="hero-card"><div class="eyebrow">Bewegung & Entspannung</div><h2>Training, Praxis und Regeneration</h2><p>Alle körperlichen und meditativen Anwendungen gebündelt.</p></div>
+  <div class="tiles" id="movementGrid"></div>
+</section>
+
+<section class="view" data-view="library">
+  <div class="hero-card"><div class="eyebrow">Spirituelle Bibliothek</div><h2>Schrift, Gebet und Liturgie</h2><p>Der vollständige Andachtsschrank, Lectio Divina und beide Stundenbücher.</p><div class="quick-row"><a class="quick-primary" href="andachtsschrank.html">Andachtsschrank öffnen</a></div></div>
+  <div class="tiles" id="libraryGrid"></div>
+</section>
+
+<section class="view" data-view="drawer">
+  <div class="hero-card"><div class="eyebrow">App-Schublade</div><h2>Alle Anwendungen</h2><p>Alphabetisch und ohne Umwege erreichbar.</p></div>
+  <div class="app-drawer" id="appDrawer"></div>
+</section>
+
+<section class="view" data-view="more">
+  <div class="hero-card"><div class="eyebrow">Mehr</div><h2>Alltag, Daten und System</h2><p>Haushalt, Sicherung und technische Verwaltung.</p></div>
+  <div class="today-grid">
+    <div class="panel"><h3>Alltag &amp; Werkzeuge</h3><div class="tiles" id="houseGrid"></div></div>
+    <div class="panel"><h3>Gesamtsicherung</h3><div class="panel-sub">Alle erkannten App-Daten in einer Datei sichern oder wiederherstellen.</div>
+      <div id="storageInfo" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:13px"></div>
+      <div class="backup-actions"><button class="btn primary" id="exportBtn">Exportieren</button><button class="btn secondary" id="importMergeBtn">Zusammenführen</button><button class="btn ghost" id="replaceBtn">Vollständig ersetzen</button><button class="btn ghost" id="installBtn" style="display:none">App installieren</button></div>
+      <div class="message" id="message"></div>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+
+<input type="file" id="importFile" accept=".json,application/json">
+
+<a class="floating-alarm" href="Wecker-Tablet.html" aria-label="Wecker & Timer öffnen" title="Wecker & Timer">⏰</a>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-go="home"><span class="nicon">⌂</span><span>Start</span></button>
+  <button class="nav-btn" data-go="today"><span class="nicon">◷</span><span>Heute</span></button>
+  <button class="nav-btn" data-go="health"><span class="nicon">♥</span><span>Gesundheit</span></button>
+  <button class="nav-btn" data-go="library"><span class="nicon">▤</span><span>Bibliothek</span></button>
+  <button class="nav-btn" data-go="more"><span class="nicon">•••</span><span>Mehr</span></button>
+</nav>
+
+<script>
+const APPS=[
+{name:'Apnoe-Tracker',icon:'🌙',href:'apnoe-tracker-tablet.html',cat:'health',accent:'blue',keys:['apnoe_tracker_entries_v1']},
+{name:'Blutdruck',icon:'🫀',href:'blutdruck-app-tablet.html',cat:'health',accent:'wine',keys:['bp:entry:']},
+{name:'Gewicht',icon:'⚖️',href:'gewicht-tablet.html',cat:'health',accent:'amber',keys:['gewichtstool_entries_v1']},
+{name:'Trainingscheck',icon:'🧭',href:'trainingscheck-tablet.html',cat:'health',accent:'navy',keys:['trainingscheck_']},
+{name:'Trainings-Schrank',icon:'🗄️',href:'trainings-schrank.html',cat:'movement',accent:'navy'},
+{name:'Nordic Walking',icon:'🥾',href:'nordicwalking-tablet.html',cat:'movement',accent:'sage',keys:['nordicwalking_log']},
+{name:'Reiki-Tagesritual',icon:'🙏',href:'reiki_tagesritual_tablet.html',cat:'movement',accent:'sage',keys:['reiki_tagesritual_state']},
+{name:'Klangschale',icon:'🔔',href:'Klangschale-Tablet.html',cat:'movement',accent:'amber',keys:['klangschale_sessions']},
+{name:'Lectio Divina',icon:'📖',href:'spirituelle-bibliothek/index.html',cat:'library',accent:'wine'},
+{name:'Andachtsschrank',icon:'📚',href:'andachtsschrank.html',cat:'library',accent:'navy'},
+{name:'Stundenbuch',icon:'🌅',href:'stundenbuch_tablet.html',cat:'library',accent:'amber'},
+{name:'Kartäuser-Stundenbuch',icon:'⛪',href:'kartaeuser-stundenbuch/index.html',cat:'library',accent:'wine'},
+{name:'Bibelleseplan 2026–2028',icon:'📘',href:'bibelleseplan_26-28_tablet.html',cat:'library',accent:'blue'},
+{name:'Bibelleseplan 2028–2030',icon:'📙',href:'bibelleseplan_28-30_tablet.html',cat:'library',accent:'amber'},
+{name:'Tagesgebete',icon:'🙏',href:'Tagesgebete.html',cat:'library',accent:'wine'},
+{name:'Dankgebete',icon:'🙌',href:'Dankgebete.html',cat:'library',accent:'amber'},
+{name:'Rosenkranz',icon:'🌹',href:'Rosenkranz-Tablet.html',cat:'library',accent:'wine'},
+{name:'Barmherzigkeitsrosenkranz',icon:'❤️',href:'Barmherzigkeitsrosenkranz-Tablet.html',cat:'library',accent:'wine'},
+{name:'Kreuzweg',icon:'✝️',href:'Kreuzweg_App_tablet.html',cat:'library',accent:'navy'},
+{name:'Gebete & Lebensregeln',icon:'🕯️',href:'Gebete-und-Lebensregeln.html',cat:'library',accent:'amber'},
+{name:'Wecker & Timer',icon:'⏰',href:'Wecker-Tablet.html',cat:'house',accent:'wine'},
+{name:'Energiezähler',icon:'⚡',href:'energiezaehler_tablet.html',cat:'house',accent:'amber',keys:['ez_readings','ez_zaehler']}
+];
+
+const FAV_KEY='alltagsschrank.favorites.v4';
+const META_KEYS=new Set(['alltagsschrank.shared.v2','alltagsschrank.shared.v3','alltagsschrank.last_change.v2','alltagsschrank.last_change.v3']);
+let importMode='merge';
+function snapshot(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&!META_KEYS.has(k))o[k]=localStorage.getItem(k)}return o}
+function favorites(){try{return JSON.parse(localStorage.getItem(FAV_KEY)||'[]')}catch(e){return[]}}
+function saveFavorites(v){localStorage.setItem(FAV_KEY,JSON.stringify(v))}
+function hasData(app){if(!app.keys)return false;const keys=Object.keys(snapshot());return keys.some(k=>app.keys.some(p=>k===p||k.startsWith(p)))}
+function tile(app,withFav=true){
+  const a=document.createElement('a');a.href=app.href;a.className='tile '+app.accent;
+  a.innerHTML=(withFav?'<button class="fav '+(favorites().includes(app.name)?'active':'')+'" data-name="'+app.name+'" type="button">★</button>':'')+
+  '<span class="tile-icon">'+app.icon+'</span><span><h4>'+app.name+'</h4><p>'+(hasData(app)?'Daten vorhanden':'Öffnen und verwenden')+'</p></span>';
+  return a;
+}
+function renderGrid(id,cat){const g=document.getElementById(id);g.innerHTML='';APPS.filter(a=>a.cat===cat).forEach(a=>g.appendChild(tile(a)))}
+function renderFavorites(){const g=document.getElementById('favoritesGrid');g.innerHTML='';let favs=favorites();if(!favs.length)favs=['Blutdruck','Lectio Divina','Kartäuser-Stundenbuch','Reiki-Tagesritual'];APPS.filter(a=>favs.includes(a.name)).slice(0,4).forEach(a=>g.appendChild(tile(a)))}
+function renderDrawer(){const g=document.getElementById('appDrawer');g.innerHTML='';[...APPS].sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(a=>{const el=document.createElement('a');el.href=a.href;el.className='app-item';el.innerHTML='<span class="i">'+a.icon+'</span><b>'+a.name+'</b>';g.appendChild(el)})}
+function go(view){
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.go===view));
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+document.addEventListener('click',e=>{
+ const fav=e.target.closest('.fav');if(fav){e.preventDefault();e.stopPropagation();let f=favorites(),n=fav.dataset.name;f=f.includes(n)?f.filter(x=>x!==n):[...f,n];saveFavorites(f);renderAll();return}
+ const g=e.target.closest('[data-go]');if(g){e.preventDefault();go(g.dataset.go)}
+});
+document.getElementById('alarmBtn').onclick=()=>location.href='Wecker-Tablet.html';document.getElementById('drawerBtn').onclick=()=>go('drawer');document.getElementById('settingsBtn').onclick=()=>go('more');
+
+function renderToday(){
+ const now=new Date(),h=now.getHours();
+ document.getElementById('welcomeTitle').textContent=(h<12?'Guten Morgen':h<18?'Guten Tag':'Guten Abend');
+ document.getElementById('todayHeading').textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+ const sp=document.getElementById('spiritualToday');sp.innerHTML='';
+ const items=h<7?[['⛪','Matutin','kartaeuser-stundenbuch/index.html'],['📖','Lectio Divina','spirituelle-bibliothek/index.html']]
+ :h<12?[['🌅','Laudes / Stundenbuch','stundenbuch_tablet.html'],['📘','Bibelleseplan','bibelleseplan_26-28_tablet.html'],['📖','Lectio Divina','spirituelle-bibliothek/index.html']]
+ :h<15?[['⛪','Sext / Kartäuser-Stundenbuch','kartaeuser-stundenbuch/index.html'],['🙏','Tagesgebete','Tagesgebete.html']]
+ :h<19?[['🌆','Vesper','stundenbuch_tablet.html'],['📖','Lectio Divina','spirituelle-bibliothek/index.html']]
+ :[['🌙','Komplet','stundenbuch_tablet.html'],['⛪','Kartäuser-Stundenbuch','kartaeuser-stundenbuch/index.html'],['🙏','Dankgebete','Dankgebete.html']];
+ items.forEach(x=>{const el=document.createElement('a');el.href=x[2];el.className='status';el.innerHTML='<b>'+x[0]+' '+x[1]+'</b><span>Öffnen</span>';sp.appendChild(el)});
+ const hp=document.getElementById('healthToday');hp.innerHTML='';APPS.filter(a=>a.cat==='health').forEach(a=>{const el=document.createElement('a');el.href=a.href;el.className='status';el.innerHTML='<b>'+a.icon+' '+a.name+'</b><span>'+(hasData(a)?'Daten vorhanden':'Noch offen')+'</span>';hp.appendChild(el)});const wt=document.createElement('a');wt.href='Wecker-Tablet.html';wt.className='status';wt.innerHTML='<b>⏰ Wecker & Timer</b><span>Öffnen</span>';hp.appendChild(wt)
+}
+
+function getAlarmSummary(){
+  const candidates=['wecker_tablet_state','alarmState','alarm_settings','alarmTime'];
+  let time=null,enabled=null;
+  for(const key of candidates){
+    const raw=localStorage.getItem(key);
+    if(!raw)continue;
+    if(/^\d{2}:\d{2}$/.test(raw)){time=raw;break}
+    try{
+      const v=JSON.parse(raw);
+      if(v&&typeof v==='object'){
+        time=v.alarmTime||v.time||v.weckzeit||time;
+        enabled=v.alarmEnabled??v.enabled??v.active??enabled;
+        if(time)break;
+      }
+    }catch(e){}
+  }
+  const separateTime=localStorage.getItem('alarmTime');
+  const separateEnabled=localStorage.getItem('alarmEnabled');
+  if(!time&&separateTime)time=separateTime;
+  if(enabled===null&&separateEnabled!==null)enabled=separateEnabled==='true';
+  if(time&&enabled!==false)return 'Nächster Wecker: '+time+' Uhr';
+  return 'Wecker, Timer und digitale Uhr öffnen.';
+}
+function renderAlarmInfo(){
+  const text=getAlarmSummary();
+  const h=document.getElementById('homeAlarmInfo'); if(h)h.textContent=text;
+  const t=document.getElementById('todayAlarmInfo'); if(t)t.textContent=text.includes('Nächster')?text.replace('Nächster Wecker: ',''): 'Öffnen';
+}
+
+function renderStorage(){const raw=JSON.stringify(snapshot());document.getElementById('storageInfo').textContent=Object.keys(snapshot()).length+' Speicherbereiche · '+(new Blob([raw]).size/1024).toFixed(1)+' KB'}
+function downloadJSON(obj,name){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function exportAll(s=''){const n=new Date(),d=n.toISOString().slice(0,10),t=n.toTimeString().slice(0,8).replaceAll(':','-');downloadJSON({format:'alltagsschrank-backup',schema:4,exportedAt:n.toISOString(),data:snapshot()},'Alltagsschrank_'+d+'_'+t+s+'.json')}
+function parse(v){try{return JSON.parse(v)}catch(e){return null}}
+function mergeRaw(a,b){if(a==null)return b;const x=parse(a),y=parse(b);if(Array.isArray(x)&&Array.isArray(y)){const seen=new Set(),o=[];[...x,...y].forEach(v=>{const id=v&&typeof v==='object'?(v.id||v.date||v.datum||JSON.stringify(v)):JSON.stringify(v);if(!seen.has(id)){seen.add(id);o.push(v)}});return JSON.stringify(o)}if(x&&y&&typeof x==='object'&&typeof y==='object'&&!Array.isArray(x)&&!Array.isArray(y))return JSON.stringify({...x,...y});return b}
+document.getElementById('exportBtn').onclick=()=>exportAll();
+document.getElementById('importMergeBtn').onclick=()=>{importMode='merge';document.getElementById('importFile').click()};
+document.getElementById('replaceBtn').onclick=()=>{importMode='replace';document.getElementById('importFile').click()};
+document.getElementById('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;exportAll('_VOR_IMPORT');try{const obj=JSON.parse(await f.text()),data=obj.data||obj;if(importMode==='replace')Object.keys(snapshot()).forEach(k=>localStorage.removeItem(k));Object.entries(data).forEach(([k,v])=>localStorage.setItem(k,importMode==='merge'?mergeRaw(localStorage.getItem(k),String(v)):String(v)));document.getElementById('message').textContent='Import abgeschlossen.';document.getElementById('message').classList.add('show');renderAll()}catch(err){document.getElementById('message').textContent='Import fehlgeschlagen: '+err.message;document.getElementById('message').classList.add('show')}})
+let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;document.getElementById('installBtn').style.display='block'});document.getElementById('installBtn').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null}}
+function renderAll(){renderGrid('healthGrid','health');renderGrid('movementGrid','movement');renderGrid('libraryGrid','library');renderGrid('houseGrid','house');renderFavorites();renderDrawer();renderToday();renderAlarmInfo();renderStorage()}
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+renderAll();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

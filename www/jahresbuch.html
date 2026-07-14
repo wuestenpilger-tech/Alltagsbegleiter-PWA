@@ -1,0 +1,57 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jahresbuch</title><script src="shared-store.js"></script><style>
+:root{
+ --parch:#eee3cb;--parch2:#e5d4b1;--paper:#f8f1e2;--ink:#30271d;--muted:#6c5f50;
+ --wine:#67202d;--wine2:#46131d;--gold:#b58a3d;--gold2:#d4b36c;--sage:#617058;
+ --wood:#5d3d2a;--night:#172033;--line:#d6c39c;--cream:#fffaf0;--blue:#3f5c68;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--parch);color:var(--ink);font-family:Georgia,'Times New Roman',serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+header{position:relative;background:linear-gradient(135deg,var(--wood),var(--wine2));color:#fff8e8;padding:34px 22px;text-align:center}
+.back{position:absolute;left:18px;top:18px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff20}
+header h1{font-size:42px;margin:0 0 6px}header p{margin:0;color:#eadbc1}
+.controls{max-width:900px;margin:18px auto;padding:0 18px;display:flex;gap:10px;flex-wrap:wrap}
+select,button{border:1px solid var(--line);border-radius:999px;padding:11px 15px;background:var(--cream);font:inherit}button{background:var(--wine);color:#fff;font-weight:700;cursor:pointer}
+.book{max-width:850px;margin:20px auto 60px;background:#fffdf6;box-shadow:0 8px 24px #3b2b1c25;padding:36px 42px}
+.cover{text-align:center;padding:80px 20px;border:2px solid var(--gold);margin-bottom:36px}.cover h2{font-size:42px;color:var(--wine2);margin:15px 0}.cover .year{font-size:28px;color:var(--gold)}
+.chapter{page-break-before:always}.chapter:first-of-type{page-break-before:auto}.chapter h2{color:var(--wine2);border-bottom:1px solid var(--gold);padding-bottom:7px}.entry{margin:14px 0;padding:12px 14px;border-left:4px solid var(--gold);background:#fffaf0}.meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+.empty{color:var(--muted);font-style:italic}
+@media print{header,.controls,.back{display:none!important}body{background:white}.book{box-shadow:none;margin:0;max-width:none;padding:15mm}.chapter{page-break-before:always}}
+</style><script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body><header><a class="back" href="komfortzentrum.html">←</a><h1>📜 Jahresbuch</h1><p>Deine Einträge als druckbare Chronik</p></header>
+<div class="controls"><select id="year"></select><button id="build">Jahresbuch erstellen</button><button onclick="window.print()">Drucken / Als PDF speichern</button></div>
+<main class="book" id="book"></main>
+<script>
+const sources=[
+ ['Skriptorium','digitales_kloster.skriptorium.v1'],
+ ['Lebensbuch','digitales_kloster.lebensbuch.v1'],
+ ['Schatzkammer','digitales_kloster.schatzkammer.v1'],
+ ['Pilgerarchiv','digitales_kloster.pilgerarchiv.v1'],
+ ['Ernährungsnotizen','digitales_kloster.foodnotes.v1']
+];
+const y=document.getElementById('year'),current=new Date().getFullYear();for(let n=current;n>=current-10;n--){const o=document.createElement('option');o.value=n;o.textContent=n;y.appendChild(o)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}}
+function dateOf(x){return x.date||x.at||''}
+function textOf(x){return x.text||x.notes||x.content||''}
+function titleOf(x){return x.title||x.name||x.type||'Eintrag'}
+function build(){const yr=y.value,b=document.getElementById('book');b.innerHTML='<section class="cover"><div>Alltagsbegleiter</div><h2>Mein Jahresbuch</h2><div class="year">'+yr+'</div><p>Gebet · Weg · Gesundheit · Erinnerung</p></section>';sources.forEach(([name,key])=>{const arr=read(key).filter(x=>String(dateOf(x)).startsWith(yr));const sec=document.createElement('section');sec.className='chapter';sec.innerHTML='<h2>'+name+'</h2>';if(!arr.length)sec.innerHTML+='<p class="empty">Keine Einträge in diesem Jahr.</p>';arr.sort((a,z)=>String(dateOf(a)).localeCompare(String(dateOf(z)))).forEach(x=>{const d=document.createElement('div');d.className='entry';d.innerHTML='<b>'+esc(titleOf(x))+'</b><div class="meta">'+esc(String(dateOf(x)).slice(0,10))+'</div><div>'+esc(textOf(x)).replace(/\n/g,'<br>')+'</div>';sec.appendChild(d)});b.appendChild(sec)})}
+document.getElementById('build').onclick=build;build();
+</script><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

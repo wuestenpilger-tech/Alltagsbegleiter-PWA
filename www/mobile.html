@@ -1,0 +1,36 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#46131d"><title>Alltagsbegleiter 11 · Handy</title>
+<link rel="manifest" href="manifest.webmanifest"><script src="shared-store.js"></script><script src="alltagsbegleiter-sync.js"></script>
+<style>
+:root{--parch:#eee3cb;--paper:#f8f1e2;--cream:#fffaf0;--wine:#67202d;--wine2:#46131d;--gold:#d4b36c;--ink:#30271d;--muted:#6c5f50;--line:#d6c39c}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--parch),#dfcba5);font-family:Georgia,serif;color:var(--ink);padding-bottom:80px}.top{background:linear-gradient(135deg,var(--wine2),var(--wine));color:white;padding:13px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20}.top h1{font-size:20px;margin:0}.top small{color:#eadbc1}.top a{color:white;text-decoration:none;background:#ffffff18;padding:10px;border-radius:50%}
+main{padding:14px;max-width:700px;margin:auto}.hero{background:linear-gradient(145deg,#5b2730,var(--wine2));color:white;border-radius:21px;padding:19px}.hero h2{font-size:29px;margin:6px 0}.hero p{color:#eadbc1}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.buttons a{padding:12px;border-radius:13px;text-align:center;text-decoration:none;font-weight:700}.primary{background:var(--gold);color:var(--wine2)}.secondary{background:#ffffff18;color:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;min-height:115px;text-decoration:none;color:var(--ink)}.card b{display:block;color:var(--wine2);font-size:18px;margin:7px 0}.card span{font-size:12px;color:var(--muted)}.icon{font-size:28px}
+.bottom{position:fixed;left:0;right:0;bottom:0;height:72px;background:#28131af2;display:grid;grid-template-columns:repeat(5,1fr)}.bottom a{color:#d9cbb8;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px}.bottom i{font-style:normal;font-size:20px}.bottom .active{color:var(--gold)}
+</style><script src="native-alarm.js"></script><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head><body>
+<header class="top"><div><h1>Alltagsbegleiter</h1><small>Version 11 · Handy</small></div><div><a href="synchronisation.html">🔄</a></div></header>
+<main><section class="hero"><small>Deine Steuerzentrale unterwegs</small><h2 id="greeting">Willkommen</h2><p>Alle Eingaben nutzen dieselbe Datenstruktur wie auf dem Tablet.</p><div class="buttons"><a class="primary" href="heute.html">Heute im Detail</a><a class="secondary" href="stille-mobile.html">Moment der Stille</a><a class="secondary" href="Klangschale-Tablet.html">Klangschale</a><a class="secondary" href="schnellnotiz-mobile.html">Schnellnotiz</a></div></section>
+<div class="grid">
+<a class="card" href="kapelle-mobile.html"><div class="icon">⛪</div><b>Kapelle</b><span>Ewiges Licht, Gebet und Stille</span></a>
+<a class="card" href="bibliothek-v10.html"><div class="icon">📚</div><b>Bibliothek</b><span>Lectio, Bibellesepläne und Texte</span></a>
+<a class="card" href="vorsorge-mobile.html"><div class="icon">❤️</div><b>Vorsorge</b><span>Medikamente, Werte und Termine</span></a>
+<a class="card" href="aufgaben.html"><div class="icon">📋</div><b>Aufgaben</b><span>Einmalig und wiederkehrend</span></a>
+<a class="card" href="skriptorium.html"><div class="icon">✍️</div><b>Skriptorium</b><span>Notizen und Spracheingabe</span></a>
+<a class="card" href="synchronisation.html"><div class="icon">🔄</div><b>Synchronisation</b><span>Tablet ↔ Handy</span></a>
+</div></main>
+<nav class="bottom"><a class="active" href="mobile.html"><i>⌂</i>Start</a><a href="heute.html"><i>◷</i>Heute</a><a href="kapelle-mobile.html"><i>⛪</i>Kapelle</a><a href="vorsorge-mobile.html"><i>♥</i>Vorsorge</a><a href="synchronisation.html"><i>🔄</i>Sync</a></nav>
+<script>const h=new Date().getHours();greeting.textContent=h<12?'Guten Morgen, Walter':h<18?'Guten Tag, Walter':'Guten Abend, Walter';</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

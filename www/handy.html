@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#46131d">
+<title>Alltagsbegleiter 11 · Motorola G55</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="motorola-g55-mobile.css">
+<script src="shared-store.js"></script>
+<script src="alltagsbegleiter-sync.js"></script>
+<style>
+:root{
+ --parch:#eee3cb;--paper:#f8f1e2;--cream:#fffaf0;--wine:#67202d;--wine2:#46131d;
+ --gold:#d4b36c;--ink:#30271d;--muted:#6c5f50;--line:#d6c39c;--sage:#617058;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;background:linear-gradient(180deg,var(--parch),#dfcba5);
+ font-family:Georgia,'Times New Roman',serif;color:var(--ink);
+ padding-bottom:calc(82px + env(safe-area-inset-bottom,0px));
+}
+.top{
+ position:sticky;top:0;z-index:50;
+ padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;
+ background:linear-gradient(135deg,var(--wine2),var(--wine));color:white;
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ box-shadow:0 4px 16px #2b101744;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.seal{width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--wine2);display:flex;align-items:center;justify-content:center;font-size:23px;flex:none}
+.brand-text{min-width:0}.brand h1{font-size:20px!important;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand small{display:block;color:#eadbc1;font-size:11px}
+.top-actions{display:flex;gap:6px;flex:none}.top-actions a{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff18;text-decoration:none;color:white}
+main{padding:14px 12px 28px;max-width:650px;margin:auto}
+.hero{background:linear-gradient(145deg,#5b2730,var(--wine2));color:white;border-radius:22px;padding:20px;box-shadow:0 8px 24px #34151c2e}
+.hero small{font:10px monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.hero h2{font-size:29px!important;margin:7px 0}.hero p{margin:0;color:#eadbc1;line-height:1.45}
+.hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+.hero-actions a{min-height:48px;padding:12px 10px;border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;font-weight:700}
+.primary{background:var(--gold);color:var(--wine2)}.secondary{background:#ffffff18;color:white}
+.section{margin-top:18px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:8px;margin:0 3px 10px}.section-head h3{font-size:22px!important;margin:0;color:var(--wine2)}.section-head span{font:9px monospace;color:var(--muted);text-transform:uppercase}
+.now-list{display:grid;gap:9px}.now-item{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-decoration:none;color:var(--ink);min-height:54px}.now-item b{color:var(--wine2)}.now-item span{font-size:12px;color:var(--muted);text-align:right}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:14px;min-height:125px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;min-width:0}.card .icon{font-size:28px}.card h4{font-size:18px!important;margin:8px 0 4px;color:var(--wine2)}.card p{font-size:12px;margin:0;color:var(--muted);line-height:1.35}
+.bottom{
+ position:fixed;left:0;right:0;bottom:0;z-index:60;
+ height:calc(74px + env(safe-area-inset-bottom,0px));
+ padding-bottom:env(safe-area-inset-bottom,0px);
+ background:#28131af5;display:grid;grid-template-columns:repeat(5,1fr);
+ border-radius:20px 20px 0 0;box-shadow:0 -4px 18px #1d111633;
+}
+.bottom a{color:#d9cbb8;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;min-width:0}.bottom i{font-style:normal;font-size:20px}.bottom .active{color:var(--gold)}
+.fab{position:fixed;right:16px;bottom:94px;width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--wine2);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:25px;z-index:55;box-shadow:0 8px 22px #2f1e1f55}
+@media(max-width:380px){.grid,.hero-actions{grid-template-columns:1fr}.brand h1{font-size:18px!important}.top-actions a{width:36px;height:36px}}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+<script src="alltagsbegleiter-view.js"></script>
+<style>
+.ab-view-switch{position:fixed;right:12px;top:78px;z-index:9999;display:flex;gap:6px;background:#28131ae8;padding:6px;border-radius:999px;box-shadow:0 4px 14px #0003}
+.ab-view-switch button{border:0;border-radius:999px;padding:8px 10px;background:#ffffff18;color:white;font:700 12px system-ui;cursor:pointer}
+.ab-view-switch button.active{background:#d4b36c;color:#46131d}
+@media(max-width:600px){.ab-view-switch{top:auto;bottom:88px;right:10px}}
+</style>
+<script src="native-alarm.js"></script><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+<div class="ab-view-switch" aria-label="Ansicht wechseln">
+<button onclick="AlltagsbegleiterView.set('tablet')">Tablet</button>
+<button onclick="AlltagsbegleiterView.set('handy')" class="active">Handy</button>
+</div>
+
+<header class="top">
+ <div class="brand"><div class="seal">✝</div><div class="brand-text"><h1>Alltagsbegleiter</h1><small>Version 12 · Motorola G55</small></div></div>
+ <div class="top-actions"><a href="suche.html" title="Suche">🔎</a><a href="synchronisation.html" title="Synchronisation">🔄</a></div>
+</header>
+
+<main>
+<section class="hero">
+ <small>Deine Steuerzentrale unterwegs</small>
+ <h2 id="greeting">Willkommen</h2>
+ <p>Alle Inhalte der Tablet-Version sind enthalten. Diese Oberfläche ist für dein 6,49-Zoll-Display optimiert.</p>
+ <div class="hero-actions">
+  <a class="primary" href="heute.html">Heute im Detail</a>
+  <a class="secondary" href="Klangschale-Tablet.html">🔔 Klangschale</a>
+  <a class="secondary" href="stille-mobile.html">🤫 Stille</a>
+  <a class="secondary" href="schnellnotiz-mobile.html">🎤 Schnellnotiz</a>
+ </div>
+</section>
+
+<section class="section">
+ <div class="section-head"><h3>Jetzt passend</h3><span>nach Tageszeit</span></div>
+ <div class="now-list" id="nowList"></div>
+</section>
+
+<section class="section">
+ <div class="section-head"><h3>Alle Bereiche</h3><span>vollständig erhalten</span></div>
+ <div class="grid">
+  <a class="card" href="heute.html"><div class="icon">◷</div><div><h4>Heute</h4><p>Wetter, Aufgaben, Medikamente und Tagesstatus.</p></div></a>
+  <a class="card" href="klosterkompass.html"><div class="icon">🧭</div><div><h4>Kompass</h4><p>Dein persönlicher Tageskompass.</p></div></a>
+  <a class="card" href="kapelle-v10.html"><div class="icon">⛪</div><div><h4>Kapelle</h4><p>Ewiges Licht, Gebete, Stille und Klangschale.</p></div></a>
+  <a class="card" href="bibliothek-v10.html"><div class="icon">📚</div><div><h4>Bibliothek</h4><p>Lectio, Lesejahre und Bibellesepläne.</p></div></a>
+  <a class="card" href="vorsorgezentrum.html"><div class="icon">❤️</div><div><h4>Vorsorge</h4><p>Werte, Medikamente, Termine und Notfallpass.</p></div></a>
+  <a class="card" href="aufgaben.html"><div class="icon">📋</div><div><h4>Aufgaben</h4><p>Einmalige und wiederkehrende Aufgaben.</p></div></a>
+  <a class="card" href="skriptorium.html"><div class="icon">✍️</div><div><h4>Skriptorium</h4><p>Notizen, Lebensbuch und Spracheingabe.</p></div></a>
+  <a class="card" href="refektorium.html"><div class="icon">🍞</div><div><h4>Refektorium</h4><p>Trinken, Fasten und Ernährung.</p></div></a>
+  <a class="card" href="trainings-schrank.html"><div class="icon">🌳</div><div><h4>Bewegung</h4><p>Training, Reiki und Nordic Walking.</p></div></a>
+  <a class="card" href="komfortzentrum.html"><div class="icon">🛠️</div><div><h4>Tools</h4><p>Sicherung, Jahresbuch und Systemeinstellungen.</p></div></a>
+  <a class="card" href="synchronisation.html"><div class="icon">🔄</div><div><h4>Synchronisation</h4><p>Gesamtdaten zwischen Handy und Tablet übertragen.</p></div></a>
+  <a class="card" href="index-tablet.html"><div class="icon">📲</div><div><h4>Tablet-Ansicht</h4><p>Die vollständige große Oberfläche öffnen.</p></div></a>
+ </div>
+</section>
+<section style="margin:16px"><a href="erinnerungen-native.html" style="display:block;padding:14px;border-radius:14px;background:#67202d;color:white;text-decoration:none;text-align:center;font-weight:700">🔔 Natives Erinnerungszentrum</a></section></main>
+
+<a class="fab" href="schnellnotiz-mobile.html" title="Schnellnotiz">🎤</a>
+
+<nav class="bottom">
+ <a class="active" href="index.html"><i>⌂</i>Start</a>
+ <a href="heute.html"><i>◷</i>Heute</a>
+ <a href="kapelle-v10.html"><i>⛪</i>Kapelle</a>
+ <a href="bibliothek-v10.html"><i>📚</i>Bibliothek</a>
+ <a href="synchronisation.html"><i>🔄</i>Sync</a>
+</nav>
+
+<script>
+const now=new Date(),h=now.getHours();
+greeting.textContent=h<12?'Guten Morgen, Walter':h<18?'Guten Tag, Walter':'Guten Abend, Walter';
+let items=[];
+if(h<6) items=[['⛪ Matutin','kartaeuser-stundenbuch/index.html','jetzt'],['🤫 Stille','stille-mobile.html','kurzer Halt']];
+else if(h<10) items=[['🌅 Laudes','stundenbuch_tablet.html','Morgengebet'],['📖 Lectio Divina','spirituelle-bibliothek/index.html','heutiger Tag'],['💊 Medikamente','medikamente.html','prüfen']];
+else if(h<13) items=[['⛪ Sext','kartaeuser-stundenbuch/index.html','Mittagsgebet'],['📘 Bibelleseplan','bibelleseplan_26-28_tablet.html','heutiger Tag'],['💧 Trinken','heute.html#waterValue','Tagesziel']];
+else if(h<18) items=[['🧭 Trainingscheck','trainingscheck-tablet.html','Tagesform'],['🙏 Reiki','reiki_tagesritual_tablet.html','Tagesritual'],['🎤 Schnellnotiz','schnellnotiz-mobile.html','Gedanke']];
+else if(h<21) items=[['🌆 Vesper','stundenbuch_tablet.html','Abendgebet'],['🔔 Klangschale','Klangschale-Tablet.html','Meditation'],['🙏 Dankgebet','Dankgebete.html','Rückblick']];
+else items=[['🌙 Komplet','stundenbuch_tablet.html','Nachtgebet'],['✍️ Abendabschluss','abendabschluss-mobile.html','3 Fragen'],['⏰ Wecker','Wecker-Tablet.html','für morgen']];
+items.forEach(x=>{const a=document.createElement('a');a.className='now-item';a.href=x[1];a.innerHTML='<b>'+x[0]+'</b><span>'+x[2]+'</span>';nowList.appendChild(a)});
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

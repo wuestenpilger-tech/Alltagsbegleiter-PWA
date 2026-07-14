@@ -1,0 +1,9 @@
+Alltagsbegleiter 22.6.1 – Stabilitätsversion
+
+- Android-Dateiauswahl für Importe zentral angebunden
+- Exporte über Android-Dokumentdialog
+- Rückkehr- und Startschaltflächen auf Unterseiten
+- Safe-Area-Abstände für Status- und Navigationsleiste
+- breite Tabellen scrollbar, Formulare displaygerecht
+- sichtbarer JavaScript-Text in Nordic Walking, Apnoe-Tracker und Trainingscheck behoben
+- Gesundheits-Schrank-Verweise repariert

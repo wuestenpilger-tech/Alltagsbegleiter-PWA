@@ -1,0 +1,19 @@
+ALLTAGSBEGLEITER 22.6.1 – KURZTEST
+
+Vor der ersten Installation:
+- Daten aus Version 22.4 exportieren, soweit möglich.
+- Version 22.4 deinstallieren, da 22.6.1 eine neue feste Testsignatur verwendet.
+- 22.6.1 installieren. Künftige 22.6.x-Versionen können darüber aktualisiert werden.
+
+Bitte testen:
+1. Nordic Walking: Sichern, Wiederherstellen, Zurück, Start.
+2. Activity-/Apnoe-Tracker: CSV importieren, Export, Zurück, Start.
+3. Gewicht: JSON- und CSV-Export, Import, Zurück, Start.
+4. Energiezähler: Export, Import, Zurück, Start.
+5. Trainingscheck: Sichern, Wiederherstellen, Zurück, Start.
+6. Trainings-Schrank: mehrere Sicherungsdateien auswählen und wiederherstellen.
+7. Gesundheitsbereich: Links öffnen ohne localhost-Fehler.
+8. Handy und Tablet: keine verdeckten Inhalte an Status- oder Navigationsleiste.
+9. Formulare: Eingabefelder vollständig erreichbar; breite Tabellen lassen sich gezielt seitlich scrollen.
+
+Bei einem Fehler bitte Modul, genaue Schaltfläche und Screenshot notieren.

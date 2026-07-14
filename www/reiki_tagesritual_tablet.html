@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Reiki Tagesritual (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=EB+Garamond:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  .back-to-menu{
+    position:fixed;top:18px;left:18px;z-index:80;
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(107,127,92,0.14);color:var(--accent-dark);
+    text-decoration:none;font-size:20px;
+    transition:transform .15s ease;
+    box-shadow:0 2px 8px rgba(58,46,30,0.10);
+  }
+  .back-to-menu:active{transform:scale(0.93);}
+  :root {
+    --bg: #F6F1E6;
+    --card: #FBF5E7;
+    --ink: #3A2E1E;
+    --muted: #8A7A5E;
+    --accent: #6B7F5C;
+    --accent-dark: #4F6144;
+    --accent-soft: #E9EEDD;
+    --gold: #B08D57;
+    --gold-soft: #D9BD8C;
+    --done-bg: #F1F4EA;
+    --border: #E5D5B5;
+    --heat-0: #ECE7DA;
+    --heat-1: #D9E1C9;
+    --heat-2: #B9CBA0;
+    --heat-3: #6B7F5C;
+    --heat-4: #4F6144;
+    --font-display:'Cormorant Garamond', serif;
+    --font-body:'EB Garamond', serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--ink);
+    padding-bottom: 40px;
+  }
+  header {
+    padding: 38px 28px 26px;
+    text-align: center;
+    background: linear-gradient(180deg, #4F6144, #6B7F5C);
+    color: #FBF9F4;
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  header .subtitle {
+    font-size: 16px;
+    opacity: 0.85;
+    margin: 0;
+  }
+  .date-line {
+    margin-top: 14px;
+    font-size: 17px;
+    opacity: 0.95;
+  }
+  .progress-wrap {
+    margin: 20px auto 0;
+    max-width: 420px;
+  }
+  .progress-bar-bg {
+    background: rgba(255,255,255,0.25);
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: var(--gold);
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 14px;
+    margin-top: 8px;
+    opacity: 0.9;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 26px 22px 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    transition: background 0.3s ease;
+  }
+  .card.done {
+    background: var(--done-bg);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 22px;
+    cursor: pointer;
+    gap: 16px;
+  }
+  .checkbox {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    color: transparent;
+    transition: all 0.2s ease;
+  }
+  .card.done .checkbox {
+    background: var(--accent);
+    color: #fff;
+  }
+  .card-title-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+  .card-time {
+    font-size: 14px;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .card-title {
+    font-size: 19px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .card.done .card-title {
+    color: var(--accent-dark);
+    text-decoration: line-through;
+    text-decoration-color: var(--muted);
+  }
+  .chevron {
+    flex: 0 0 20px;
+    color: var(--muted);
+    transition: transform 0.25s ease;
+    font-size: 16px;
+  }
+  .chevron.open {
+    transform: rotate(90deg);
+  }
+  .card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 22px;
+  }
+  .card-body.open {
+    max-height: 700px;
+    padding: 0 22px 22px;
+  }
+  .card-body-inner {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .card-body-inner .label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin: 14px 0 6px;
+  }
+  .card-body-inner .label:first-child {
+    margin-top: 0;
+  }
+  .card-body-inner ol {
+    margin: 0;
+    padding-left: 24px;
+  }
+  .card-body-inner li {
+    margin-bottom: 8px;
+  }
+  .leitgedanke {
+    font-style: italic;
+    color: var(--accent-dark);
+    background: #f2f0e8;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border-left: 3px solid var(--gold);
+    margin-top: 14px;
+  }
+  .reset-wrap {
+    text-align: center;
+    margin: 24px 0 14px;
+  }
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 20px;
+  }
+
+  .complete-banner {
+    max-width: 720px;
+    margin: 0 auto 18px;
+    padding: 16px 20px;
+    background: var(--accent-soft);
+    border: 1px solid var(--gold-soft);
+    border-radius: 16px;
+    text-align: center;
+    font-size: 16px;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .stats-card {
+    max-width: 720px;
+    margin: 6px auto 20px;
+    padding: 6px 20px 20px;
+  }
+  .stats-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--accent-dark);
+  }
+  .stats-summary .chev {
+    color: var(--muted);
+    font-size: 15px;
+    transition: transform 0.25s ease;
+  }
+  .stats-summary.open .chev { transform: rotate(90deg); }
+  .stats-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+  .stats-body.open { max-height: 1100px; }
+  .stats-inner {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 18px 18px;
+    margin-top: -2px;
+    padding: 22px;
+  }
+  .streak-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .streak-box {
+    flex: 1;
+    background: var(--accent-soft);
+    border-radius: 14px;
+    padding: 16px 10px;
+    text-align: center;
+  }
+  .streak-num {
+    font-size: 27px;
+    font-weight: 700;
+    color: var(--accent-dark);
+  }
+  .streak-label {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 4px;
+  }
+  .week-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 26px;
+  }
+  .week-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .week-ring {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .week-ring.today { box-shadow: 0 0 0 2px var(--gold); }
+  .week-ring-inner {
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--accent-dark);
+  }
+  .week-day-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .month-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 7px;
+  }
+  .month-cell {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    background: var(--heat-0);
+  }
+  .month-cell.today-cell { box-shadow: 0 0 0 2px var(--gold); }
+  .month-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .month-legend .sq {
+    width: 13px; height: 13px; border-radius: 3px;
+  }
+
+  .backup-row {
+    max-width: 720px;
+    margin: 0 auto 8px;
+    padding: 0 20px;
+    display: flex;
+    gap: 14px;
+  }
+  .backup-btn {
+    flex: 1;
+    padding: 14px 10px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--accent-dark);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .backfill-date-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .backfill-date-row input[type="date"] {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+  }
+  .backfill-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 6px;
+    border-bottom: 1px solid var(--border);
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .backfill-row:last-child { border-bottom: none; }
+  .backfill-row input {
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    accent-color: var(--accent);
+  }
+  .backfill-row .bf-time {
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 4px;
+  }
+  .backfill-hint {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 14px;
+  }
+  footer {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 14px 20px 34px;
+  }
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+
+<a class="back-to-menu" href="uebungsschrank.html" aria-label="Zurück zum Übungsschrank" title="Zurück zum Übungsschrank">←</a>
+
+<header>
+  <h1>🪷 Reiki Tagesritual</h1>
+  <p class="subtitle">Gendai Reiki Ho · Tagespraxis</p>
+  <div class="date-line" id="dateLine"></div>
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 7 erledigt</div>
+  </div>
+</header>
+
+<div id="completeBanner"></div>
+
+<main id="cardsContainer"></main>
+
+<div class="stats-card">
+  <div class="stats-summary" id="statsSummary" onclick="toggleStats()">
+    <span>📊 Verlauf &amp; Serie</span>
+    <span class="chev" id="statsChev">▶</span>
+  </div>
+  <div class="stats-body" id="statsBody">
+    <div class="stats-inner">
+      <div class="streak-row">
+        <div class="streak-box">
+          <div class="streak-num" id="streakCurrent">0</div>
+          <div class="streak-label">Serie (Tage)</div>
+        </div>
+        <div class="streak-box">
+          <div class="streak-num" id="streakBest">0</div>
+          <div class="streak-label">Beste Serie</div>
+        </div>
+        <div class="streak-box">
+          <div class="streak-num" id="streakMonth">0%</div>
+          <div class="streak-label">Monat ø</div>
+        </div>
+      </div>
+
+      <div class="month-label">Letzte 7 Tage</div>
+      <div class="week-row" id="weekRow"></div>
+
+      <div class="month-label" id="monthLabel">Monatsübersicht</div>
+      <div class="month-grid" id="monthGrid"></div>
+      <div class="month-legend">
+        <span>weniger</span>
+        <span class="sq" style="background:var(--heat-0)"></span>
+        <span class="sq" style="background:var(--heat-1)"></span>
+        <span class="sq" style="background:var(--heat-2)"></span>
+        <span class="sq" style="background:var(--heat-3)"></span>
+        <span class="sq" style="background:var(--heat-4)"></span>
+        <span>alle 7 erledigt</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-card">
+  <div class="stats-summary" id="backfillSummary" onclick="toggleBackfill()">
+    <span>🗓️ Tag nachtragen</span>
+    <span class="chev" id="backfillChev">▶</span>
+  </div>
+  <div class="stats-body" id="backfillBody">
+    <div class="stats-inner">
+      <div class="backfill-date-row">
+        <input type="date" id="backfillDate">
+      </div>
+      <div id="backfillList"></div>
+      <div class="backfill-hint">Änderungen werden sofort gespeichert und fließen in Serie &amp; Übersicht oben ein.</div>
+    </div>
+  </div>
+</div>
+
+<div class="backup-row">
+  <button class="backup-btn" onclick="exportState()">⇩ Sichern</button>
+  <button class="backup-btn" onclick="document.getElementById('importFile').click()">⇧ Laden</button>
+  <input type="file" id="importFile" accept="application/json" style="display:none;">
+</div>
+
+<div class="reset-wrap">
+  <button class="reset-btn" onclick="resetToday()">Heutigen Tag zurücksetzen</button>
+</div>
+
+<footer>Lokal gespeichert auf diesem Gerät · kein Internet nötig</footer>
+
+<script>
+const RITUALS = [
+  {
+    id: "hatsurei",
+    time: "06:35",
+    title: "Hatsurei-Ho — Morgen-Vollpraxis",
+    steps: [
+      "Kenyoku-Ho: Handkante diagonal über die gegenüberliegende Schulter bis zur Hüfte ziehen, dann Arm entlang bis zur Fingerspitze — je 3× pro Seite, abwechselnd.",
+      "Kanko-Ho: Kerze oder inneres Licht betrachten, dann Augen schließen und das Licht als Punkt vor der Stirn visualisieren, bis es stabil erscheint.",
+      "Gassho: Handflächen vor dem Brustbein zusammenlegen, Mittelfinger auf Nasenspitzenhöhe. Ruhig atmen, ca. 3–5 Minuten.",
+      "Seishin Toitsu: Aufmerksamkeit zum Hara (unterhalb des Bauchnabels) führen, Atem dorthin lenken, Energie sammeln.",
+      "Reiji-Ho: In Gassho innerlich um Führung bitten, Hände lösen und sie intuitiv dorthin führen lassen, wo Energie gebraucht wird.",
+      "Gokai Sansho: Die 5 Reiki-Prinzipien dreimal rezitieren (siehe unten)."
+    ],
+    gokai: true,
+    leitgedanke: "Der Morgen gehört der Stille, bevor er dem Tag gehört."
+  },
+  {
+    id: "kenyoku-laudes",
+    time: "08:40",
+    title: "Kenyoku-Ho — Übergang vor Laudes",
+    steps: [
+      "Kurzform des trockenen Badens: Handkante 3× über jede Schulter-Arm-Linie ziehen.",
+      "Ein bewusster Atemzug, dann direkt in die Gebetshaltung übergehen."
+    ],
+    leitgedanke: "Was du ablegst, trägst du nicht mit ins Gebet."
+  },
+  {
+    id: "seishin",
+    time: "15:00",
+    title: "Seishin Toitsu — Sammlungsmeditation",
+    steps: [
+      "Aufrecht sitzen, Hände locker im Schoß oder in Gassho.",
+      "10 Atemzüge zählen, dabei die Aufmerksamkeit im Hara verankern.",
+      "Wenn die Gedanken abschweifen, sanft zum Atem zurückkehren — ca. 10–15 Minuten."
+    ],
+    leitgedanke: "Mitten am Tag eine stille Insel."
+  },
+  {
+    id: "kenyoku-vesper",
+    time: "17:55",
+    title: "Kenyoku-Ho — Übergang vor Vesper",
+    steps: [
+      "Kurzform des trockenen Badens: 3× pro Seite.",
+      "Übergang bewusst vollziehen, dann Vesper beginnen."
+    ],
+    leitgedanke: "Der Abend beginnt mit einem klaren Feld."
+  },
+  {
+    id: "gokai-abend",
+    time: "19:00",
+    title: "Gokai-Rezitation — Abendliche Reflexion",
+    steps: [
+      "In Gassho die 5 Prinzipien laut oder innerlich rezitieren (siehe unten).",
+      "Bei jedem Prinzip kurz innehalten: Wo zeigte sich das heute in mir?",
+      "Ohne Bewertung — nur wahrnehmen und loslassen."
+    ],
+    gokai: true,
+    leitgedanke: "Heute nur für heute."
+  },
+  {
+    id: "chiryo",
+    time: "21:30",
+    title: "Chiryo — Reiki-Selbstbehandlung",
+    steps: [
+      "Kopf vorne (Stirn/Augen), ca. 2–3 Minuten.",
+      "Kopf seitlich (Schläfen, beide Hände), ca. 2–3 Minuten.",
+      "Hinterkopf, ca. 2–3 Minuten.",
+      "Kehle, sanft mit beiden Handflächen, ca. 2 Minuten.",
+      "Herzbereich, ca. 3 Minuten.",
+      "Solarplexus, ca. 3 Minuten.",
+      "Bauch/Hara, ca. 3 Minuten — Behandlung ruhig ausklingen lassen."
+    ],
+    leitgedanke: "Die eigenen Hände sind der erste Ort der Heilung."
+  },
+  {
+    id: "kenyoku-komplet",
+    time: "21:55",
+    title: "Kenyoku-Ho — Übergang vor Komplet",
+    steps: [
+      "Kurzform des trockenen Badens: 3× pro Seite.",
+      "Den Tag energetisch abschließen, dann Komplet beginnen."
+    ],
+    leitgedanke: "Was war, darf gehen."
+  }
+];
+
+const GOKAI_HTML = `
+  <div class="label">Die 5 Reiki-Prinzipien (Gokai) — jede Zeile beginnt mit „Nur für heute" (Kyo dake wa)</div>
+  <ol style="list-style:none; padding-left:0;">
+    <li><strong>Ärgere dich nicht</strong> <span style="color:var(--muted);">(Shinpai suna)</span><br>Wut und Ärger loslassen</li>
+    <li><strong>Sorge dich nicht</strong> <span style="color:var(--muted);">(Ikaru na)</span><br>Vertrauen statt Angst und Sorgen</li>
+    <li><strong>Sei dankbar</strong> <span style="color:var(--muted);">(Kansha shite)</span><br>Demut und Wertschätzung</li>
+    <li><strong>Sei ehrlich zu dir selbst</strong> <span style="color:var(--muted);">(Gyo wo hageme)</span><br>Ehrlichkeit, Fleiß und stetige persönliche Weiterentwicklung</li>
+    <li><strong>Sei freundlich zu allen Lebewesen</strong> <span style="color:var(--muted);">(Hito ni shinsetsu ni)</span><br>Mitgefühl, Respekt und Güte</li>
+  </ol>
+`;
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem("reiki_tagesritual_state");
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveState(state) {
+  localStorage.setItem("reiki_tagesritual_state", JSON.stringify(state));
+}
+
+let state = loadState();
+const key = todayKey();
+if (!state[key]) state[key] = {};
+
+function toggleDone(id) {
+  state[key][id] = !state[key][id];
+  saveState(state);
+  render();
+}
+
+function toggleOpen(id) {
+  const body = document.getElementById("body-" + id);
+  const chev = document.getElementById("chev-" + id);
+  const isOpen = body.classList.contains("open");
+  if (isOpen) {
+    body.classList.remove("open");
+    chev.classList.remove("open");
+  } else {
+    body.classList.add("open");
+    chev.classList.add("open");
+  }
+}
+
+function resetToday() {
+  if (confirm("Heutigen Tag wirklich zurücksetzen?")) {
+    state[key] = {};
+    saveState(state);
+    render();
+  }
+}
+
+function render() {
+  const dateLine = document.getElementById("dateLine");
+  const now = new Date();
+  const options = { weekday: 'long', day: 'numeric', month: 'long' };
+  dateLine.textContent = now.toLocaleDateString('de-DE', options);
+
+  const container = document.getElementById("cardsContainer");
+  container.innerHTML = "";
+  let doneCount = 0;
+
+  RITUALS.forEach(r => {
+    const isDone = !!state[key][r.id];
+    if (isDone) doneCount++;
+
+    const card = document.createElement("div");
+    card.className = "card" + (isDone ? " done" : "");
+
+    const stepsHtml = r.steps.map(s => `<li>${s}</li>`).join("");
+    const gokaiHtml = r.gokai ? GOKAI_HTML : "";
+
+    card.innerHTML = `
+      <div class="card-header" onclick="toggleOpen('${r.id}')">
+        <div class="checkbox" onclick="event.stopPropagation(); toggleDone('${r.id}')">${isDone ? "✓" : ""}</div>
+        <div class="card-title-wrap">
+          <div class="card-time">${r.time} Uhr</div>
+          <div class="card-title">${r.title}</div>
+        </div>
+        <div class="chevron" id="chev-${r.id}">▶</div>
+      </div>
+      <div class="card-body" id="body-${r.id}">
+        <div class="card-body-inner">
+          <div class="label">Ablauf</div>
+          <ol>${stepsHtml}</ol>
+          ${gokaiHtml}
+          <div class="leitgedanke">„${r.leitgedanke}"</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  const pct = Math.round((doneCount / RITUALS.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = doneCount + " / " + RITUALS.length + " erledigt";
+
+  const banner = document.getElementById("completeBanner");
+  if (doneCount === RITUALS.length) {
+    banner.innerHTML = `<div class="complete-banner">✨ Tagesritual vollständig — gut gemacht</div>`;
+  } else {
+    banner.innerHTML = "";
+  }
+
+  renderHistory();
+}
+
+// ---------- Verlauf, Serie & Heatmap ----------
+function dateKeyFor(d) {
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function countDone(dKey) {
+  const day = state[dKey];
+  if (!day) return 0;
+  return RITUALS.reduce((n, r) => n + (day[r.id] ? 1 : 0), 0);
+}
+function isFullDay(dKey) {
+  return countDone(dKey) === RITUALS.length;
+}
+function heatLevel(count) {
+  if (count === 0) return 0;
+  if (count <= 2) return 1;
+  if (count <= 4) return 2;
+  if (count <= 6) return 3;
+  return 4;
+}
+
+function calcCurrentStreak() {
+  let streak = 0;
+  const d = new Date();
+  if (isFullDay(dateKeyFor(d))) { streak++; }
+  d.setDate(d.getDate() - 1);
+  while (isFullDay(dateKeyFor(d))) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+function calcBestStreak() {
+  const fullKeys = Object.keys(state).filter(isFullDay).sort();
+  if (fullKeys.length === 0) return 0;
+  let best = 1, cur = 1;
+  for (let i = 1; i < fullKeys.length; i++) {
+    const diffDays = Math.round((new Date(fullKeys[i]) - new Date(fullKeys[i-1])) / 86400000);
+    cur = diffDays === 1 ? cur + 1 : 1;
+    if (cur > best) best = cur;
+  }
+  return best;
+}
+
+function renderHistory() {
+  const total = RITUALS.length;
+  document.getElementById("streakCurrent").textContent = calcCurrentStreak();
+  document.getElementById("streakBest").textContent = calcBestStreak();
+
+  // Wochen-Ringe (letzte 7 Tage inkl. heute)
+  const weekRow = document.getElementById("weekRow");
+  weekRow.innerHTML = "";
+  const dayNames = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dKey = dateKeyFor(d);
+    const count = countDone(dKey);
+    const pct = Math.round((count / total) * 100);
+    const isToday = i === 0;
+    const wrap = document.createElement("div");
+    wrap.className = "week-day";
+    wrap.innerHTML = `
+      <div class="week-ring${isToday ? ' today' : ''}" style="background:conic-gradient(var(--accent) ${pct}%, var(--border) ${pct}% 100%)">
+        <div class="week-ring-inner">${count}</div>
+      </div>
+      <div class="week-day-label">${dayNames[d.getDay()]}</div>
+    `;
+    weekRow.appendChild(wrap);
+  }
+
+  // Monats-Heatmap
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const monthGrid = document.getElementById("monthGrid");
+  monthGrid.innerHTML = "";
+  let monthSum = 0, monthDaysPassed = 0;
+  document.getElementById("monthLabel").textContent =
+    "Monatsübersicht — " + now.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(y, m, day);
+    const dKey = dateKeyFor(d);
+    const isFuture = d > now;
+    const count = isFuture ? 0 : countDone(dKey);
+    if (!isFuture) { monthSum += count; monthDaysPassed++; }
+    const cell = document.createElement("div");
+    cell.className = "month-cell" + (dateKeyFor(now) === dKey ? " today-cell" : "");
+    cell.style.background = isFuture ? "transparent" : `var(--heat-${heatLevel(count)})`;
+    cell.title = `${d.toLocaleDateString('de-DE')}: ${count} / ${total} erledigt`;
+    monthGrid.appendChild(cell);
+  }
+  const monthAvgPct = monthDaysPassed ? Math.round((monthSum / (monthDaysPassed * total)) * 100) : 0;
+  document.getElementById("streakMonth").textContent = monthAvgPct + "%";
+}
+
+function toggleStats() {
+  document.getElementById("statsSummary").classList.toggle("open");
+  document.getElementById("statsChev").classList.toggle("open");
+  document.getElementById("statsBody").classList.toggle("open");
+}
+
+function toggleBackfill() {
+  document.getElementById("backfillSummary").classList.toggle("open");
+  document.getElementById("backfillChev").classList.toggle("open");
+  document.getElementById("backfillBody").classList.toggle("open");
+}
+
+function renderBackfillList() {
+  const dateInput = document.getElementById("backfillDate");
+  const dKey = dateInput.value;
+  if (!dKey) return;
+  if (!state[dKey]) state[dKey] = {};
+
+  const listEl = document.getElementById("backfillList");
+  listEl.innerHTML = "";
+  RITUALS.forEach(r => {
+    const isDone = !!state[dKey][r.id];
+    const row = document.createElement("label");
+    row.className = "backfill-row";
+    row.innerHTML = `
+      <input type="checkbox" ${isDone ? "checked" : ""}>
+      <span><span class="bf-time">${r.time}</span>${r.title}</span>
+    `;
+    row.querySelector("input").addEventListener("change", (e) => {
+      state[dKey][r.id] = e.target.checked;
+      saveState(state);
+      renderHistory();
+      if (dKey === key) render();
+    });
+    listEl.appendChild(row);
+  });
+}
+
+function initBackfill() {
+  const dateInput = document.getElementById("backfillDate");
+  dateInput.max = key;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  dateInput.value = dateKeyFor(yesterday);
+  dateInput.addEventListener("change", renderBackfillList);
+  renderBackfillList();
+}
+
+// ---------- Export / Import ----------
+function exportState() {
+  const payload = {
+    app: "reiki_tagesritual",
+    exportedAt: new Date().toISOString(),
+    state: state
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `reiki-tagesritual_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importState(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const incoming = data && data.state ? data.state : data;
+      if (incoming && typeof incoming === "object") {
+        state = incoming;
+        if (!state[key]) state[key] = {};
+        saveState(state);
+        render();
+        renderBackfillList();
+        alert("Verlauf wurde geladen.");
+      } else {
+        alert("Datei enthält keinen gültigen Verlauf.");
+      }
+    } catch (e) {
+      alert("Datei konnte nicht gelesen werden.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById("importFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) importState(file);
+  e.target.value = "";
+});
+
+render();
+initBackfill();
+</script>
+
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

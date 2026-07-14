@@ -1,0 +1,8 @@
+ALLTAGSBEGLEITER PWA – VERSION 16
+
+- Direkte, stets sichtbare Eingabeleiste auf Tablet- und Heute-Seite
+- Medikamente, Termine/Geburtstage und Aufgaben direkt erreichbar
+- Medikamentenverwaltung: anlegen, bearbeiten, löschen
+- Termin- und Geburtstagsverwaltung: anlegen, bearbeiten, löschen
+- Service Worker auf Version 16 aktualisiert
+- HTML-Seiten werden online zuerst geladen, damit Updates nicht im alten Cache hängen bleiben

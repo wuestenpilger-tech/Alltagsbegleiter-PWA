@@ -1,0 +1,13 @@
+Alltagsbegleiter 22.4 – Android-Importprüfung
+
+Geprüfte Änderung:
+- ACTION_OPEN_DOCUMENT verwendet type */*.
+- Keine einschränkende EXTRA_MIME_TYPES-Liste mehr.
+- Dadurch werden Dateien unabhängig von herstellerspezifischen MIME-Zuordnungen auswählbar.
+- CSV, JSON, TXT, ABG und DKBACKUP werden weiterhin durch Dateiname/Inhalt im Webmodul verarbeitet.
+
+Primärer Alltagstest:
+1. Blutdruck_Export.csv im Android-Dateidialog öffnen.
+2. Datei muss anklickbar sein.
+3. Daten müssen in das Blutdruckprotokoll übernommen werden.
+4. Danach weitere CSV- und Gesamtsicherungsimporte prüfen.

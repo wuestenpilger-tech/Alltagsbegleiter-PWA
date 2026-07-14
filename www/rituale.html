@@ -1,0 +1,54 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rituale</title><script src="shared-store.js"></script><style>
+:root{
+ --parch:#eee3cb;--parch2:#e5d4b1;--paper:#f8f1e2;--ink:#30271d;--muted:#6c5f50;
+ --wine:#67202d;--wine2:#46131d;--gold:#b58a3d;--gold2:#d4b36c;--sage:#617058;
+ --wood:#5d3d2a;--night:#172033;--line:#d6c39c;--cream:#fffaf0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--parch);color:var(--ink);font-family:Georgia,'Times New Roman',serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+header{position:relative;background:linear-gradient(135deg,var(--wine2),var(--night));color:#fff8e8;padding:34px 22px;text-align:center}
+.back{position:absolute;left:18px;top:18px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff20}
+header h1{font-size:40px;margin:0 0 6px}header p{margin:0;color:#d8dbe5}
+main{max-width:900px;margin:auto;padding:24px 18px 60px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:18px}.card h2{color:var(--wine2)}
+.step{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:12px;margin:9px 0}
+.step a{font-weight:700}.done{border:0;border-radius:50%;width:34px;height:34px;background:var(--parch2);cursor:pointer}.done.active{background:var(--sage);color:#fff}
+@media(max-width:650px){.grid{grid-template-columns:1fr}}</style><script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body><header><a class="back" href="index.html">←</a><h1>🌅 Rituale</h1><p>Morgen und Abend Schritt für Schritt</p></header>
+<main><div class="grid">
+<section class="card"><h2>Morgenritual</h2>
+<div class="step"><a href="stundenbuch_tablet.html">Laudes</a><button class="done" data-key="m1">✓</button></div>
+<div class="step"><a href="Tagesgebete.html">Tagesgebet</a><button class="done" data-key="m2">✓</button></div>
+<div class="step"><a href="spirituelle-bibliothek/index.html">Lectio Divina</a><button class="done" data-key="m3">✓</button></div>
+<div class="step"><a href="blutdruck-app-tablet.html">Blutdruck</a><button class="done" data-key="m4">✓</button></div>
+<div class="step"><a href="gewicht-tablet.html">Gewicht</a><button class="done" data-key="m5">✓</button></div>
+</section>
+<section class="card"><h2>Abendritual</h2>
+<div class="step"><a href="stundenbuch_tablet.html">Vesper / Komplet</a><button class="done" data-key="a1">✓</button></div>
+<div class="step"><a href="Klangschale-Tablet.html">Klangschale</a><button class="done" data-key="a2">✓</button></div>
+<div class="step"><a href="Dankgebete.html">Dankgebet</a><button class="done" data-key="a3">✓</button></div>
+<div class="step"><a href="skriptorium.html">Skriptorium</a><button class="done" data-key="a4">✓</button></div>
+<div class="step"><a href="Wecker-Tablet.html">Wecker prüfen</a><button class="done" data-key="a5">✓</button></div>
+</section></div></main>
+<script>
+const D=new Date().toISOString().slice(0,10),KEY='digitales_kloster.rituale.'+D;
+let state={};try{state=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+document.querySelectorAll('.done').forEach(b=>{b.classList.toggle('active',!!state[b.dataset.key]);b.onclick=()=>{state[b.dataset.key]=!state[b.dataset.key];localStorage.setItem(KEY,JSON.stringify(state));b.classList.toggle('active',!!state[b.dataset.key])}});
+</script><script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body></html>

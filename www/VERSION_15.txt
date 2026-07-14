@@ -1,0 +1,8 @@
+Alltagsbegleiter Version 15.0
+
+- Medikamente: anlegen, bearbeiten, löschen, speichern mit Bestätigung
+- Termine: anlegen, bearbeiten, löschen, wiederkehrend speichern
+- Geburtstage: anlegen, bearbeiten, löschen
+- Direkte Eingabeknöpfe in Heute- und Tabletansicht
+- Android-WebView/PWA-sichere DOM-Ansteuerung
+- Offline-Cache auf Version 15 aktualisiert

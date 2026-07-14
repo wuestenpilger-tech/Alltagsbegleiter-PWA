@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energiezähler (Tablet)</title>
+<style>
+  :root{
+    --parchment:#f5efe0;
+    --parchment-dark:#ebe0c8;
+    --wine:#6d2e3a;
+    --wine-dark:#4c1f28;
+    --gold:#b8935f;
+    --gold-light:#d8bd8d;
+    --sage:#7c8c68;
+    --sage-dark:#5c6a4c;
+    --ink:#3a2f28;
+    --ink-light:#6b5f52;
+    --paper:#fffdf8;
+    --line:#d8c9a8;
+    --danger:#8a3a2a;
+    --ok:#4c6b3a;
+  }
+  *{box-sizing:border-box;}
+  html{font-size:17px;}
+  body{
+    margin:0;
+    font-family:'EB Garamond','Cormorant Garamond',Georgia,serif;
+    background:var(--parchment);
+    color:var(--ink);
+    line-height:1.6;
+    display:flex;
+    min-height:100vh;
+  }
+  header{
+    background:linear-gradient(180deg,var(--wine),var(--wine-dark));
+    color:var(--parchment);
+    padding:1.6rem 1.2rem;
+    box-shadow:2px 0 8px rgba(0,0,0,.2);
+    width:230px;
+    flex-shrink:0;
+    position:sticky;
+    top:0;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  header h1{
+    font-family:'Cormorant Garamond',Georgia,serif;
+    margin:0 0 1.6rem 0;
+    font-size:2.1rem;
+    letter-spacing:.03em;
+    font-weight:600;
+    line-height:1.2;
+  }
+  nav#tabs{
+    display:flex;
+    flex-direction:column;
+    gap:.5rem;
+  }
+  nav#tabs button{
+    background:rgba(255,255,255,.08);
+    border:1px solid var(--gold-light);
+    color:var(--parchment);
+    padding:.65rem .9rem;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:1.02rem;
+    cursor:pointer;
+    letter-spacing:.02em;
+    text-align:left;
+  }
+  nav#tabs button.active{
+    background:var(--gold);
+    color:var(--wine-dark);
+    border-color:var(--gold);
+    font-weight:600;
+  }
+  main{
+    flex:1;
+    max-width:1180px;
+    margin:0 auto;
+    padding:1.6rem 2rem 4rem;
+    width:100%;
+  }
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1rem;
+    align-items:start;
+  }
+  @media (max-width:900px){
+    body{display:block;}
+    header{width:auto;height:auto;position:static;}
+    nav#tabs{flex-direction:row;flex-wrap:wrap;}
+    .grid2{grid-template-columns:1fr;}
+  }
+  section.tab{display:none;}
+  section.tab.active{display:block;}
+  h2{
+    color:var(--wine-dark);
+    font-size:1.4rem;
+    border-bottom:2px solid var(--gold-light);
+    padding-bottom:.25rem;
+    margin-top:1.4rem;
+  }
+  h3{color:var(--wine);font-size:1.15rem;margin-bottom:.4rem;}
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1rem;
+    margin-bottom:1rem;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+    overflow-x:auto;
+  }
+  table{min-width:100%;}
+  label{
+    display:block;
+    font-size:.85rem;
+    color:var(--ink-light);
+    margin:.6rem 0 .2rem;
+  }
+  input,select{
+    width:100%;
+    padding:.5rem .6rem;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-family:inherit;
+    font-size:1rem;
+    background:#fffef9;
+    color:var(--ink);
+  }
+  input:focus,select:focus{outline:2px solid var(--gold);}
+  .row{display:flex;gap:.6rem;flex-wrap:wrap;}
+  .row > *{flex:1;min-width:140px;}
+  button.btn{
+    font-family:inherit;
+    background:var(--wine);
+    color:#fff;
+    border:none;
+    padding:.55rem 1.1rem;
+    border-radius:6px;
+    font-size:.95rem;
+    cursor:pointer;
+    margin-top:.8rem;
+  }
+  button.btn.secondary{background:var(--sage);}
+  button.btn.danger{background:var(--danger);}
+  button.btn.small{padding:.3rem .6rem;font-size:.8rem;margin-top:0;}
+  button.btn:hover{opacity:.9;}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:.6rem;
+    font-size:.92rem;
+  }
+  th,td{
+    text-align:left;
+    padding:.4rem .6rem;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  th{color:var(--wine-dark);font-weight:600;background:var(--parchment-dark);}
+  tr:hover td{background:#faf6ea;}
+  .trend-up{color:var(--danger);font-weight:600;}
+  .trend-down{color:var(--ok);font-weight:600;}
+  .trend-flat{color:var(--ink-light);}
+  .badge{
+    display:inline-block;
+    padding:.1rem .5rem;
+    border-radius:999px;
+    font-size:.75rem;
+    background:var(--gold-light);
+    color:var(--wine-dark);
+    margin-left:.4rem;
+  }
+  .badge.heizung{background:var(--sage);color:#fff;}
+  .badge.strom{background:var(--wine);color:#fff;}
+  .muted{color:var(--ink-light);font-size:.85rem;}
+  .zaehler-card{
+    border-left:5px solid var(--wine);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:.5rem;
+  }
+  .zaehler-card.heizung{border-left-color:var(--sage);}
+  .zaehler-card .info{flex:1;min-width:200px;}
+  .zaehler-card .actions{display:flex;gap:.4rem;}
+  .diff-pos{color:var(--ok);font-weight:600;}
+  .diff-neg{color:var(--danger);font-weight:600;}
+  .lock-note{
+    background:#f3e6c8;
+    border:1px solid var(--gold);
+    padding:.5rem .7rem;
+    border-radius:6px;
+    font-size:.85rem;
+    margin-top:.5rem;
+  }
+  .hint{font-size:.8rem;color:var(--ink-light);margin-top:.3rem;}
+  table.kompakt{table-layout:fixed;}
+  table.kompakt th,table.kompakt td{white-space:normal;word-break:break-word;}
+  table.kompakt .zeile-tendenz{display:inline-block;margin-left:.3rem;}
+  table.kompakt .unterzeile{display:block;font-size:.78rem;}
+  @media print{
+    header,nav,#no-print,button{display:none !important;}
+    body{background:#fff;}
+    main{max-width:100%;padding:0;}
+    section.tab{display:none !important;}
+    #print-area{display:block !important;}
+    .card{box-shadow:none;border:1px solid #999;}
+  }
+  #print-area{display:none;}
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+
+<header>
+  <h1>⚡ Energiezähler</h1>
+  <nav id="tabs">
+    <button data-tab="zaehler" class="active">Zähler</button>
+    <button data-tab="erfassen">Stand erfassen</button>
+    <button data-tab="statistik">Statistik</button>
+    <button data-tab="kosten">Kosten</button>
+    <button data-tab="zielwerte">Zielwerte</button>
+    <button data-tab="jahr">Jahresabschluss</button>
+    <button data-tab="daten">Daten</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ZÄHLER VERWALTEN -->
+  <section class="tab active" id="tab-zaehler">
+    <h2>Zähler verwalten</h2>
+    <div id="zaehler-liste" class="grid2"></div>
+
+    <div class="card">
+      <h3 id="zaehler-form-titel">Neuen Zähler anlegen</h3>
+      <input type="hidden" id="zf-id">
+      <label>Typ</label>
+      <select id="zf-typ">
+        <option value="strom">Stromzähler</option>
+        <option value="heizung">Heizungsmessgerät (Wärmezähler)</option>
+      </select>
+
+      <label>Zählername</label>
+      <input id="zf-name" placeholder="z. B. Stromzähler Keller / Heizkörper Bad">
+
+      <div id="zf-strom-felder">
+        <label>Energieversorger</label>
+        <input id="zf-versorger" placeholder="z. B. Stadtwerke ...">
+        <div class="row">
+          <div>
+            <label>Vertragsnummer</label>
+            <input id="zf-vertragsnr">
+          </div>
+          <div>
+            <label>Kundennummer</label>
+            <input id="zf-kundennr">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Grundpreis (€ / Monat)</label>
+            <input type="number" step="0.01" id="zf-grundpreis">
+          </div>
+          <div>
+            <label>Bruttopreis (€ / kWh)</label>
+            <input type="number" step="0.0001" id="zf-preiskwh">
+          </div>
+        </div>
+        <label>Monatliche Vorauszahlung (€)</label>
+        <input type="number" step="0.01" id="zf-vorauszahlung">
+      </div>
+
+      <div id="zf-heizung-felder" style="display:none;">
+        <label>Raum</label>
+        <input id="zf-raum" placeholder="z. B. Badezimmer">
+        <label>Anbieter / Messdienst (optional)</label>
+        <input id="zf-anbieter">
+        <div class="row">
+          <div>
+            <label>Vertragsnummer (optional)</label>
+            <input id="zf-h-vertragsnr">
+          </div>
+          <div>
+            <label>Kundennummer (optional)</label>
+            <input id="zf-h-kundennr">
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="speichereZaehler()">Zähler speichern</button>
+      <button class="btn secondary" onclick="resetZaehlerForm()">Abbrechen / Neu</button>
+    </div>
+  </section>
+
+  <!-- STAND ERFASSEN -->
+  <section class="tab" id="tab-erfassen">
+    <h2>Zählerstand erfassen</h2>
+    <div class="card">
+      <label>Zähler</label>
+      <select id="ef-zaehler" onchange="renderErfassungsListe()"></select>
+      <div class="row">
+        <div>
+          <label>Datum (frei änderbar zum Nachtragen)</label>
+          <input type="date" id="ef-datum">
+        </div>
+        <div>
+          <label>Zählerstand</label>
+          <input type="number" step="0.01" id="ef-stand">
+        </div>
+      </div>
+      <button class="btn" onclick="speichereStand()">Stand speichern</button>
+      <div class="hint">Ein bereits vorhandener Eintrag für dasselbe Datum wird überschrieben (nach Bestätigung).</div>
+    </div>
+
+    <div class="card">
+      <h3>Bisherige Einträge</h3>
+      <div id="erfassung-liste"></div>
+    </div>
+  </section>
+
+  <!-- STATISTIK -->
+  <section class="tab" id="tab-statistik">
+    <h2>Statistik</h2>
+    <div class="card">
+      <label>Zähler</label>
+      <select id="st-zaehler" onchange="renderStatistik()"></select>
+    </div>
+    <div class="card">
+      <h3>Zeitraum-Auswertung</h3>
+      <p class="hint">Verbrauch und reine Verbrauchskosten (ohne Grundpreis) für einen frei wählbaren Zeitraum.</p>
+      <div class="grid2">
+        <div>
+          <label>Von</label>
+          <input type="date" id="zr-von">
+        </div>
+        <div>
+          <label>Bis</label>
+          <input type="date" id="zr-bis">
+        </div>
+      </div>
+      <button class="btn" onclick="berechneZeitraum()">Berechnen</button>
+      <div id="zr-ergebnis"></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Tagesauswertung: Verbrauch &amp; Kosten (letzte Einträge)</h3>
+        <div id="st-tage"></div>
+      </div>
+      <div class="card">
+        <h3>Monatsverbrauch <span class="muted" id="st-jahr-label"></span></h3>
+        <div id="st-monate"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Jahresverbrauch</h3>
+      <div id="st-jahre"></div>
+    </div>
+  </section>
+
+  <!-- KOSTEN -->
+  <section class="tab" id="tab-kosten">
+    <h2>Kostenübersicht (Strom)</h2>
+    <div class="card">
+      <label>Stromzähler</label>
+      <select id="ko-zaehler" onchange="renderKosten()"></select>
+    </div>
+    <div class="card" id="kosten-inhalt"></div>
+  </section>
+
+  <!-- ZIELWERTE -->
+  <section class="tab" id="tab-zielwerte">
+    <h2>Zielwerte <span class="muted" id="zw-jahr-label"></span></h2>
+    <div class="card">
+      <label>Stromzähler</label>
+      <select id="zw-zaehler" onchange="zwZaehlerGeaendert()"></select>
+      <label>Ziel-Verbrauch (kWh pro Tag)</label>
+      <input type="number" step="0.01" id="zw-proTag" onchange="speichereZielwert()">
+      <div class="hint">Der Monats-Zielwert ergibt sich aus Tage im Monat × dieser Tagesrate (z. B. 31 Tage × 10 kWh/Tag = 310 kWh für Januar, 30 Tage × 10 kWh/Tag = 300 kWh für April). Die Übersicht zeigt immer das laufende Jahr und startet mit dem Jahresabschluss automatisch wieder bei 0.</div>
+    </div>
+    <div class="card" id="zielwerte-inhalt"></div>
+  </section>
+
+  <!-- JAHRESABSCHLUSS -->
+  <section class="tab" id="tab-jahr">
+    <h2>Jahresabschluss</h2>
+    <div class="card">
+      <p class="muted">Ein Jahr läuft vom 01.01. bis 31.12. Beim Abschließen wird der Endstand festgehalten, die Einträge des Jahres werden archiviert (nicht mehr veränderbar) und automatisch ein Eröffnungsstand zum 01.01. des Folgejahres angelegt.</p>
+      <label>Zähler</label>
+      <select id="ja-zaehler"></select>
+      <label>Jahr</label>
+      <select id="ja-jahr"></select>
+      <button class="btn" onclick="jahrAbschliessen()">Jahr abschließen</button>
+    </div>
+    <div class="card">
+      <h3>Archivierte Jahre</h3>
+      <div id="archiv-liste"></div>
+    </div>
+  </section>
+
+  <!-- DATEN -->
+  <section class="tab" id="tab-daten">
+    <h2>Datensicherung &amp; Druck</h2>
+    <div class="card">
+      <h3>Export</h3>
+      <button class="btn" onclick="exportJSON()">Komplettsicherung (JSON) exportieren</button>
+      <button class="btn secondary" onclick="exportCSV()">Zählerstände als CSV exportieren</button>
+    </div>
+    <div class="card">
+      <h3>Import</h3>
+      <label>JSON-Sicherung wiederherstellen</label>
+      <input type="file" id="import-file" accept="application/json">
+      <button class="btn" onclick="importJSON()">Importieren (ersetzt alle Daten)</button>
+      <div class="hint">Vor dem Import wird zur Sicherheit noch einmal nachgefragt.</div>
+    </div>
+    <div class="card">
+      <h3>Drucken</h3>
+      <label>Zähler für den Ausdruck</label>
+      <select id="dr-zaehler"></select>
+      <button class="btn" onclick="drucken()">Übersicht drucken</button>
+    </div>
+  </section>
+
+  <div id="print-area"></div>
+
+</main>
+
+<script>
+/* ---------- Basisdaten ---------- */
+const LS_ZAEHLER = 'ez_zaehler';
+const LS_READINGS = 'ez_readings';
+const LS_ARCHIV = 'ez_archiv';
+const LS_ZIELWERTE = 'ez_zielwerte';
+
+function uuid(){
+  if(crypto.randomUUID) return crypto.randomUUID();
+  return 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+}
+function load(key){ try{ return JSON.parse(localStorage.getItem(key)) || []; }catch(e){ return []; } }
+function save(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+let zaehlerListe = load(LS_ZAEHLER);
+let readings = load(LS_READINGS);
+let archiv = load(LS_ARCHIV); // [{zaehlerId, jahr, endstand, enddatum, abgeschlossenAm}]
+let zielwerte = load(LS_ZIELWERTE); // [{zaehlerId, proTag}] proTag = Ziel-kWh pro Tag
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('#tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    refreshAll();
+  });
+});
+
+/* ---------- Zähler-Formular ---------- */
+document.getElementById('zf-typ').addEventListener('change', updateZfFelder);
+function updateZfFelder(){
+  const typ = document.getElementById('zf-typ').value;
+  document.getElementById('zf-strom-felder').style.display = typ==='strom' ? 'block' : 'none';
+  document.getElementById('zf-heizung-felder').style.display = typ==='heizung' ? 'block' : 'none';
+}
+
+function resetZaehlerForm(){
+  document.getElementById('zf-id').value='';
+  document.getElementById('zf-typ').value='strom';
+  ['zf-name','zf-versorger','zf-vertragsnr','zf-kundennr','zf-grundpreis','zf-preiskwh','zf-vorauszahlung',
+   'zf-raum','zf-anbieter','zf-h-vertragsnr','zf-h-kundennr'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('zaehler-form-titel').textContent='Neuen Zähler anlegen';
+  updateZfFelder();
+}
+
+function speichereZaehler(){
+  const id = document.getElementById('zf-id').value || uuid();
+  const typ = document.getElementById('zf-typ').value;
+  const name = document.getElementById('zf-name').value.trim();
+  if(!name){ alert('Bitte einen Zählernamen eingeben.'); return; }
+
+  let obj = { id, typ, name };
+  if(typ==='strom'){
+    obj.versorger = document.getElementById('zf-versorger').value.trim();
+    obj.vertragsnummer = document.getElementById('zf-vertragsnr').value.trim();
+    obj.kundennummer = document.getElementById('zf-kundennr').value.trim();
+    obj.grundpreis = parseFloat(document.getElementById('zf-grundpreis').value)||0;
+    obj.preisKwh = parseFloat(document.getElementById('zf-preiskwh').value)||0;
+    obj.vorauszahlung = parseFloat(document.getElementById('zf-vorauszahlung').value)||0;
+    obj.einheit = 'kWh';
+  } else {
+    obj.raum = document.getElementById('zf-raum').value.trim();
+    obj.anbieter = document.getElementById('zf-anbieter').value.trim();
+    obj.vertragsnummer = document.getElementById('zf-h-vertragsnr').value.trim();
+    obj.kundennummer = document.getElementById('zf-h-kundennr').value.trim();
+    obj.einheit = 'Einheiten';
+  }
+
+  const idx = zaehlerListe.findIndex(z=>z.id===id);
+  if(idx>=0) zaehlerListe[idx]=obj; else zaehlerListe.push(obj);
+  save(LS_ZAEHLER, zaehlerListe);
+  resetZaehlerForm();
+  refreshAll();
+}
+
+function editZaehler(id){
+  const z = zaehlerListe.find(z=>z.id===id);
+  if(!z) return;
+  document.getElementById('zf-id').value=z.id;
+  document.getElementById('zf-typ').value=z.typ;
+  document.getElementById('zf-name').value=z.name;
+  if(z.typ==='strom'){
+    document.getElementById('zf-versorger').value=z.versorger||'';
+    document.getElementById('zf-vertragsnr').value=z.vertragsnummer||'';
+    document.getElementById('zf-kundennr').value=z.kundennummer||'';
+    document.getElementById('zf-grundpreis').value=z.grundpreis||'';
+    document.getElementById('zf-preiskwh').value=z.preisKwh||'';
+    document.getElementById('zf-vorauszahlung').value=z.vorauszahlung||'';
+  } else {
+    document.getElementById('zf-raum').value=z.raum||'';
+    document.getElementById('zf-anbieter').value=z.anbieter||'';
+    document.getElementById('zf-h-vertragsnr').value=z.vertragsnummer||'';
+    document.getElementById('zf-h-kundennr').value=z.kundennummer||'';
+  }
+  updateZfFelder();
+  document.getElementById('zaehler-form-titel').textContent='Zähler bearbeiten';
+  window.scrollTo({top:document.getElementById('zaehler-form-titel').offsetTop-20, behavior:'smooth'});
+}
+
+function loescheZaehler(id){
+  if(!confirm('Diesen Zähler inklusive aller Zählerstände wirklich löschen?')) return;
+  zaehlerListe = zaehlerListe.filter(z=>z.id!==id);
+  readings = readings.filter(r=>r.zaehlerId!==id);
+  archiv = archiv.filter(a=>a.zaehlerId!==id);
+  save(LS_ZAEHLER, zaehlerListe); save(LS_READINGS, readings); save(LS_ARCHIV, archiv);
+  refreshAll();
+}
+
+function renderZaehlerListe(){
+  const el = document.getElementById('zaehler-liste');
+  if(zaehlerListe.length===0){ el.innerHTML='<p class="muted">Noch keine Zähler angelegt.</p>'; return; }
+  el.innerHTML = zaehlerListe.map(z=>{
+    const badge = z.typ==='strom' ? '<span class="badge strom">Strom</span>' : '<span class="badge heizung">Heizung</span>';
+    let details='';
+    if(z.typ==='strom'){
+      details = `${z.versorger||'–'} · Vertrag ${z.vertragsnummer||'–'} · Kunde ${z.kundennummer||'–'}<br>
+      Grundpreis ${z.grundpreis.toFixed(2)} €/Monat · ${z.preisKwh.toFixed(4)} €/kWh · Vorauszahlung ${z.vorauszahlung.toFixed(2)} €/Monat`;
+    } else {
+      details = `Raum: ${z.raum||'–'}${z.anbieter? ' · '+z.anbieter:''}`;
+    }
+    return `<div class="card zaehler-card ${z.typ}">
+      <div class="info"><strong>${z.name}</strong> ${badge}<br><span class="muted">${details}</span></div>
+      <div class="actions">
+        <button class="btn small secondary" onclick="editZaehler('${z.id}')">Bearbeiten</button>
+        <button class="btn small danger" onclick="loescheZaehler('${z.id}')">Löschen</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Dropdown-Helfer ---------- */
+function fillZaehlerSelect(selectId, filterFn){
+  const sel = document.getElementById(selectId);
+  const prev = sel.value;
+  const liste = filterFn ? zaehlerListe.filter(filterFn) : zaehlerListe;
+  sel.innerHTML = liste.map(z=>`<option value="${z.id}">${z.name}</option>`).join('') || '<option value="">– keine Zähler –</option>';
+  if(liste.some(z=>z.id===prev)) sel.value = prev;
+}
+
+/* ---------- Stand erfassen ---------- */
+function initErfassungTab(){
+  fillZaehlerSelect('ef-zaehler');
+  const d = document.getElementById('ef-datum');
+  if(!d.value) d.value = new Date().toISOString().slice(0,10);
+  renderErfassungsListe();
+}
+
+function istJahrGesperrt(zaehlerId, datum){
+  const jahr = parseInt(datum.slice(0,4));
+  return archiv.some(a=>a.zaehlerId===zaehlerId && a.jahr===jahr);
+}
+
+function speichereStand(){
+  const zaehlerId = document.getElementById('ef-zaehler').value;
+  const datum = document.getElementById('ef-datum').value;
+  const stand = parseFloat(document.getElementById('ef-stand').value);
+  if(!zaehlerId){ alert('Bitte zuerst einen Zähler anlegen.'); return; }
+  if(!datum){ alert('Bitte ein Datum wählen.'); return; }
+  if(isNaN(stand)){ alert('Bitte einen Zählerstand eingeben.'); return; }
+  if(istJahrGesperrt(zaehlerId, datum)){
+    alert('Das Jahr '+datum.slice(0,4)+' ist für diesen Zähler bereits abgeschlossen und gesperrt.');
+    return;
+  }
+  const bestehend = readings.find(r=>r.zaehlerId===zaehlerId && r.datum===datum);
+  if(bestehend){
+    if(!confirm('Für dieses Datum existiert bereits ein Eintrag ('+bestehend.stand+'). Überschreiben?')) return;
+    bestehend.stand = stand;
+  } else {
+    readings.push({id:uuid(), zaehlerId, datum, stand});
+  }
+  save(LS_READINGS, readings);
+  document.getElementById('ef-stand').value='';
+  renderErfassungsListe();
+}
+
+function loescheStand(id){
+  if(!confirm('Diesen Eintrag löschen?')) return;
+  readings = readings.filter(r=>r.id!==id);
+  save(LS_READINGS, readings);
+  renderErfassungsListe();
+}
+
+function sortierteReadings(zaehlerId){
+  return readings.filter(r=>r.zaehlerId===zaehlerId).sort((a,b)=> a.datum.localeCompare(b.datum));
+}
+
+function tageZwischen(d1,d2){
+  return Math.round((new Date(d2)-new Date(d1))/86400000);
+}
+
+function renderErfassungsListe(){
+  const zaehlerId = document.getElementById('ef-zaehler').value;
+  const el = document.getElementById('erfassung-liste');
+  if(!zaehlerId){ el.innerHTML=''; return; }
+  const z = zaehlerListe.find(z=>z.id===zaehlerId);
+  const liste = sortierteReadings(zaehlerId);
+  if(liste.length===0){ el.innerHTML='<p class="muted">Noch keine Einträge.</p>'; return; }
+  let rows='';
+  for(let i=liste.length-1;i>=0;i--){
+    const r = liste[i];
+    let verbrauchTxt='–';
+    if(i>0){
+      const prev = liste[i-1];
+      const tage = tageZwischen(prev.datum, r.datum) || 1;
+      const verbrauch = r.stand - prev.stand;
+      const proTag = verbrauch/tage;
+      verbrauchTxt = `${verbrauch.toFixed(2)} ${z.einheit} in ${tage} Tg. (Ø ${proTag.toFixed(2)}/Tag)`;
+    }
+    const gesperrt = istJahrGesperrt(zaehlerId, r.datum);
+    rows += `<tr>
+      <td>${formatDatum(r.datum)}</td>
+      <td>${r.stand}</td>
+      <td>${verbrauchTxt}</td>
+      <td>${gesperrt ? '<span class="muted">archiviert</span>' : `<button class="btn small secondary" onclick="uebernehmeZumBearbeiten('${r.id}')">Ändern</button> <button class="btn small danger" onclick="loescheStand('${r.id}')">Löschen</button>`}</td>
+    </tr>`;
+  }
+  el.innerHTML = `<table><tr><th>Datum</th><th>Stand</th><th>Verbrauch seit letztem Eintrag</th><th></th></tr>${rows}</table>`;
+}
+
+function uebernehmeZumBearbeiten(readingId){
+  const r = readings.find(r=>r.id===readingId);
+  if(!r) return;
+  document.getElementById('ef-zaehler').value = r.zaehlerId;
+  document.getElementById('ef-datum').value = r.datum;
+  document.getElementById('ef-stand').value = r.stand;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function formatDatum(iso){
+  const [j,m,t]=iso.split('-');
+  return `${t}.${m}.${j}`;
+}
+
+/* ---------- Statistik ---------- */
+function initStatistikTab(){
+  fillZaehlerSelect('st-zaehler');
+  const vonEl = document.getElementById('zr-von');
+  const bisEl = document.getElementById('zr-bis');
+  if(!vonEl.value){
+    const heute = new Date();
+    const monatsStart = new Date(heute.getFullYear(), heute.getMonth(), 1);
+    vonEl.value = monatsStart.toISOString().slice(0,10);
+    bisEl.value = heute.toISOString().slice(0,10);
+  }
+  renderStatistik();
+}
+
+function berechneZeitraum(){
+  const zaehlerId = document.getElementById('st-zaehler').value;
+  const von = document.getElementById('zr-von').value;
+  const bis = document.getElementById('zr-bis').value;
+  const el = document.getElementById('zr-ergebnis');
+  if(!zaehlerId){ el.innerHTML='<p class="muted">Bitte einen Zähler wählen.</p>'; return; }
+  if(!von || !bis){ el.innerHTML='<p class="muted">Bitte Start- und Enddatum wählen.</p>'; return; }
+  if(von > bis){ el.innerHTML='<p class="muted">Das Startdatum muss vor dem Enddatum liegen.</p>'; return; }
+  const z = zaehlerListe.find(z=>z.id===zaehlerId);
+  const standVon = letzterStandBisEinschliesslich(zaehlerId, von) || sortierteReadings(zaehlerId).find(r=>r.datum>=von);
+  const standBis = letzterStandBisEinschliesslich(zaehlerId, bis);
+  if(!standVon || !standBis || standBis.datum<=standVon.datum){
+    el.innerHTML='<p class="muted">Für diesen Zeitraum liegen nicht genügend Zählerstände vor.</p>';
+    return;
+  }
+  const verbrauch = standBis.stand - standVon.stand;
+  const istStrom = z.typ==='strom';
+  const kosten = istStrom ? verbrauch*z.preisKwh : null;
+  el.innerHTML = `
+    <table class="kompakt">
+      <tr><th>Zugrunde liegende Stände</th><td>${formatDatum(standVon.datum)} (${standVon.stand}) – ${formatDatum(standBis.datum)} (${standBis.stand})</td></tr>
+      <tr><th>Verbrauch</th><td>${verbrauch.toFixed(2)} ${z.einheit}</td></tr>
+      <tr><th>Reine Verbrauchskosten<span class="unterzeile muted">ohne Grundpreis</span></th><td>${istStrom ? kosten.toFixed(2)+' €<span class="unterzeile muted">bei '+z.preisKwh.toFixed(4)+' €/kWh</span>' : '<span class="muted">Kein kWh-Preis für diesen Zählertyp hinterlegt</span>'}</td></tr>
+    </table>
+    <p class="hint">Als Basis dienen die nächstgelegenen tatsächlich erfassten Zählerstände am/vor den gewählten Daten – nicht zwingend exakt Von-/Bis-Datum.</p>
+  `;
+}
+
+function letzterStandBisEinschliesslich(zaehlerId, isoDatum){
+  const liste = sortierteReadings(zaehlerId).filter(r=>r.datum<=isoDatum);
+  return liste.length ? liste[liste.length-1] : null;
+}
+
+function tageImMonat(jahr,monat){ return new Date(jahr, monat, 0).getDate(); }
+
+function trendHTML(diffProzent){
+  if(diffProzent===null) return '<span class="trend-flat">–</span>';
+  if(diffProzent > 3) return `<span class="trend-up">▲ +${diffProzent.toFixed(1)}%</span>`;
+  if(diffProzent < -3) return `<span class="trend-down">▼ ${diffProzent.toFixed(1)}%</span>`;
+  return `<span class="trend-flat">→ ${diffProzent.toFixed(1)}%</span>`;
+}
+
+/* Wie berechneMonatsVerbrauch, begrenzt den Verbrauch aber strikt auf den jeweiligen
+   Monat: Als Endstand zählt nur ein Zählerstand, der tatsächlich INNERHALB dieses Monats
+   erfasst wurde. Als Startstand zählt nur ein Stand aus dem UNMITTELBAR VORANGEHENDEN
+   Monat (bzw. für Januar nur ein Stand exakt vom 01.01.). Fehlt einer der beiden, bleibt
+   der Monat leer ("–") - so wird nie der Verbrauch mehrerer übersprungener Monate
+   fälschlich einem einzelnen Monat zugerechnet.*/
+function berechneMonatsVerbrauchImJahr(zaehlerId, jahr){
+  const heute = new Date();
+  const jahrAktuell = heute.getFullYear();
+  const jahrBeginn = `${jahr}-01-01`;
+  const alle = sortierteReadings(zaehlerId);
+  let monatsWerte=[];
+  for(let m=1;m<=12;m++){
+    const istZukunft = (jahr>jahrAktuell) || (jahr===jahrAktuell && m>heute.getMonth()+1);
+    if(istZukunft){ monatsWerte.push(null); continue; }
+    const istAktuellerMonat = (jahr===jahrAktuell && m===heute.getMonth()+1);
+    const letzterTagDesMonats = tageImMonat(jahr,m);
+    const monatsStart = `${jahr}-${String(m).padStart(2,'0')}-01`;
+    const monatsEndeIso = `${jahr}-${String(m).padStart(2,'0')}-${String(letzterTagDesMonats).padStart(2,'0')}`;
+    const grenzeEnde = istAktuellerMonat ? heute.toISOString().slice(0,10) : monatsEndeIso;
+
+    // Startstand: exakt Jahresanfang für Januar, sonst letzter Stand aus dem Vormonat selbst
+    let standVor;
+    if(m===1){
+      standVor = alle.find(r=>r.datum===jahrBeginn) || null;
+    } else {
+      const vorMonatTage = tageImMonat(jahr, m-1);
+      const vorMonatStart = `${jahr}-${String(m-1).padStart(2,'0')}-01`;
+      const vorMonatEnde = `${jahr}-${String(m-1).padStart(2,'0')}-${String(vorMonatTage).padStart(2,'0')}`;
+      const kandidatenVor = alle.filter(r=>r.datum>=vorMonatStart && r.datum<=vorMonatEnde);
+      standVor = kandidatenVor.length ? kandidatenVor[kandidatenVor.length-1] : null;
+    }
+    if(!standVor){ monatsWerte.push(null); continue; }
+
+    // Endstand: nur ein Zählerstand, der tatsächlich in diesem Monat erfasst wurde
+    const kandidatenEnde = alle.filter(r=>r.datum>=monatsStart && r.datum<=grenzeEnde);
+    if(kandidatenEnde.length===0){ monatsWerte.push(null); continue; }
+    const standEnde = kandidatenEnde[kandidatenEnde.length-1];
+
+    let verbrauch = standEnde.stand - standVor.stand;
+    let hochgerechnet = false;
+    if(istAktuellerMonat){
+      const tageBisher = tageZwischen(monatsStart, standEnde.datum)+1;
+      if(tageBisher>0 && tageBisher<letzterTagDesMonats){
+        verbrauch = (verbrauch/tageBisher)*letzterTagDesMonats;
+        hochgerechnet = true;
+      }
+    }
+    monatsWerte.push({verbrauch, hochgerechnet});
+  }
+  return monatsWerte;
+}
+
+function berechneMonatsVerbrauch(zaehlerId, jahr){
+  const heute = new Date();
+  const jahrAktuell = heute.getFullYear();
+  let monatsWerte=[];
+  for(let m=1;m<=12;m++){
+    const istZukunft = (jahr>jahrAktuell) || (jahr===jahrAktuell && m>heute.getMonth()+1);
+    if(istZukunft){ monatsWerte.push(null); continue; }
+    const istAktuellerMonat = (jahr===jahrAktuell && m===heute.getMonth()+1);
+    const monatsStart = `${jahr}-${String(m).padStart(2,'0')}-01`;
+    const letzterTagDesMonats = tageImMonat(jahr,m);
+    const monatsEndeIso = `${jahr}-${String(m).padStart(2,'0')}-${String(letzterTagDesMonats).padStart(2,'0')}`;
+    const vorMonatsStart = new Date(jahr, m-1, 0).toISOString().slice(0,10); // letzter Tag Vormonat
+    const standVor = letzterStandBisEinschliesslich(zaehlerId, vorMonatsStart);
+    const grenzeEnde = istAktuellerMonat ? heute.toISOString().slice(0,10) : monatsEndeIso;
+    const standEnde = letzterStandBisEinschliesslich(zaehlerId, grenzeEnde);
+    if(!standVor || !standEnde){ monatsWerte.push(null); continue; }
+    let verbrauch = standEnde.stand - standVor.stand;
+    let hochgerechnet = false;
+    if(istAktuellerMonat){
+      const tageBisher = tageZwischen(monatsStart, grenzeEnde)+1;
+      if(tageBisher>0 && tageBisher<letzterTagDesMonats){
+        verbrauch = (verbrauch/tageBisher)*letzterTagDesMonats;
+        hochgerechnet = true;
+      }
+    }
+    monatsWerte.push({verbrauch, hochgerechnet});
+  }
+  return monatsWerte;
+}
+
+function renderStatistik(){
+  const zaehlerId = document.getElementById('st-zaehler').value;
+  document.getElementById('st-tage').innerHTML='';
+  document.getElementById('st-monate').innerHTML='';
+  document.getElementById('st-jahre').innerHTML='';
+  if(!zaehlerId) return;
+  const z = zaehlerListe.find(z=>z.id===zaehlerId);
+  const liste = sortierteReadings(zaehlerId);
+
+  /* Tagesverbrauch & Tageskosten: letzte 14 Intervalle */
+  const istStrom = z.typ==='strom';
+  if(liste.length<2){
+    document.getElementById('st-tage').innerHTML='<p class="muted">Mindestens zwei Einträge nötig.</p>';
+  } else {
+    const intervalle=[];
+    for(let i=1;i<liste.length;i++){
+      const tage = tageZwischen(liste[i-1].datum, liste[i].datum)||1;
+      const verbrauch = liste[i].stand - liste[i-1].stand;
+      const proTag = verbrauch/tage;
+      const kosten = istStrom ? verbrauch*z.preisKwh : null;
+      const kostenProTag = istStrom ? kosten/tage : null;
+      intervalle.push({datum:liste[i].datum, verbrauch, tage, proTag, kosten, kostenProTag});
+    }
+    const letzte = intervalle.slice(-14);
+    let rows='';
+    for(let i=letzte.length-1;i>=0;i--){
+      const cur = letzte[i];
+      const prev = letzte[i-1];
+      let trend = null, trendKosten = null;
+      if(prev && prev.proTag!==0) trend = ((cur.proTag-prev.proTag)/Math.abs(prev.proTag))*100;
+      if(istStrom && prev && prev.kostenProTag!==0) trendKosten = ((cur.kostenProTag-prev.kostenProTag)/Math.abs(prev.kostenProTag))*100;
+      rows+=`<tr>
+        <td>${formatDatum(cur.datum)}<span class="unterzeile muted">${cur.tage} Tg.</span></td>
+        <td>${cur.verbrauch.toFixed(2)} ${z.einheit}<span class="zeile-tendenz">${trendHTML(trend)}</span><span class="unterzeile muted">Ø ${cur.proTag.toFixed(2)}/Tag</span></td>
+        <td>${istStrom
+          ? cur.kosten.toFixed(2)+' €<span class="zeile-tendenz">'+trendHTML(trendKosten)+'</span><span class="unterzeile muted">Ø '+cur.kostenProTag.toFixed(2)+' €/Tag</span>'
+          : '<span class="muted">–</span>'}</td>
+      </tr>`;
+    }
+    document.getElementById('st-tage').innerHTML = `<table class="kompakt"><tr><th>Datum</th><th>Verbrauch</th><th>Kosten</th></tr>${rows}</table>${istStrom?'':'<p class="hint">Kosten werden nur für Stromzähler berechnet (Preis pro kWh erforderlich).</p>'}`;
+  }
+
+  /* Monatsverbrauch aktuelles Jahr */
+  const heute = new Date();
+  const jahrAktuell = heute.getFullYear();
+  document.getElementById('st-jahr-label').textContent = '('+jahrAktuell+')';
+  let monatsWerte = berechneMonatsVerbrauch(zaehlerId, jahrAktuell);
+  const monatsNamen=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  let rows='';
+  for(let m=1;m<=12;m++){
+    const w = monatsWerte[m-1];
+    if(w===null){ rows+=`<tr><td>${monatsNamen[m-1]}</td><td class="muted">–</td><td></td><td></td></tr>`; continue; }
+    const prevW = m>1 ? monatsWerte[m-2] : null;
+    let trend=null;
+    if(prevW && prevW.verbrauch!==0) trend = ((w.verbrauch-prevW.verbrauch)/Math.abs(prevW.verbrauch))*100;
+    rows+=`<tr><td>${monatsNamen[m-1]}${w.hochgerechnet?'<span class="badge">hochger.</span>':''}</td><td>${w.verbrauch.toFixed(2)} ${z.einheit}</td><td>${trendHTML(trend)}</td></tr>`;
+  }
+  document.getElementById('st-monate').innerHTML = `<table><tr><th>Monat</th><th>Verbrauch</th><th>Tendenz z. Vormonat</th></tr>${rows}</table>`;
+
+  /* Jahresverbrauch: aktuelles Jahr + archivierte Jahre */
+  const jahresListe = [];
+  const jahrBeginn = `${jahrAktuell}-01-01`;
+  const standJahrStart = letzterStandBisEinschliesslich(zaehlerId, jahrBeginn) || sortierteReadings(zaehlerId).find(r=>r.datum>=jahrBeginn);
+  const standJetzt = letzterStandBisEinschliesslich(zaehlerId, heute.toISOString().slice(0,10));
+  if(standJahrStart && standJetzt){
+    const tageBisher = tageZwischen(jahrBeginn, heute.toISOString().slice(0,10))+1;
+    const tageGesamt = ((jahrAktuell%4===0 && jahrAktuell%100!==0)||jahrAktuell%400===0) ? 366:365;
+    let verbrauch = standJetzt.stand - standJahrStart.stand;
+    let hochgerechnet=false;
+    if(tageBisher>0 && tageBisher<tageGesamt){ verbrauch=(verbrauch/tageBisher)*tageGesamt; hochgerechnet=true; }
+    jahresListe.push({jahr:jahrAktuell, verbrauch, hochgerechnet});
+  }
+  const archivJahre = [...new Set(archiv.filter(a=>a.zaehlerId===zaehlerId).map(a=>a.jahr))].sort((a,b)=>b-a);
+  archivJahre.forEach(j=>{
+    const start = letzterStandBisEinschliesslich(zaehlerId, `${j-1}-12-31`) || sortierteReadings(zaehlerId).find(r=>r.datum.startsWith(String(j)));
+    const ende = letzterStandBisEinschliesslich(zaehlerId, `${j}-12-31`);
+    if(start && ende) jahresListe.push({jahr:j, verbrauch: ende.stand-start.stand, hochgerechnet:false});
+  });
+  jahresListe.sort((a,b)=>b.jahr-a.jahr);
+  let rows2='';
+  jahresListe.forEach((w,i)=>{
+    const naechstes = jahresListe[i+1];
+    let trend=null;
+    if(naechstes && naechstes.verbrauch!==0) trend = ((w.verbrauch-naechstes.verbrauch)/Math.abs(naechstes.verbrauch))*100;
+    rows2+=`<tr><td>${w.jahr}${w.hochgerechnet?'<span class="badge">hochger.</span>':''}</td><td>${w.verbrauch.toFixed(2)} ${z.einheit}</td><td>${trendHTML(trend)}</td></tr>`;
+  });
+  document.getElementById('st-jahre').innerHTML = rows2 ? `<table><tr><th>Jahr</th><th>Verbrauch</th><th>Tendenz z. Vorjahr</th></tr>${rows2}</table>` : '<p class="muted">Noch keine Jahresdaten.</p>';
+}
+
+/* ---------- Kosten ---------- */
+function initKostenTab(){
+  fillZaehlerSelect('ko-zaehler', z=>z.typ==='strom');
+  renderKosten();
+}
+
+function renderKosten(){
+  const zaehlerId = document.getElementById('ko-zaehler').value;
+  const el = document.getElementById('kosten-inhalt');
+  if(!zaehlerId){ el.innerHTML='<p class="muted">Kein Stromzähler vorhanden.</p>'; return; }
+  const z = zaehlerListe.find(z=>z.id===zaehlerId);
+  const heute = new Date();
+  const jahr = heute.getFullYear();
+  const jahrBeginn = `${jahr}-01-01`;
+  const standStart = letzterStandBisEinschliesslich(zaehlerId, jahrBeginn) || sortierteReadings(zaehlerId).find(r=>r.datum>=jahrBeginn);
+  const standJetzt = letzterStandBisEinschliesslich(zaehlerId, heute.toISOString().slice(0,10));
+  if(!standStart || !standJetzt){ el.innerHTML='<p class="muted">Für dieses Jahr liegen noch nicht genügend Zählerstände vor.</p>'; return; }
+
+  const tageBisher = tageZwischen(standStart.datum, standJetzt.datum)||0;
+  const monateAnteilig = tageBisher/30.44;
+  const verbrauch = standJetzt.stand - standStart.stand;
+
+  const grundpreisSumme = z.grundpreis*monateAnteilig;
+  const verbrauchskosten = verbrauch*z.preisKwh;
+  const sollKosten = grundpreisSumme+verbrauchskosten;
+  const vorauszahlungGeleistet = z.vorauszahlung*monateAnteilig;
+  const differenz = vorauszahlungGeleistet - sollKosten;
+
+  el.innerHTML = `
+    <table>
+      <tr><td>Zeitraum</td><td>${formatDatum(standStart.datum)} – ${formatDatum(standJetzt.datum)} (${monateAnteilig.toFixed(2)} Monate)</td></tr>
+      <tr><td>Verbrauch</td><td>${verbrauch.toFixed(2)} kWh</td></tr>
+      <tr><td>Grundpreis-Anteil</td><td>${grundpreisSumme.toFixed(2)} €</td></tr>
+      <tr><td>Verbrauchskosten</td><td>${verbrauchskosten.toFixed(2)} €</td></tr>
+      <tr><td><strong>Summe Sollkosten</strong></td><td><strong>${sollKosten.toFixed(2)} €</strong></td></tr>
+      <tr><td>Geleistete Vorauszahlung</td><td>${vorauszahlungGeleistet.toFixed(2)} €</td></tr>
+      <tr><td><strong>${differenz>=0?'Guthaben':'Nachzahlung'}</strong></td><td class="${differenz>=0?'diff-pos':'diff-neg'}"><strong>${Math.abs(differenz).toFixed(2)} €</strong></td></tr>
+    </table>
+    <p class="hint">Berechnung anteilig auf Basis der bisher im laufenden Jahr erfassten Zählerstände (Ø 30,44 Tage/Monat).</p>`;
+}
+
+/* ---------- Zielwerte ---------- */
+function initZielwerteTab(){
+  fillZaehlerSelect('zw-zaehler', z=>z.typ==='strom');
+  document.getElementById('zw-jahr-label').textContent = '('+new Date().getFullYear()+')';
+  ladeZielwertFeld();
+  renderZielwerte();
+}
+
+function zwZaehlerGeaendert(){
+  ladeZielwertFeld();
+  renderZielwerte();
+}
+
+function ladeZielwertFeld(){
+  const zaehlerId = document.getElementById('zw-zaehler').value;
+  const eintrag = zielwerte.find(zw=>zw.zaehlerId===zaehlerId);
+  document.getElementById('zw-proTag').value = eintrag ? eintrag.proTag : '';
+}
+
+function speichereZielwert(){
+  const zaehlerId = document.getElementById('zw-zaehler').value;
+  if(!zaehlerId){ alert('Bitte zuerst einen Stromzähler wählen.'); return; }
+  const proTag = parseFloat(document.getElementById('zw-proTag').value)||0;
+  const idx = zielwerte.findIndex(zw=>zw.zaehlerId===zaehlerId);
+  if(idx>=0) zielwerte[idx].proTag = proTag; else zielwerte.push({zaehlerId, proTag});
+  save(LS_ZIELWERTE, zielwerte);
+  renderZielwerte();
+}
+
+function renderZielwerte(){
+  const zaehlerId = document.getElementById('zw-zaehler').value;
+  const el = document.getElementById('zielwerte-inhalt');
+  if(!zaehlerId){ el.innerHTML='<p class="muted">Kein Stromzähler vorhanden.</p>'; return; }
+  const z = zaehlerListe.find(z=>z.id===zaehlerId);
+  const eintrag = zielwerte.find(zw=>zw.zaehlerId===zaehlerId);
+  const proTag = eintrag ? eintrag.proTag : 0;
+  if(!proTag){ el.innerHTML='<p class="muted">Bitte zuerst einen Ziel-Tageswert (kWh/Tag) eingeben und speichern.</p>'; return; }
+
+  const jahr = new Date().getFullYear();
+  const monatsWerte = berechneMonatsVerbrauchImJahr(zaehlerId, jahr);
+  const monatsNamen=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+  let rows='';
+  let summeZiel=0, summeVerbrauch=0, summeMehrkosten=0, habenDaten=false;
+  for(let m=1;m<=12;m++){
+    const tage = tageImMonat(jahr,m);
+    const ziel = tage*proTag;
+    const w = monatsWerte[m-1];
+    if(w===null){
+      rows += `<tr><td>${monatsNamen[m-1]}</td><td>${ziel.toFixed(2)} kWh</td><td class="muted">–</td><td class="muted">–</td><td class="muted">–</td></tr>`;
+      continue;
+    }
+    habenDaten = true;
+    const diff = w.verbrauch - ziel; // positiv = Zielwert überschritten
+    const mehrkosten = diff*z.preisKwh;
+    summeZiel += ziel;
+    summeVerbrauch += w.verbrauch;
+    summeMehrkosten += mehrkosten;
+    const diffKlasse = diff>0 ? 'diff-neg' : 'diff-pos';
+    rows += `<tr>
+      <td>${monatsNamen[m-1]}${w.hochgerechnet?'<span class="badge">hochger.</span>':''}</td>
+      <td>${ziel.toFixed(2)} kWh</td>
+      <td>${w.verbrauch.toFixed(2)} kWh</td>
+      <td class="${diffKlasse}">${diff>=0?'+':''}${diff.toFixed(2)} kWh</td>
+      <td class="${diffKlasse}">${diff>=0?'+':''}${mehrkosten.toFixed(2)} €</td>
+    </tr>`;
+  }
+
+  if(!habenDaten){
+    el.innerHTML = `<p class="muted">Für ${jahr} liegen noch keine ausreichenden Zählerstände vor.</p>`;
+    return;
+  }
+
+  const diffSumme = summeVerbrauch - summeZiel;
+  const diffSummeKlasse = diffSumme>0 ? 'diff-neg' : 'diff-pos';
+  const mehrkostenSummeKlasse = summeMehrkosten>=0 ? 'diff-neg' : 'diff-pos';
+
+  el.innerHTML = `
+    <table class="kompakt">
+      <tr><th>Monat</th><th>Zielwert</th><th>Ist-Verbrauch</th><th>Differenz</th><th>Mehr-/Minderkosten</th></tr>
+      ${rows}
+      <tr>
+        <td><strong>Summe ${jahr}</strong></td>
+        <td><strong>${summeZiel.toFixed(2)} kWh</strong></td>
+        <td><strong>${summeVerbrauch.toFixed(2)} kWh</strong></td>
+        <td class="${diffSummeKlasse}"><strong>${diffSumme>=0?'+':''}${diffSumme.toFixed(2)} kWh</strong></td>
+        <td class="${mehrkostenSummeKlasse}"><strong>${summeMehrkosten>=0?'+':''}${summeMehrkosten.toFixed(2)} €</strong></td>
+      </tr>
+    </table>
+    <p class="hint">Zielwert = Tage im Monat × ${proTag} kWh/Tag (z. B. 31 Tage × ${proTag} kWh/Tag). Mehr-/Minderkosten = Differenz (Ist − Ziel) × ${z.preisKwh.toFixed(4)} €/kWh (reiner Arbeitspreis, ohne Grundpreis). Rot = Zielwert überschritten, grün = darunter. Der Ist-Verbrauch eines Monats wird strikt auf diesen Monat begrenzt: als Endstand zählt nur ein Zählerstand, der tatsächlich in diesem Monat erfasst wurde, als Startstand nur einer aus dem unmittelbar vorangehenden Monat (für Januar: ein Stand vom 01.01.). Fehlt einer davon, bleibt der Monat leer ("–"), statt den Verbrauch mehrerer Monate fälschlich einem einzigen zuzurechnen.</p>
+  `;
+}
+
+/* ---------- Jahresabschluss ---------- */
+function initJahrTab(){
+  fillZaehlerSelect('ja-zaehler', null);
+  const jsel = document.getElementById('ja-jahr');
+  const jahrJetzt = new Date().getFullYear();
+  jsel.innerHTML='';
+  for(let j=jahrJetzt-5;j<=jahrJetzt;j++){
+    jsel.innerHTML += `<option value="${j}" ${j===jahrJetzt?'selected':''}>${j}</option>`;
+  }
+  renderArchivListe();
+}
+
+function jahrAbschliessen(){
+  const zaehlerId = document.getElementById('ja-zaehler').value;
+  const jahr = parseInt(document.getElementById('ja-jahr').value);
+  if(!zaehlerId){ alert('Bitte einen Zähler wählen.'); return; }
+  if(archiv.some(a=>a.zaehlerId===zaehlerId && a.jahr===jahr)){ alert('Dieses Jahr ist für diesen Zähler bereits abgeschlossen.'); return; }
+  const z = zaehlerListe.find(z=>z.id===zaehlerId);
+  const endstandEintrag = letzterStandBisEinschliesslich(zaehlerId, `${jahr}-12-31`);
+  if(!endstandEintrag){ alert('Für dieses Jahr liegt kein Zählerstand vor.'); return; }
+  const startstandEintrag = letzterStandBisEinschliesslich(zaehlerId, `${jahr-1}-12-31`) || sortierteReadings(zaehlerId).find(r=>r.datum.startsWith(String(jahr)));
+  if(!confirm(`Jahr ${jahr} für diesen Zähler wirklich abschließen? Endstand: ${endstandEintrag.stand} am ${formatDatum(endstandEintrag.datum)}. Die Einträge dieses Jahres werden danach gesperrt.`)) return;
+
+  const eintrag = {
+    zaehlerId, jahr,
+    startstand: startstandEintrag ? startstandEintrag.stand : null,
+    startdatum: startstandEintrag ? startstandEintrag.datum : null,
+    endstand: endstandEintrag.stand,
+    enddatum: endstandEintrag.datum,
+    abgeschlossenAm: new Date().toISOString().slice(0,10)
+  };
+  if(startstandEintrag){
+    eintrag.verbrauch = endstandEintrag.stand - startstandEintrag.stand;
+    if(z.typ==='strom'){
+      const tage = tageZwischen(startstandEintrag.datum, endstandEintrag.datum)||0;
+      const monateAnteilig = tage/30.44;
+      eintrag.grundpreisSumme = z.grundpreis*monateAnteilig;
+      eintrag.verbrauchskosten = eintrag.verbrauch*z.preisKwh;
+      eintrag.sollKosten = eintrag.grundpreisSumme + eintrag.verbrauchskosten;
+      eintrag.vorauszahlungGeleistet = z.vorauszahlung*monateAnteilig;
+      eintrag.differenz = eintrag.vorauszahlungGeleistet - eintrag.sollKosten;
+    }
+  }
+  archiv.push(eintrag);
+  save(LS_ARCHIV, archiv);
+
+  const neujahrDatum = `${jahr+1}-01-01`;
+  if(!readings.some(r=>r.zaehlerId===zaehlerId && r.datum===neujahrDatum)){
+    readings.push({id:uuid(), zaehlerId, datum:neujahrDatum, stand:endstandEintrag.stand});
+    save(LS_READINGS, readings);
+  }
+  refreshAll();
+  alert('Jahr '+jahr+' wurde abgeschlossen.');
+}
+
+function entsperreJahr(zaehlerId, jahr){
+  if(!confirm(`Jahr ${jahr} wirklich wieder entsperren? Einträge können danach erneut geändert werden.`)) return;
+  archiv = archiv.filter(a=>!(a.zaehlerId===zaehlerId && a.jahr===jahr));
+  save(LS_ARCHIV, archiv);
+  renderArchivListe();
+  refreshAll();
+}
+
+function renderArchivListe(){
+  const el = document.getElementById('archiv-liste');
+  if(archiv.length===0){ el.innerHTML='<p class="muted">Noch keine Jahre abgeschlossen.</p>'; return; }
+  const sortiert = [...archiv].sort((a,b)=> b.jahr-a.jahr);
+  el.innerHTML = `<table class="kompakt"><tr><th>Zähler</th><th>Jahr</th><th>Verbrauch</th><th>Kosten / Ergebnis</th><th></th></tr>${
+    sortiert.map(a=>{
+      const z = zaehlerListe.find(z=>z.id===a.zaehlerId);
+      const zeitraumTxt = a.startdatum ? `${formatDatum(a.startdatum)} – ${formatDatum(a.enddatum)}` : `bis ${formatDatum(a.enddatum)}`;
+      const verbrauchTxt = (a.verbrauch!=null)
+        ? `${a.verbrauch.toFixed(2)} ${z?z.einheit:''}<span class="unterzeile muted">${zeitraumTxt}</span>`
+        : `<span class="muted">Endstand: ${a.endstand} (kein Anfangsstand bekannt)</span>`;
+      let kostenTxt = '<span class="muted">–</span>';
+      if(a.sollKosten!=null){
+        kostenTxt = `Sollkosten: ${a.sollKosten.toFixed(2)} €<span class="unterzeile muted">Grundpreis: ${a.grundpreisSumme.toFixed(2)} € · Verbrauch: ${a.verbrauchskosten.toFixed(2)} €</span><span class="unterzeile ${a.differenz>=0?'diff-pos':'diff-neg'}">${a.differenz>=0?'Guthaben':'Nachzahlung'}: ${Math.abs(a.differenz).toFixed(2)} €</span>`;
+      }
+      return `<tr><td>${z?z.name:'(gelöscht)'}<span class="unterzeile muted">Endstand: ${a.endstand} am ${formatDatum(a.enddatum)}</span></td><td>${a.jahr}</td><td>${verbrauchTxt}</td><td>${kostenTxt}</td>
+      <td><button class="btn small secondary" onclick="entsperreJahr('${a.zaehlerId}',${a.jahr})">Entsperren</button></td></tr>`;
+    }).join('')
+  }</table>`;
+}
+
+/* ---------- Export / Import ---------- */
+function exportJSON(){
+  const data = { zaehlerListe, readings, archiv, zielwerte, exportiertAm:new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'energiezaehler_sicherung_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+function exportCSV(){
+  let lines = ['Zaehlername;Typ;Datum;Stand;Einheit'];
+  readings.slice().sort((a,b)=>a.datum.localeCompare(b.datum)).forEach(r=>{
+    const z = zaehlerListe.find(z=>z.id===r.zaehlerId);
+    if(!z) return;
+    lines.push(`${z.name};${z.typ};${formatDatum(r.datum)};${r.stand};${z.einheit}`);
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'energiezaehler_stände_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+function importJSON(){
+  const file = document.getElementById('import-file').files[0];
+  if(!file){ alert('Bitte zuerst eine Datei auswählen.'); return; }
+  if(!confirm('Achtung: Der Import ersetzt ALLE aktuellen Daten in dieser App. Fortfahren?')) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      zaehlerListe = data.zaehlerListe || [];
+      readings = data.readings || [];
+      archiv = data.archiv || [];
+      zielwerte = data.zielwerte || [];
+      save(LS_ZAEHLER, zaehlerListe); save(LS_READINGS, readings); save(LS_ARCHIV, archiv); save(LS_ZIELWERTE, zielwerte);
+      refreshAll();
+      alert('Import erfolgreich.');
+    }catch(err){
+      alert('Die Datei konnte nicht gelesen werden: '+err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------- Drucken ---------- */
+function initDatenTab(){
+  fillZaehlerSelect('dr-zaehler');
+}
+
+function drucken(){
+  const zaehlerId = document.getElementById('dr-zaehler').value;
+  const z = zaehlerListe.find(z=>z.id===zaehlerId);
+  if(!z){ alert('Kein Zähler ausgewählt.'); return; }
+  const liste = sortierteReadings(zaehlerId);
+  let stammHtml = z.typ==='strom'
+    ? `<p>Energieversorger: ${z.versorger||'–'}<br>Vertragsnummer: ${z.vertragsnummer||'–'} · Kundennummer: ${z.kundennummer||'–'}<br>
+       Grundpreis: ${z.grundpreis.toFixed(2)} €/Monat · Preis: ${z.preisKwh.toFixed(4)} €/kWh · Vorauszahlung: ${z.vorauszahlung.toFixed(2)} €/Monat</p>`
+    : `<p>Raum: ${z.raum||'–'} ${z.anbieter?('· '+z.anbieter):''}</p>`;
+
+  let rows = liste.map((r,i)=>{
+    let verbrauch='–';
+    if(i>0){
+      const tage = tageZwischen(liste[i-1].datum, r.datum)||1;
+      verbrauch = (r.stand-liste[i-1].stand).toFixed(2)+' '+z.einheit+' / '+tage+' Tg.';
+    }
+    return `<tr><td>${formatDatum(r.datum)}</td><td>${r.stand}</td><td>${verbrauch}</td></tr>`;
+  }).join('');
+
+  document.getElementById('print-area').innerHTML = `
+    <h1>Energiezähler – ${z.name}</h1>
+    ${stammHtml}
+    <h2>Zählerstände</h2>
+    <table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;width:100%;">
+      <tr><th>Datum</th><th>Stand</th><th>Verbrauch</th></tr>
+      ${rows}
+    </table>
+    <p style="margin-top:1rem;font-size:.8rem;">Gedruckt am ${formatDatum(new Date().toISOString().slice(0,10))}</p>
+  `;
+  window.print();
+}
+
+/* ---------- Gesamt-Refresh ---------- */
+function refreshAll(){
+  renderZaehlerListe();
+  initErfassungTab();
+  initStatistikTab();
+  initKostenTab();
+  initZielwerteTab();
+  initJahrTab();
+  initDatenTab();
+}
+
+updateZfFelder();
+refreshAll();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

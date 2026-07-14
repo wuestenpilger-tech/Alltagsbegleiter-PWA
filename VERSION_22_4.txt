@@ -1,0 +1,4 @@
+Alltagsbegleiter Version 22.4
+versionName 22.4
+versionCode 2240
+Schwerpunkt: Android-Dateiauswahl – CSV und weitere Importdateien sicher auswählbar

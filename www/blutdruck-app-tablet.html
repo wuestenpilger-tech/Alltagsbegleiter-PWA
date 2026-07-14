@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Blutdruckprotokoll (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE7D9;
+    --card:#FAF6EC;
+    --ink:#24211B;
+    --sub:#5B564C;
+    --line:#D9D0BC;
+    --accent:#7B2E3B;
+    --accent-soft:#E8D9DC;
+    --font-display:'Fraunces', serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+    --blau-bg:#C7D9E3; --blau-fg:#1F4E78;
+    --gruen-bg:#D7E4CE; --gruen-fg:#3F5C34;
+    --gelb-bg:#F0DDA0; --gelb-fg:#8A6200;
+    --orange-bg:#F0C9A0; --orange-fg:#8F4A06;
+    --rot-bg:#E8C2C2; --rot-fg:#8C3B3B;
+    --drot-bg:#C99191; --drot-fg:#5C0000;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:28px 30px 60px;}
+  header{margin-bottom:20px;}
+  h1{
+    font-family:var(--font-display);
+    font-size:34px; font-weight:700; letter-spacing:.2px;
+    margin:0 0 4px; color:var(--accent);
+  }
+  .tagline{font-size:16px; color:var(--sub); margin:0;}
+  .datebar{
+    display:flex; align-items:center; gap:14px;
+    background:var(--card); border:1px solid var(--line);
+    border-radius:16px; padding:14px 20px; margin:20px 0 22px;
+  }
+  .datebar label{font-size:15px; color:var(--sub); display:block; margin-bottom:3px;}
+  .datebar input[type=date]{
+    border:none; background:transparent; font-size:21px; color:var(--ink);
+    font-weight:600; width:100%; font-family:inherit;
+  }
+  .status-pill{
+    font-size:14px; padding:5px 13px; border-radius:999px; white-space:nowrap;
+    background:var(--accent-soft); color:var(--accent); font-weight:600;
+  }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:20px;
+    padding:20px 24px 24px; margin-bottom:20px;
+  }
+  .card h2{
+    font-size:18px; margin:0 0 16px; color:var(--accent);
+    display:flex; align-items:center; gap:10px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.6px;
+  }
+  .card h2 .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+  .row{display:flex; gap:16px; margin-bottom:16px;}
+  .field{flex:1; min-width:0;}
+  .field label{display:block; font-size:15px; color:var(--sub); margin-bottom:6px;}
+  .field input{
+    width:100%; font-size:25px; padding:14px 6px; text-align:center;
+    border:1.5px solid var(--line); border-radius:13px; background:#FCFBF9;
+    font-weight:600; color:var(--ink); font-family:inherit;
+    -moz-appearance:textfield;
+  }
+  .field input:focus{outline:none; border-color:var(--accent);}
+  .field input::-webkit-inner-spin-button,
+  .field input::-webkit-outer-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+  .results{display:flex; gap:12px; margin-top:10px; flex-wrap:wrap;}
+  .chip{
+    flex:1; min-width:110px; border-radius:13px; padding:12px 9px; text-align:center;
+  }
+  .chip .val{font-size:21px; font-weight:700; line-height:1.1;}
+  .chip .lbl{font-size:12.5px; opacity:.85; margin-top:2px;}
+  .chip.empty{background:#F1EEE8; color:#A39C90;}
+  textarea{
+    width:100%; border:1.5px solid var(--line); border-radius:13px; padding:14px;
+    font-family:inherit; font-size:18px; resize:vertical; min-height:60px; background:#FCFBF9;
+  }
+  .savebar{display:flex; gap:14px; margin:10px 0 30px;}
+  button{
+    font-family:inherit; font-size:19px; font-weight:700; border:none; border-radius:15px;
+    padding:17px 20px; cursor:pointer;
+  }
+  .btn-primary{background:var(--accent); color:#fff; flex:1;}
+  .btn-secondary{background:var(--accent-soft); color:var(--accent); flex:1;}
+  .btn-primary:active, .btn-secondary:active{opacity:.8;}
+  .section-title{
+    font-size:17px; text-transform:uppercase; letter-spacing:.6px; color:var(--sub);
+    font-weight:700; margin:30px 0 12px;
+  }
+  .history-item{
+    background:var(--card); border:1px solid var(--line); border-radius:15px;
+    padding:14px 18px; margin-bottom:12px; font-size:16px;
+  }
+  .history-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .history-date{font-weight:700; color:var(--accent);}
+  .history-actions button{padding:8px 14px; font-size:15px; border-radius:10px;}
+  .history-slots{display:flex; gap:9px; flex-wrap:wrap;}
+  .mini-chip{
+    padding:5px 10px; border-radius:10px; font-size:14.5px; font-weight:600;
+  }
+  .empty-hint{font-size:16px; color:var(--sub); text-align:center; padding:22px 0;}
+  .export-row{display:flex; gap:14px; margin-top:12px;}
+  .loading{text-align:center; color:var(--sub); font-size:16px; padding:26px;}
+  #sessions{display:flex; gap:18px; align-items:stretch;}
+  #sessions .card{flex:1; margin-bottom:0;}
+  .toast{
+    position:fixed; left:50%; bottom:32px; transform:translateX(-50%);
+    background:var(--accent); color:#fff; padding:13px 24px; border-radius:999px;
+    font-size:16px; opacity:0; pointer-events:none; transition:opacity .25s;
+    max-width:90%; text-align:center;
+  }
+  .toast.show{opacity:1;}
+  .backup-banner{
+    background:var(--gelb-bg); color:var(--gelb-fg); border-radius:12px;
+    padding:10px 14px; font-size:12.5px; margin-bottom:14px;
+  }
+  .backup-banner b{font-weight:700;}
+
+  /* ---------- Statistik ---------- */
+  .stat-period-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  .period-btn{
+    font-family:inherit; font-size:15px; font-weight:600; cursor:pointer;
+    border:1.5px solid var(--line); background:#FCFBF9; color:var(--sub);
+    border-radius:999px; padding:9px 18px;
+  }
+  .period-btn.active{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .stat-grid{display:flex; flex-direction:column; gap:14px; margin-bottom:20px;}
+  .stat-block{
+    background:#FCFBF9; border:1px solid var(--line); border-radius:15px; padding:14px 16px;
+  }
+  .stat-block h3{
+    margin:0 0 10px; font-size:15.5px; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--accent); font-weight:700; display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .stat-block h3 .n{font-size:13px; color:var(--sub); text-transform:none; font-weight:500; letter-spacing:0;}
+  .stat-avg-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .stat-chip{
+    flex:1; min-width:88px; background:var(--card); border:1px solid var(--line);
+    border-radius:11px; padding:9px 8px; text-align:center;
+  }
+  .stat-chip .val{font-size:19px; font-weight:700; color:var(--ink); font-family:var(--font-mono);}
+  .stat-chip .lbl{font-size:12px; color:var(--sub); margin-top:2px;}
+  .section-sub{
+    font-size:16px; font-weight:700; color:var(--accent); margin:18px 0 10px;
+    text-transform:uppercase; letter-spacing:.5px;
+  }
+  .trend-box{
+    display:flex; align-items:center; gap:12px; background:#FCFBF9;
+    border:1px solid var(--line); border-radius:15px; padding:14px 18px; margin-bottom:20px;
+  }
+  .trend-arrow{font-size:26px; font-weight:700; line-height:1;}
+  .trend-up{color:var(--rot-fg);}
+  .trend-down{color:var(--gruen-fg);}
+  .trend-flat{color:var(--sub);}
+  .trend-text{font-size:15.5px; color:var(--ink);}
+  .trend-text b{font-family:var(--font-mono);}
+  .dist-wrap{margin-bottom:20px;}
+  .dist-bar{
+    display:flex; width:100%; height:26px; border-radius:8px; overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .dist-seg{height:100%;}
+  .dist-legend{display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; font-size:13.5px; color:var(--sub);}
+  .dist-legend span{display:inline-flex; align-items:center; gap:5px;}
+  .dist-swatch{width:11px; height:11px; border-radius:3px; display:inline-block;}
+  .stat-mm-row{display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;}
+  .stat-mm-box{
+    flex:1; min-width:200px; background:#FCFBF9; border:1px solid var(--line);
+    border-radius:15px; padding:14px 16px;
+  }
+  .stat-mm-box .mm-title{font-size:13.5px; color:var(--sub); margin-bottom:4px;}
+  .stat-mm-box .mm-val{font-size:22px; font-weight:700; font-family:var(--font-mono);}
+  .stat-mm-box .mm-date{font-size:13px; color:var(--sub); margin-top:2px;}
+  .compliance-box{
+    background:var(--accent-soft); color:var(--accent); border-radius:15px;
+    padding:14px 18px; font-size:15.5px; font-weight:600;
+  }
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div style="margin-bottom:10px;">
+      <a href="vorsorgezentrum.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;font-weight:600;font-size:15px;">← Zurück zum Schrank</a>
+    </div>
+    <h1>Blutdruckprotokoll</h1>
+    <p class="tagline">Morgens · Mittags · Abends — mit MAP &amp; Pulsdruck</p>
+  </header>
+
+  <div class="datebar">
+    <div style="flex:1">
+      <label for="dateInput">Datum</label>
+      <input type="date" id="dateInput">
+    </div>
+    <span class="status-pill" id="statusPill">neuer Tag</span>
+  </div>
+
+  <div id="fallbackNotice" style="display:none; background:var(--gelb-bg); color:var(--gelb-fg); border-radius:14px; padding:14px 18px; font-size:16px; margin-bottom:18px;">
+    Die dauerhafte Speicherung ist in diesem Browser gerade nicht erreichbar (z.B. privates Fenster). Deine Einträge bleiben nur für diese Sitzung erhalten — bitte am Ende „CSV herunterladen" oder „In Zwischenablage kopieren" nutzen, bevor du die App schließt.
+  </div>
+
+  <div class="backup-banner" id="backupBanner" style="display:none;"></div>
+
+  <div class="section-title" style="margin-top:0;">Letzte Tage</div>
+  <div id="recentDays" class="loading">Lädt…</div>
+
+  <div id="sessions"></div>
+
+  <div class="card">
+    <h2><span class="dot"></span>Notizen</h2>
+    <textarea id="notes" placeholder="Symptome, Medikamente, Besonderheiten…"></textarea>
+  </div>
+
+  <div class="savebar">
+    <button class="btn-primary" id="saveBtn">Speichern</button>
+    <button class="btn-secondary" id="clearBtn">Leeren</button>
+  </div>
+
+  <div class="section-title">Statistik</div>
+  <div class="card">
+    <div class="stat-period-row" id="statPeriods"></div>
+    <div id="statContent" class="loading">Lädt…</div>
+  </div>
+
+  <div class="section-title">Verlauf</div>
+  <div id="history" class="loading">Lädt…</div>
+
+  <div class="section-title">Export für die ODS-Tabelle</div>
+  <div class="card">
+    <p style="font-size:16px; color:var(--sub); margin:0 0 14px;">
+      Spaltenreihenfolge entspricht dem Tabellenblatt „Blutdruckprotokoll“ (Datum … Notizen). CSV zum Import, oder Kopieren zum direkten Einfügen in Calc.
+    </p>
+    <div class="export-row">
+      <button class="btn-secondary" id="copyBtn" style="flex:1">In Zwischenablage kopieren</button>
+      <button class="btn-primary" id="csvBtn" style="flex:1">CSV herunterladen</button>
+    </div>
+    <div class="export-row">
+      <button class="btn-secondary" id="importBtn" style="flex:1">Zuletzt exportierte CSV wieder laden</button>
+      <input type="file" id="csvFile" accept=".csv" style="display:none">
+    </div>
+    <p style="font-size:14.5px; color:var(--sub); margin:12px 0 0;">
+      Deine Einträge werden dauerhaft in diesem Browser auf dem Gerät gespeichert — kein Export nötig, um sie zu behalten. CSV-Export/-Import eignen sich als Sicherung oder zum Übertragen in die ODS-Tabelle.
+    </p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PREFIX = "bp:entry:";
+
+// Dauerhafte Speicherung direkt im Browser des Geräts (localStorage).
+// Bleibt erhalten, solange du dieselbe Seite im selben Browser öffnest —
+// auch nach Schließen der App/des Tabs. Kein CSV-Export als Zwischenschritt
+// mehr nötig; Export/Import bleiben als Backup-Möglichkeit erhalten.
+function checkStorageAvailable(){
+  try{
+    const testKey = "__bp_test__";
+    localStorage.setItem(testKey, "1");
+    localStorage.removeItem(testKey);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+let persistentOk = checkStorageAvailable();
+const memoryStore = new Map();
+
+/* ---------- Backup-Erinnerung ---------- */
+const BACKUP_TS_KEY = "bp_last_backup";
+const BACKUP_REMINDER_DAYS = 30;
+
+function markBackupDone(){
+  try{ localStorage.setItem(BACKUP_TS_KEY, new Date().toISOString()); }catch(e){}
+  renderBackupReminder();
+}
+function daysSinceBackup(){
+  let raw;
+  try{ raw = localStorage.getItem(BACKUP_TS_KEY); }catch(e){ raw = null; }
+  if(!raw) return null;
+  const then = new Date(raw);
+  if(isNaN(then.getTime())) return null;
+  return Math.floor((Date.now() - then.getTime()) / 86400000);
+}
+function renderBackupReminder(){
+  const el = document.getElementById("backupBanner");
+  if(!el) return;
+  const days = daysSinceBackup();
+  if(days === null){
+    el.style.display = "block";
+    el.innerHTML = "⚠️ <b>Noch keine Sicherung erstellt.</b> Bitte regelmäßig „CSV herunterladen“ nutzen, damit deine Werte nicht verloren gehen.";
+  } else if(days >= BACKUP_REMINDER_DAYS){
+    el.style.display = "block";
+    el.innerHTML = "⚠️ <b>Letzte Sicherung vor " + days + " Tagen.</b> Zeit für ein neues CSV-Backup.";
+  } else {
+    el.style.display = "none";
+  }
+}
+
+async function storageSet(key, value){
+  if(persistentOk){
+    try{
+      localStorage.setItem(key, value);
+      return true;
+    }catch(e){
+      console.warn("localStorage.setItem fehlgeschlagen, wechsle auf Sitzungsspeicher:", e);
+      persistentOk = false;
+    }
+  }
+  memoryStore.set(key, value);
+  return true;
+}
+
+async function storageGet(key){
+  if(persistentOk){
+    try{
+      return localStorage.getItem(key);
+    }catch(e){
+      persistentOk = false;
+    }
+  }
+  return memoryStore.has(key) ? memoryStore.get(key) : null;
+}
+
+async function storageDelete(key){
+  if(persistentOk){
+    try{ localStorage.removeItem(key); }catch(e){}
+  }
+  memoryStore.delete(key);
+}
+
+async function storageListKeys(prefix){
+  let keys = [];
+  if(persistentOk){
+    try{
+      for(let i=0; i<localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(k && k.startsWith(prefix)) keys.push(k);
+      }
+    }catch(e){
+      persistentOk = false;
+    }
+  }
+  for(const k of memoryStore.keys()){
+    if(k.startsWith(prefix) && !keys.includes(k)) keys.push(k);
+  }
+  return keys;
+}
+
+function pad(n){return n<10?"0"+n:""+n;}
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+}
+function fmtDateDE(iso){
+  const [y,m,d] = iso.split("-");
+  return d+"."+m+"."+y;
+}
+function weekdayDE(iso){
+  const days = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const d = new Date(iso+"T00:00:00");
+  return days[d.getDay()];
+}
+
+const sessions = [
+  {key:"morgens", label:"Morgens"},
+  {key:"mittags", label:"Mittags"},
+  {key:"abends", label:"Abends"}
+];
+
+function classifySys(v){
+  if(v==null||isNaN(v)) return null;
+  if(v<90) return {bg:"var(--blau-bg)",fg:"var(--blau-fg)",lbl:"Niedrig"};
+  if(v<=129) return {bg:"var(--gruen-bg)",fg:"var(--gruen-fg)",lbl:"Normal"};
+  if(v<=139) return {bg:"var(--gelb-bg)",fg:"var(--gelb-fg)",lbl:"Hochnormal"};
+  if(v<=159) return {bg:"var(--orange-bg)",fg:"var(--orange-fg)",lbl:"Hyp. Grad 1"};
+  if(v<=179) return {bg:"var(--rot-bg)",fg:"var(--rot-fg)",lbl:"Hyp. Grad 2"};
+  return {bg:"var(--drot-bg)",fg:"var(--drot-fg)",lbl:"Grad 3/Krise"};
+}
+function classifyDia(v){
+  if(v==null||isNaN(v)) return null;
+  if(v<60) return {bg:"var(--blau-bg)",fg:"var(--blau-fg)",lbl:"Niedrig"};
+  if(v<=84) return {bg:"var(--gruen-bg)",fg:"var(--gruen-fg)",lbl:"Normal"};
+  if(v<=89) return {bg:"var(--gelb-bg)",fg:"var(--gelb-fg)",lbl:"Hochnormal"};
+  if(v<=99) return {bg:"var(--orange-bg)",fg:"var(--orange-fg)",lbl:"Hyp. Grad 1"};
+  if(v<=109) return {bg:"var(--rot-bg)",fg:"var(--rot-fg)",lbl:"Hyp. Grad 2"};
+  return {bg:"var(--drot-bg)",fg:"var(--drot-fg)",lbl:"Grad 3/Krise"};
+}
+function classifyPuls(v){
+  if(v==null||isNaN(v)) return null;
+  if(v<50) return {bg:"var(--blau-bg)",fg:"var(--blau-fg)",lbl:"Bradykard"};
+  if(v<=100) return {bg:"var(--gruen-bg)",fg:"var(--gruen-fg)",lbl:"Normal"};
+  return {bg:"var(--rot-bg)",fg:"var(--rot-fg)",lbl:"Tachykard"};
+}
+function classifyMap(v){
+  if(v==null||isNaN(v)) return null;
+  if(v<70) return {bg:"var(--blau-bg)",fg:"var(--blau-fg)",lbl:"Niedrig"};
+  if(v<=100) return {bg:"var(--gruen-bg)",fg:"var(--gruen-fg)",lbl:"Normal"};
+  if(v<=110) return {bg:"var(--gelb-bg)",fg:"var(--gelb-fg)",lbl:"Erhöht"};
+  return {bg:"var(--rot-bg)",fg:"var(--rot-fg)",lbl:"Hoch"};
+}
+function classifyPP(v){
+  if(v==null||isNaN(v)) return null;
+  if(v<30) return {bg:"var(--gelb-bg)",fg:"var(--gelb-fg)",lbl:"Niedrig"};
+  if(v<=59) return {bg:"var(--gruen-bg)",fg:"var(--gruen-fg)",lbl:"Normal"};
+  if(v<=69) return {bg:"var(--orange-bg)",fg:"var(--orange-fg)",lbl:"Erhöht"};
+  return {bg:"var(--rot-bg)",fg:"var(--rot-fg)",lbl:"Hoch"};
+}
+
+function computeSession(sys,dia,puls){
+  const s = sys==null||sys===""?null:Number(sys);
+  const d = dia==null||dia===""?null:Number(dia);
+  const p = puls==null||puls===""?null:Number(puls);
+  let map=null, pp=null;
+  if(s!=null && d!=null && !isNaN(s) && !isNaN(d)){
+    map = Math.round(d + (s-d)/3);
+    pp = s-d;
+  }
+  return {sys:s, dia:d, puls:p, map, pp};
+}
+
+function buildSessionCard(sess){
+  const div = document.createElement("div");
+  div.className = "card";
+  div.innerHTML = `
+    <h2><span class="dot"></span>${sess.label}</h2>
+    <div class="row">
+      <div class="field"><label>Systole</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="${sess.key}_sys" placeholder="mmHg"></div>
+      <div class="field"><label>Diastole</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="${sess.key}_dia" placeholder="mmHg"></div>
+      <div class="field"><label>Puls</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="${sess.key}_puls" placeholder="/min"></div>
+    </div>
+    <div class="results" id="${sess.key}_results"></div>
+  `;
+  return div;
+}
+
+const sessionsContainer = document.getElementById("sessions");
+sessions.forEach(s => sessionsContainer.appendChild(buildSessionCard(s)));
+
+function chip(label, value, unit, cls){
+  const d = document.createElement("div");
+  if(cls){
+    d.className = "chip";
+    d.style.background = cls.bg;
+    d.style.color = cls.fg;
+    d.innerHTML = `<div class="val">${value}${unit}</div><div class="lbl">${label} · ${cls.lbl}</div>`;
+  } else {
+    d.className = "chip empty";
+    d.innerHTML = `<div class="val">–</div><div class="lbl">${label}</div>`;
+  }
+  return d;
+}
+
+function refreshSession(sess){
+  const sys = document.getElementById(sess.key+"_sys").value;
+  const dia = document.getElementById(sess.key+"_dia").value;
+  const puls = document.getElementById(sess.key+"_puls").value;
+  const c = computeSession(sys,dia,puls);
+  const box = document.getElementById(sess.key+"_results");
+  box.innerHTML = "";
+  box.appendChild(chip("Sys", c.sys!=null?c.sys:"–", "", c.sys!=null?classifySys(c.sys):null));
+  box.appendChild(chip("Dia", c.dia!=null?c.dia:"–", "", c.dia!=null?classifyDia(c.dia):null));
+  box.appendChild(chip("Puls", c.puls!=null?c.puls:"–", "", c.puls!=null?classifyPuls(c.puls):null));
+  box.appendChild(chip("MAP", c.map!=null?c.map:"–", "", c.map!=null?classifyMap(c.map):null));
+  box.appendChild(chip("Pulsdr.", c.pp!=null?c.pp:"–", "", c.pp!=null?classifyPP(c.pp):null));
+}
+
+sessions.forEach(s=>{
+  ["sys","dia","puls"].forEach(f=>{
+    const el = document.getElementById(s.key+"_"+f);
+    el.addEventListener("input", ()=>{
+      const cleaned = el.value.replace(/[^0-9]/g, "");
+      if(cleaned !== el.value) el.value = cleaned;
+      refreshSession(s);
+    });
+  });
+});
+
+function refreshAll(){ sessions.forEach(refreshSession); }
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+function clearForm(){
+  sessions.forEach(s=>{
+    document.getElementById(s.key+"_sys").value="";
+    document.getElementById(s.key+"_dia").value="";
+    document.getElementById(s.key+"_puls").value="";
+  });
+  document.getElementById("notes").value="";
+  refreshAll();
+}
+
+async function loadEntry(dateIso){
+  const pill = document.getElementById("statusPill");
+  try{
+    const raw = await storageGet(PREFIX+dateIso);
+    const entry = raw ? JSON.parse(raw) : null;
+    clearForm();
+    if(entry){
+      sessions.forEach(s=>{
+        const d = entry[s.key];
+        if(d){
+          if(d.sys!=null) document.getElementById(s.key+"_sys").value = d.sys;
+          if(d.dia!=null) document.getElementById(s.key+"_dia").value = d.dia;
+          if(d.puls!=null) document.getElementById(s.key+"_puls").value = d.puls;
+        }
+      });
+      document.getElementById("notes").value = entry.notes || "";
+      pill.textContent = "gespeichert";
+    } else {
+      pill.textContent = "neuer Tag";
+    }
+  }catch(e){
+    clearForm();
+    pill.textContent = "neuer Tag";
+  }
+  refreshAll();
+}
+
+async function saveEntry(){
+  const dateIso = document.getElementById("dateInput").value;
+  if(!dateIso){ showToast("Bitte Datum wählen"); return; }
+  const entry = {date: dateIso, notes: document.getElementById("notes").value};
+  let hasAny = false;
+  sessions.forEach(s=>{
+    const sys = document.getElementById(s.key+"_sys").value;
+    const dia = document.getElementById(s.key+"_dia").value;
+    const puls = document.getElementById(s.key+"_puls").value;
+    if(sys!=="" || dia!=="" || puls!==""){
+      hasAny = true;
+      entry[s.key] = {
+        sys: sys!==""?Number(sys):null,
+        dia: dia!==""?Number(dia):null,
+        puls: puls!==""?Number(puls):null
+      };
+    }
+  });
+  if(!hasAny && !entry.notes){ showToast("Bitte mindestens einen Wert eingeben"); return; }
+  try{
+    await storageSet(PREFIX+dateIso, JSON.stringify(entry));
+    document.getElementById("statusPill").textContent = persistentOk ? "gespeichert" : "gespeichert (nur diese Sitzung)";
+    showToast(persistentOk ? "Gespeichert für "+fmtDateDE(dateIso) : "Gespeichert (nur für diese Sitzung — bitte am Ende exportieren)");
+    document.getElementById("fallbackNotice").style.display = persistentOk ? "none" : "block";
+    await renderHistory();
+    await renderRecentDays();
+    await renderStats();
+  }catch(e){
+    console.error("Speichern fehlgeschlagen:", e);
+    showToast("Speichern fehlgeschlagen: "+(e && e.message ? e.message : "unbekannter Fehler"));
+  }
+}
+
+async function deleteEntry(dateIso){
+  try{
+    await storageDelete(PREFIX+dateIso);
+    showToast("Eintrag gelöscht");
+    if(document.getElementById("dateInput").value === dateIso){
+      clearForm();
+      document.getElementById("statusPill").textContent = "neuer Tag";
+    }
+    await renderHistory();
+    await renderRecentDays();
+    await renderStats();
+  }catch(e){
+    showToast("Löschen fehlgeschlagen");
+  }
+}
+
+async function getAllEntries(){
+  const keys = await storageListKeys(PREFIX);
+  const entries = [];
+  for(const k of keys){
+    try{
+      const raw = await storageGet(k);
+      if(raw) entries.push(JSON.parse(raw));
+    }catch(e){}
+  }
+  entries.sort((a,b)=> a.date < b.date ? 1 : -1);
+  return entries;
+}
+
+function miniChip(label, value, cls){
+  const span = document.createElement("span");
+  span.className = "mini-chip";
+  if(cls){ span.style.background = cls.bg; span.style.color = cls.fg; }
+  else { span.style.background = "#F1EEE8"; span.style.color = "#A39C90"; }
+  span.textContent = label+" "+(value!=null?value:"–");
+  return span;
+}
+
+async function renderHistory(){
+  const container = document.getElementById("history");
+  container.innerHTML = "";
+  let entries;
+  try{
+    entries = await getAllEntries();
+  }catch(e){
+    container.innerHTML = '<div class="empty-hint">Verlauf konnte nicht geladen werden.</div>';
+    return;
+  }
+  if(entries.length === 0){
+    container.innerHTML = '<div class="empty-hint">Noch keine Einträge — trag oben deinen ersten Wert ein.</div>';
+    return;
+  }
+  entries.slice(0,30).forEach(entry=>{
+    const item = document.createElement("div");
+    item.className = "history-item";
+    const top = document.createElement("div");
+    top.className = "history-top";
+    top.innerHTML = `<span class="history-date">${weekdayDE(entry.date)}, ${fmtDateDE(entry.date)}</span>`;
+    const actions = document.createElement("div");
+    actions.className = "history-actions";
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn-secondary";
+    editBtn.textContent = "Öffnen";
+    editBtn.onclick = ()=>{ document.getElementById("dateInput").value = entry.date; loadEntry(entry.date); window.scrollTo({top:0,behavior:"smooth"}); };
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn-secondary";
+    delBtn.textContent = "Löschen";
+    delBtn.style.marginLeft = "6px";
+    delBtn.onclick = ()=> deleteEntry(entry.date);
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    top.appendChild(actions);
+    item.appendChild(top);
+    const slots = document.createElement("div");
+    slots.className = "history-slots";
+    sessions.forEach(s=>{
+      const d = entry[s.key];
+      if(d && (d.sys!=null || d.dia!=null)){
+        const cls = d.sys!=null ? classifySys(d.sys) : null;
+        slots.appendChild(miniChip(s.label.slice(0,2)+":"+(d.sys!=null?d.sys:"–")+"/"+(d.dia!=null?d.dia:"–"), null, cls));
+      }
+    });
+    if(slots.children.length===0){
+      slots.appendChild(miniChip("nur Notiz", null, null));
+    }
+    item.appendChild(slots);
+    container.appendChild(item);
+  });
+}
+
+async function renderRecentDays(){
+  const container = document.getElementById("recentDays");
+  container.innerHTML = "";
+  let entries;
+  try{
+    entries = await getAllEntries();
+  }catch(e){
+    container.innerHTML = '<div class="empty-hint">Konnte nicht geladen werden.</div>';
+    return;
+  }
+  if(entries.length === 0){
+    container.innerHTML = '<div class="empty-hint">Noch keine Einträge.</div>';
+    return;
+  }
+  entries.slice(0,3).forEach(entry=>{
+    const item = document.createElement("div");
+    item.className = "history-item";
+    item.style.cursor = "pointer";
+    item.onclick = ()=>{ document.getElementById("dateInput").value = entry.date; loadEntry(entry.date); };
+    const top = document.createElement("div");
+    top.className = "history-top";
+    top.innerHTML = `<span class="history-date">${weekdayDE(entry.date)}, ${fmtDateDE(entry.date)}</span>`;
+    item.appendChild(top);
+    const slots = document.createElement("div");
+    slots.className = "history-slots";
+    sessions.forEach(s=>{
+      const d = entry[s.key];
+      if(d && (d.sys!=null || d.dia!=null)){
+        const cls = d.sys!=null ? classifySys(d.sys) : null;
+        slots.appendChild(miniChip(s.label.slice(0,2)+":"+(d.sys!=null?d.sys:"–")+"/"+(d.dia!=null?d.dia:"–"), null, cls));
+      }
+    });
+    if(slots.children.length===0){
+      slots.appendChild(miniChip("nur Notiz", null, null));
+    }
+    item.appendChild(slots);
+    container.appendChild(item);
+  });
+}
+
+/* ---------- Statistik ---------- */
+const STAT_PERIODS = [
+  {label:"7 Tage", days:7},
+  {label:"14 Tage", days:14},
+  {label:"30 Tage", days:30},
+  {label:"90 Tage", days:90},
+  {label:"Alles", days:null}
+];
+let currentStatDays = 30;
+
+function isoDaysAgo(n){
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+}
+
+function filterEntriesByPeriod(entries, days){
+  if(days == null) return entries.slice();
+  const cutoff = isoDaysAgo(days-1);
+  return entries.filter(e => e.date >= cutoff);
+}
+
+function collectReadings(entries){
+  const readings = [];
+  entries.forEach(e=>{
+    sessions.forEach(s=>{
+      const d = e[s.key];
+      if(d){
+        const c = computeSession(d.sys, d.dia, d.puls);
+        if(c.sys!=null || c.dia!=null || c.puls!=null){
+          readings.push({date:e.date, key:s.key, label:s.label, sys:c.sys, dia:c.dia, puls:c.puls, map:c.map, pp:c.pp});
+        }
+      }
+    });
+  });
+  return readings;
+}
+
+function average(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
+function stddev(arr){
+  if(arr.length < 2) return null;
+  const m = average(arr);
+  const variance = arr.reduce((a,b)=>a+(b-m)*(b-m),0)/(arr.length-1);
+  return Math.sqrt(variance);
+}
+function round1(v){ return v==null ? null : Math.round(v*10)/10; }
+
+function computeGroupStats(readings, sessKey){
+  const filtered = sessKey ? readings.filter(r=>r.key===sessKey) : readings;
+  const sysArr = filtered.filter(r=>r.sys!=null).map(r=>r.sys);
+  const diaArr = filtered.filter(r=>r.dia!=null).map(r=>r.dia);
+  const pulsArr = filtered.filter(r=>r.puls!=null).map(r=>r.puls);
+  const mapArr = filtered.filter(r=>r.map!=null).map(r=>r.map);
+  const ppArr = filtered.filter(r=>r.pp!=null).map(r=>r.pp);
+  return {
+    n: filtered.length,
+    avgSys: average(sysArr), avgDia: average(diaArr), avgPuls: average(pulsArr),
+    avgMap: average(mapArr), avgPp: average(ppArr),
+    sdSys: stddev(sysArr), sdDia: stddev(diaArr)
+  };
+}
+
+function computeTrend(readings){
+  const withSys = readings.filter(r=>r.sys!=null).slice().sort((a,b)=> a.date<b.date?-1:(a.date>b.date?1:0));
+  if(withSys.length < 4) return null;
+  const mid = Math.floor(withSys.length/2);
+  const first = withSys.slice(0, mid).map(r=>r.sys);
+  const second = withSys.slice(mid).map(r=>r.sys);
+  const a1 = average(first), a2 = average(second);
+  if(a1==null || a2==null) return null;
+  return {diff: a2-a1, first:a1, second:a2};
+}
+
+const CAT_LABELS = ["Niedrig","Normal","Hochnormal","Hyp. Grad 1","Hyp. Grad 2","Grad 3/Krise"];
+const CAT_COLORS = ["var(--blau-bg)","var(--gruen-bg)","var(--gelb-bg)","var(--orange-bg)","var(--rot-bg)","var(--drot-bg)"];
+const CAT_FG = ["var(--blau-fg)","var(--gruen-fg)","var(--gelb-fg)","var(--orange-fg)","var(--rot-fg)","var(--drot-fg)"];
+
+function sysRank(v){
+  if(v<90) return 0; if(v<=129) return 1; if(v<=139) return 2;
+  if(v<=159) return 3; if(v<=179) return 4; return 5;
+}
+function diaRank(v){
+  if(v<60) return 0; if(v<=84) return 1; if(v<=89) return 2;
+  if(v<=99) return 3; if(v<=109) return 4; return 5;
+}
+function readingCategoryRank(r){
+  const sr = r.sys!=null ? sysRank(r.sys) : null;
+  const dr = r.dia!=null ? diaRank(r.dia) : null;
+  if(sr==null && dr==null) return null;
+  if(sr==null) return dr;
+  if(dr==null) return sr;
+  return Math.max(sr, dr);
+}
+
+function computeDistribution(readings){
+  const counts = [0,0,0,0,0,0];
+  let total = 0;
+  readings.forEach(r=>{
+    const rank = readingCategoryRank(r);
+    if(rank!=null){ counts[rank]++; total++; }
+  });
+  return {counts, total};
+}
+
+function computeMinMax(readings){
+  const withSys = readings.filter(r=>r.sys!=null);
+  if(withSys.length===0) return null;
+  let max = withSys[0], min = withSys[0];
+  withSys.forEach(r=>{ if(r.sys>max.sys) max=r; if(r.sys<min.sys) min=r; });
+  return {max, min};
+}
+
+function computeCompliance(entries, days){
+  const daysWithData = new Set(entries.filter(e=>{
+    return sessions.some(s=>{
+      const d = e[s.key];
+      return d && (d.sys!=null || d.dia!=null || d.puls!=null);
+    });
+  }).map(e=>e.date)).size;
+  let totalDays;
+  if(days!=null){
+    totalDays = days;
+  } else {
+    if(entries.length===0){ totalDays = 0; }
+    else {
+      const sorted = entries.slice().sort((a,b)=> a.date<b.date?-1:1);
+      const first = new Date(sorted[0].date+"T00:00:00");
+      const today = new Date(todayStr()+"T00:00:00");
+      totalDays = Math.round((today-first)/86400000) + 1;
+    }
+  }
+  return {daysWithData, totalDays};
+}
+
+function statChip(label, value, unit){
+  const div = document.createElement("div");
+  div.className = "stat-chip";
+  div.innerHTML = `<div class="val">${value!=null?round1(value):"–"}${value!=null?unit:""}</div><div class="lbl">${label}</div>`;
+  return div;
+}
+
+function buildStatBlock(title, stats){
+  const block = document.createElement("div");
+  block.className = "stat-block";
+  block.innerHTML = `<h3>${title} <span class="n">${stats.n} Messung${stats.n===1?"":"en"}</span></h3>`;
+  const row = document.createElement("div");
+  row.className = "stat-avg-row";
+  row.appendChild(statChip("Ø Sys", stats.avgSys, ""));
+  row.appendChild(statChip("Ø Dia", stats.avgDia, ""));
+  row.appendChild(statChip("Ø Puls", stats.avgPuls, ""));
+  row.appendChild(statChip("Ø MAP", stats.avgMap, ""));
+  row.appendChild(statChip("Ø Pulsdr.", stats.avgPp, ""));
+  block.appendChild(row);
+  return block;
+}
+
+async function renderStats(){
+  const container = document.getElementById("statContent");
+  let entries;
+  try{
+    entries = await getAllEntries();
+  }catch(e){
+    container.innerHTML = '<div class="empty-hint">Statistik konnte nicht geladen werden.</div>';
+    return;
+  }
+  const periodEntries = filterEntriesByPeriod(entries, currentStatDays);
+  const readings = collectReadings(periodEntries);
+
+  container.innerHTML = "";
+
+  if(readings.length === 0){
+    container.innerHTML = '<div class="empty-hint">Keine Messwerte in diesem Zeitraum.</div>';
+    return;
+  }
+
+  // Mittelwerte
+  const grid = document.createElement("div");
+  grid.className = "stat-grid";
+  grid.appendChild(buildStatBlock("Gesamt", computeGroupStats(readings, null)));
+  sessions.forEach(s=>{
+    const stats = computeGroupStats(readings, s.key);
+    if(stats.n > 0) grid.appendChild(buildStatBlock(s.label, stats));
+  });
+  container.appendChild(grid);
+
+  // Trend
+  const trend = computeTrend(readings);
+  const trendBox = document.createElement("div");
+  trendBox.className = "trend-box";
+  if(trend){
+    const diff = trend.diff;
+    let arrowCls, arrow, word;
+    if(diff > 2){ arrowCls="trend-up"; arrow="↗"; word="steigend"; }
+    else if(diff < -2){ arrowCls="trend-down"; arrow="↘"; word="fallend"; }
+    else { arrowCls="trend-flat"; arrow="→"; word="stabil"; }
+    trendBox.innerHTML = `<span class="trend-arrow ${arrowCls}">${arrow}</span>
+      <span class="trend-text">Trend Sys: <b>${word}</b> — erste Hälfte Ø ${round1(trend.first)}, zweite Hälfte Ø ${round1(trend.second)} (${diff>=0?"+":""}${round1(diff)} mmHg)</span>`;
+  } else {
+    trendBox.innerHTML = `<span class="trend-arrow trend-flat">–</span><span class="trend-text">Noch zu wenige Messwerte für einen Trend.</span>`;
+  }
+  container.appendChild(trendBox);
+
+  // Verteilung
+  const dist = computeDistribution(readings);
+  const distWrap = document.createElement("div");
+  distWrap.className = "dist-wrap";
+  const subTitle = document.createElement("div");
+  subTitle.className = "section-sub";
+  subTitle.textContent = "Verteilung nach Kategorie";
+  distWrap.appendChild(subTitle);
+  const bar = document.createElement("div");
+  bar.className = "dist-bar";
+  const legend = document.createElement("div");
+  legend.className = "dist-legend";
+  CAT_LABELS.forEach((lbl, i)=>{
+    const pct = dist.total ? (dist.counts[i]/dist.total*100) : 0;
+    if(pct > 0){
+      const seg = document.createElement("div");
+      seg.className = "dist-seg";
+      seg.style.width = pct+"%";
+      seg.style.background = CAT_COLORS[i];
+      bar.appendChild(seg);
+    }
+    if(dist.counts[i] > 0){
+      const item = document.createElement("span");
+      item.innerHTML = `<span class="dist-swatch" style="background:${CAT_COLORS[i]}"></span>${lbl}: ${dist.counts[i]} (${Math.round(pct)}%)`;
+      legend.appendChild(item);
+    }
+  });
+  distWrap.appendChild(bar);
+  distWrap.appendChild(legend);
+  container.appendChild(distWrap);
+
+  // Variabilität
+  const gesamt = computeGroupStats(readings, null);
+  const subTitle2 = document.createElement("div");
+  subTitle2.className = "section-sub";
+  subTitle2.textContent = "Variabilität";
+  container.appendChild(subTitle2);
+  const varRow = document.createElement("div");
+  varRow.className = "stat-avg-row";
+  varRow.style.marginBottom = "20px";
+  varRow.appendChild(statChip("SD Sys", gesamt.sdSys, ""));
+  varRow.appendChild(statChip("SD Dia", gesamt.sdDia, ""));
+  container.appendChild(varRow);
+
+  // Min/Max
+  const mm = computeMinMax(readings);
+  if(mm){
+    const subTitle3 = document.createElement("div");
+    subTitle3.className = "section-sub";
+    subTitle3.textContent = "Extremwerte (Systole)";
+    container.appendChild(subTitle3);
+    const mmRow = document.createElement("div");
+    mmRow.className = "stat-mm-row";
+    const maxBox = document.createElement("div");
+    maxBox.className = "stat-mm-box";
+    maxBox.innerHTML = `<div class="mm-title">Höchster Wert</div><div class="mm-val" style="color:var(--rot-fg)">${mm.max.sys}/${mm.max.dia!=null?mm.max.dia:"–"}</div><div class="mm-date">${mm.max.label}, ${fmtDateDE(mm.max.date)}</div>`;
+    const minBox = document.createElement("div");
+    minBox.className = "stat-mm-box";
+    minBox.innerHTML = `<div class="mm-title">Niedrigster Wert</div><div class="mm-val" style="color:var(--blau-fg)">${mm.min.sys}/${mm.min.dia!=null?mm.min.dia:"–"}</div><div class="mm-date">${mm.min.label}, ${fmtDateDE(mm.min.date)}</div>`;
+    mmRow.appendChild(maxBox);
+    mmRow.appendChild(minBox);
+    container.appendChild(mmRow);
+  }
+
+  // Erfassungsquote
+  const comp = computeCompliance(periodEntries, currentStatDays);
+  const compBox = document.createElement("div");
+  compBox.className = "compliance-box";
+  const pct = comp.totalDays ? Math.round(comp.daysWithData/comp.totalDays*100) : 0;
+  compBox.textContent = `${comp.daysWithData} von ${comp.totalDays} Tagen erfasst (${pct}%)`;
+  container.appendChild(compBox);
+}
+
+function buildStatPeriodButtons(){
+  const container = document.getElementById("statPeriods");
+  container.innerHTML = "";
+  STAT_PERIODS.forEach(p=>{
+    const btn = document.createElement("button");
+    btn.className = "period-btn" + (p.days===currentStatDays ? " active" : "");
+    btn.textContent = p.label;
+    btn.onclick = ()=>{
+      currentStatDays = p.days;
+      buildStatPeriodButtons();
+      renderStats();
+    };
+    container.appendChild(btn);
+  });
+}
+
+function toCsvRow(fields){
+  return fields.map(f=>{
+    if(f==null) return "";
+    const s = String(f);
+    if(s.includes(";") || s.includes('"') || s.includes("\n")){
+      return '"'+s.replace(/"/g,'""')+'"';
+    }
+    return s;
+  }).join(";");
+}
+
+function buildExportRows(entries){
+  const header = ["Datum","Tag",
+    "Morgens_Sys","Morgens_Dia","Morgens_Puls","Morgens_MAP","Morgens_Pulsdruck",
+    "Mittags_Sys","Mittags_Dia","Mittags_Puls","Mittags_MAP","Mittags_Pulsdruck",
+    "Abends_Sys","Abends_Dia","Abends_Puls","Abends_MAP","Abends_Pulsdruck",
+    "OE_Sys","OE_Dia","OE_Puls","OE_MAP","OE_Pulsdruck","Notizen"];
+  const rows = [header];
+  const sorted = entries.slice().sort((a,b)=> a.date < b.date ? -1 : 1);
+  sorted.forEach(entry=>{
+    const row = [fmtDateDE(entry.date), weekdayDE(entry.date)];
+    const sysVals=[], diaVals=[], pulsVals=[];
+    sessions.forEach(s=>{
+      const d = entry[s.key] || {};
+      const c = computeSession(d.sys, d.dia, d.puls);
+      row.push(c.sys!=null?c.sys:"", c.dia!=null?c.dia:"", c.puls!=null?c.puls:"", c.map!=null?c.map:"", c.pp!=null?c.pp:"");
+      if(c.sys!=null) sysVals.push(c.sys);
+      if(c.dia!=null) diaVals.push(c.dia);
+      if(c.puls!=null) pulsVals.push(c.puls);
+    });
+    const avg = arr => arr.length? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : null;
+    const aSys = avg(sysVals), aDia = avg(diaVals), aPuls = avg(pulsVals);
+    let aMap=null, aPp=null;
+    if(aSys!=null && aDia!=null){ aMap = Math.round(aDia+(aSys-aDia)/3); aPp = aSys-aDia; }
+    row.push(aSys!=null?aSys:"", aDia!=null?aDia:"", aPuls!=null?aPuls:"", aMap!=null?aMap:"", aPp!=null?aPp:"");
+    row.push(entry.notes || "");
+    rows.push(row);
+  });
+  return rows;
+}
+
+async function exportCsv(){
+  const entries = await getAllEntries();
+  if(entries.length===0){ showToast("Keine Einträge zum Exportieren"); return; }
+  const rows = buildExportRows(entries);
+  const csv = rows.map(toCsvRow).join("\r\n");
+  const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Blutdruckprotokoll_Export.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("CSV heruntergeladen");
+  markBackupDone();
+}
+
+async function copyToClipboard(){
+  const entries = await getAllEntries();
+  if(entries.length===0){ showToast("Keine Einträge zum Kopieren"); return; }
+  const rows = buildExportRows(entries);
+  const text = rows.map(r=>r.map(f=>f==null?"":f).join("\t")).join("\n");
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast("In Zwischenablage kopiert — in Calc einfügen");
+  }catch(e){
+    showToast("Kopieren nicht möglich in diesem Browser");
+  }
+}
+
+function parseCsvLine(line){
+  const out = [];
+  let cur = "";
+  let inQuotes = false;
+  for(let i=0;i<line.length;i++){
+    const ch = line[i];
+    if(inQuotes){
+      if(ch === '"'){
+        if(line[i+1] === '"'){ cur += '"'; i++; }
+        else inQuotes = false;
+      } else cur += ch;
+    } else {
+      if(ch === '"') inQuotes = true;
+      else if(ch === ";"){ out.push(cur); cur = ""; }
+      else cur += ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+function deDateToIso(de){
+  const parts = de.split(".");
+  if(parts.length !== 3) return null;
+  const [d,m,y] = parts;
+  return y+"-"+pad(Number(m))+"-"+pad(Number(d));
+}
+
+function numOrNull(v){
+  if(v===undefined || v===null || v==="") return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
+async function importCsv(file){
+  try{
+    const text = await file.text();
+    const lines = text.replace(/^\ufeff/, "").split(/\r\n|\n/).filter(l=>l.trim()!=="");
+    if(lines.length < 2){ showToast("Keine Daten in der Datei gefunden"); return; }
+    let imported = 0, merged = 0;
+    for(let i=1;i<lines.length;i++){
+      const cols = parseCsvLine(lines[i]);
+      const iso = deDateToIso(cols[0]);
+      if(!iso) continue;
+      const sessionCols = {morgens:[2,3,4], mittags:[7,8,9], abends:[12,13,14]};
+      const fileEntry = {date: iso, notes: cols[22] || ""};
+      let fileHasAny = false;
+      sessions.forEach(s=>{
+        const [si,di,pi] = sessionCols[s.key];
+        const sys = numOrNull(cols[si]), dia = numOrNull(cols[di]), puls = numOrNull(cols[pi]);
+        if(sys!=null || dia!=null || puls!=null){
+          fileHasAny = true;
+          fileEntry[s.key] = {sys, dia, puls};
+        }
+      });
+      if(!fileHasAny && !fileEntry.notes) continue;
+
+      // Bestehenden Eintrag laden und NICHT überschreiben — nur fehlende Zeitpunkte
+      // aus der Datei ergänzen. Bereits vorhandene (neuere) Werte in der App bleiben erhalten.
+      let existing = null;
+      try{
+        const raw = await storageGet(PREFIX+iso);
+        existing = raw ? JSON.parse(raw) : null;
+      }catch(e){ existing = null; }
+
+      const merged_entry = existing ? {...existing} : {date: iso, notes: ""};
+      let changed = !existing;
+      sessions.forEach(s=>{
+        const existingHasData = existing && existing[s.key] &&
+          (existing[s.key].sys!=null || existing[s.key].dia!=null || existing[s.key].puls!=null);
+        if(!existingHasData && fileEntry[s.key]){
+          merged_entry[s.key] = fileEntry[s.key];
+          changed = true;
+        }
+      });
+      if(!merged_entry.notes && fileEntry.notes){
+        merged_entry.notes = fileEntry.notes;
+        changed = true;
+      }
+      if(changed){
+        await storageSet(PREFIX+iso, JSON.stringify(merged_entry));
+        merged++;
+      }
+      imported++;
+    }
+    showToast(imported+" Tag(e) aus Datei gelesen, "+merged+" ergänzt/neu — vorhandene Werte in der App wurden nicht überschrieben");
+    await renderHistory();
+    await renderRecentDays();
+    await renderStats();
+    const currentDate = document.getElementById("dateInput").value;
+    if(currentDate) await loadEntry(currentDate);
+  }catch(e){
+    console.error("Import fehlgeschlagen:", e);
+    showToast("Import fehlgeschlagen — Datei prüfen");
+  }
+}
+
+document.getElementById("saveBtn").addEventListener("click", saveEntry);
+document.getElementById("clearBtn").addEventListener("click", ()=>{ clearForm(); document.getElementById("statusPill").textContent="neuer Tag"; });
+document.getElementById("csvBtn").addEventListener("click", exportCsv);
+document.getElementById("copyBtn").addEventListener("click", copyToClipboard);
+document.getElementById("dateInput").addEventListener("change", (e)=> loadEntry(e.target.value));
+document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("csvFile").click());
+document.getElementById("csvFile").addEventListener("change", (e)=>{
+  if(e.target.files && e.target.files[0]) importCsv(e.target.files[0]);
+  e.target.value = "";
+});
+
+(async function init(){
+  const t = todayStr();
+  document.getElementById("dateInput").value = t;
+  await loadEntry(t);
+  await renderHistory();
+  await renderRecentDays();
+  buildStatPeriodButtons();
+  await renderStats();
+  renderBackupReminder();
+  if(!persistentOk){
+    document.getElementById("fallbackNotice").style.display = "block";
+  }
+})();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="shared-store.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Klangschale (Tablet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=EB+Garamond:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F1E6;
+    --card:#FBF5E7;
+    --card-border:#E5D5B5;
+    --brass:#B08D57;
+    --brass-soft:#8A7A5E;
+    --text:#3A2E1E;
+    --text-muted:#8A7A5E;
+    --ring:#E9EEDD;
+    --font-display:'Cormorant Garamond', serif;
+    --font-body:'EB Garamond', serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;min-height:100vh;background:var(--bg);color:var(--text);
+    font-family:var(--font-body);
+    display:flex;align-items:center;justify-content:center;padding:40px 16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+  .card{
+    width:100%;max-width:720px;background:var(--card);border:1px solid var(--card-border);
+    border-radius:30px;padding:52px 64px;position:relative;
+  }
+  .back-to-menu{
+    position:absolute;top:24px;left:24px;
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(176,141,87,0.12);color:var(--brass);
+    text-decoration:none;font-size:20px;
+    transition:opacity .2s ease, transform .15s ease;
+  }
+  .back-to-menu:active{transform:scale(0.93);}
+  .back-to-menu.hidden{display:none;}
+  .eyebrow{
+    text-align:center;font-size:16px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--brass);margin-bottom:8px;
+  }
+  h1{text-align:center;font-size:46px;margin:0 0 40px;letter-spacing:.02em;font-weight:400;}
+
+  /* Setup */
+  .field-row{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--card-border);}
+  .field-row:last-of-type{border-bottom:none;}
+  .field-label{font-size:20px;color:var(--text-muted);}
+  .time-input-group{display:flex;align-items:center;gap:4px;}
+  .time-input-group input{
+    width:84px;text-align:right;background:transparent;border:none;border-bottom:1px solid var(--card-border);
+    color:var(--text);font-size:26px;font-family:inherit;padding:6px 0;font-variant-numeric:tabular-nums;
+  }
+  .time-input-group input:focus{outline:none;border-color:var(--brass);}
+  .time-input-group span{color:var(--text-muted);font-size:19px;}
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button{opacity:.5;}
+
+  .quick-select{display:flex;gap:8px;}
+  .quick-btn{
+    padding:11px 20px;border-radius:999px;font-size:19px;border:1px solid var(--card-border);
+    background:transparent;color:var(--text-muted);cursor:pointer;
+  }
+  .quick-btn.active{border-color:var(--brass);color:var(--brass);background:rgba(176,141,87,0.12);}
+
+  .toggle{width:60px;height:32px;border-radius:999px;position:relative;border:none;cursor:pointer;background:var(--ring);}
+  .toggle.on{background:var(--brass);}
+  .toggle .knob{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:var(--card);transition:transform .15s;}
+  .toggle.on .knob{transform:translateX(28px);}
+  .interval-row-right{display:flex;align-items:center;gap:12px;}
+
+  .total-est{text-align:center;font-size:17px;color:var(--text-muted);margin:30px 0;}
+
+  .start-btn{
+    width:100%;padding:20px 16px;border-radius:999px;border:none;background:var(--brass);color:var(--bg);
+    font-size:23px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+  }
+  .start-btn:disabled{opacity:.4;cursor:default;}
+
+  /* Session */
+  .session{display:none;flex-direction:column;align-items:center;}
+  .session.active{display:flex;}
+  .phase-label{font-size:18px;letter-spacing:.25em;text-transform:uppercase;color:var(--brass);margin-bottom:32px;}
+
+  .ring-wrap{position:relative;width:360px;height:360px;display:flex;align-items:center;justify-content:center;margin-bottom:44px;}
+  .ring-outer{position:absolute;inset:0;border-radius:50%;border:2px solid var(--ring);animation:breathe 6s ease-in-out infinite;}
+  .ring-inner{position:absolute;inset:16px;border-radius:50%;border:1px solid var(--ring);}
+  .progress-svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+  .ripple{position:absolute;inset:0;border-radius:50%;border:1px solid var(--brass);pointer-events:none;opacity:0;}
+  .ripple.go{animation:ripple 2.6s cubic-bezier(.2,.6,.35,1) forwards;}
+  .timer-text{font-size:80px;font-variant-numeric:tabular-nums;color:var(--text);position:relative;z-index:1;}
+
+  @keyframes ripple{0%{transform:scale(1);opacity:.55;}100%{transform:scale(1.9);opacity:0;}}
+  @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.035);}}
+
+  .session-controls{display:flex;align-items:center;gap:16px;}
+  .ctrl-btn{
+    width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:var(--brass);color:var(--bg);border:none;cursor:pointer;
+  }
+  .ctrl-btn.secondary{width:80px;height:80px;background:transparent;border:1px solid var(--card-border);color:var(--text-muted);}
+  .ctrl-btn svg{width:30px;height:30px;}
+
+  /* Done */
+  .done-screen{display:none;flex-direction:column;align-items:center;text-align:center;padding:24px 0;}
+  .done-screen.active{display:flex;}
+  .done-icon{
+    width:64px;height:64px;border-radius:50%;background:rgba(176,141,87,0.15);
+    display:flex;align-items:center;justify-content:center;color:var(--brass);margin-bottom:24px;
+  }
+  .done-icon svg{width:26px;height:26px;}
+  .done-title{font-size:30px;margin-bottom:8px;}
+  .done-text{font-size:20px;color:var(--text-muted);margin-bottom:32px;}
+  .restart-btn{
+    padding:16px 34px;border-radius:999px;border:none;background:var(--brass);color:var(--bg);
+    font-size:20px;font-weight:600;cursor:pointer;
+  }
+
+  /* Statistik */
+  .stats{
+    margin-top:24px;padding-top:20px;border-top:1px solid var(--card-border);
+  }
+  .stats-title{
+    font-size:16px;letter-spacing:.25em;text-transform:uppercase;color:var(--brass);
+    text-align:center;margin-bottom:18px;
+  }
+  .stats-grid{display:flex;justify-content:space-between;gap:8px;}
+  .stat{flex:1;text-align:center;}
+  .stat-value{font-size:32px;color:var(--text);font-variant-numeric:tabular-nums;}
+  .stat-label{font-size:15px;color:var(--text-muted);margin-top:2px;line-height:1.3;}
+
+  .done-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    margin-top:4px;
+  }
+  .done-action{
+    min-height:54px;
+    border-radius:999px;
+    border:1px solid var(--card-border);
+    padding:14px 18px;
+    font-family:var(--font-body);
+    font-size:18px;
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .done-action.primary{
+    background:var(--brass);
+    color:var(--bg);
+    border-color:var(--brass);
+  }
+  .done-action.secondary{
+    background:transparent;
+    color:var(--text-muted);
+  }
+  .done-action.prayer{
+    grid-column:1 / -1;
+    background:rgba(123,46,59,0.10);
+    border-color:#9A6670;
+    color:#6E2634;
+    display:none;
+  }
+  .done-action.prayer.visible{display:flex;}
+  .done-time-note{
+    font-size:15px;
+    color:var(--text-muted);
+    line-height:1.45;
+    margin:0 0 18px;
+    display:none;
+  }
+  .done-time-note.visible{display:block;}
+  @media(max-width:560px){
+    .done-actions{grid-template-columns:1fr;}
+    .done-action.prayer{grid-column:auto;}
+  }
+
+</style>
+<script src="alltagsbegleiter-sync.js"></script><script src="native-alarm.js"></script><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alltagsbegleiter">
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
+</script>
+<link rel="stylesheet" href="alltagsbegleiter-stability.css">
+</head>
+<body>
+
+<div class="card">
+  <a class="back-to-menu" id="backToMenu" href="index.html" aria-label="Zurück zum Alltagsschrank" title="Zurück zum Alltagsschrank">←</a>
+  <div class="eyebrow">Meditationstimer</div>
+  <h1>Klangschale</h1>
+
+  <!-- ===== Setup ===== -->
+  <div id="setupScreen">
+    <div class="field-row">
+      <span class="field-label">Vorbereitung</span>
+      <div class="time-input-group">
+        <input type="number" id="prepMin" min="0" max="180" value="0"><span>min</span>
+        <input type="number" id="prepSec" min="0" max="59" step="5" value="15"><span>sek</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <span class="field-label">Meditation</span>
+      <div class="time-input-group">
+        <input type="number" id="medMin" min="0" max="180" value="10"><span>min</span>
+        <input type="number" id="medSec" min="0" max="59" step="5" value="0"><span>sek</span>
+      </div>
+    </div>
+    <div class="field-row" style="border-bottom:1px solid var(--card-border);">
+      <span class="field-label">Schnellwahl</span>
+      <div class="quick-select">
+        <button class="quick-btn" data-med="30">30 Min</button>
+        <button class="quick-btn" data-med="40">40 Min</button>
+        <button class="quick-btn" data-med="60">60 Min</button>
+      </div>
+    </div>
+    <div class="field-row">
+      <span class="field-label">Rückkehr</span>
+      <div class="quick-select">
+        <button class="quick-btn active" data-return="30">30 Sek</button>
+        <button class="quick-btn" data-return="60">1 Min</button>
+      </div>
+    </div>
+    <div class="field-row">
+      <span class="field-label">Intervallklang</span>
+      <div class="interval-row-right">
+        <div class="time-input-group" id="intervalInputWrap" style="display:none;">
+          <input type="number" id="intervalMin" min="1" max="60" value="5"><span>min</span>
+        </div>
+        <button class="toggle" id="intervalToggle" aria-label="Intervallklang umschalten"><span class="knob"></span></button>
+      </div>
+    </div>
+
+    <div class="total-est" id="totalEst"></div>
+
+    <button class="start-btn" id="startBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Beginnen
+    </button>
+
+    <div class="stats">
+      <div class="stats-title">Deine Meditationen</div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-value" id="statWeek">0</div><div class="stat-label">letzte<br>7 Tage</div></div>
+        <div class="stat"><div class="stat-value" id="statMonth">0</div><div class="stat-label">letzte<br>30 Tage</div></div>
+        <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">insgesamt</div></div>
+        <div class="stat"><div class="stat-value" id="statMinutes">0</div><div class="stat-label">Minuten<br>gesamt</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button class="quick-btn" id="exportBtn" style="flex:1;">Daten sichern</button>
+        <button class="quick-btn" id="importBtn" style="flex:1;">Wiederherstellen</button>
+        <input type="file" id="importFile" accept=".json,application/json" style="display:none;">
+      </div>
+      <div id="backupStatus" style="text-align:center;font-size:16px;color:var(--text-muted);margin-top:10px;min-height:19px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== Session ===== -->
+  <div class="session" id="sessionScreen">
+    <div class="phase-label" id="phaseLabel">Vorbereitung</div>
+    <div class="ring-wrap" id="ringWrap">
+      <div class="ring-outer"></div>
+      <div class="ring-inner"></div>
+      <svg class="progress-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="var(--brass)" stroke-width="2" stroke-linecap="round"
+                id="progressCircle" stroke-dasharray="282.7" stroke-dashoffset="282.7"
+                style="transition:stroke-dashoffset 1s linear;"/>
+      </svg>
+      <div class="timer-text" id="timerText">00:00</div>
+    </div>
+    <div class="session-controls">
+      <button class="ctrl-btn" id="pauseBtn" aria-label="Pause">
+        <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+      </button>
+      <button class="ctrl-btn secondary" id="cancelBtn" aria-label="Abbrechen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== Done ===== -->
+  <div class="done-screen" id="doneScreen">
+    <div class="done-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="done-title">Meditation beendet</div>
+    <div class="done-text" id="doneText">Nimm dir einen Moment, bevor du zurückkehrst.</div>
+    <div class="done-time-note" id="prayerNote">
+      Diese Meditation liegt in deiner Gebetszeit. Du kannst jetzt direkt zu „Gebete &amp; Lebensregeln“ wechseln.
+    </div>
+    <div class="done-actions">
+      <a class="done-action primary" href="index.html">Zum Alltagsschrank</a>
+      <button class="done-action secondary" id="restartBtn">Neue Sitzung</button>
+      <a class="done-action prayer" id="prayerBtn" href="Gebete-und-Lebensregeln.html">🙏 Zu Gebete &amp; Lebensregeln</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  function fmt(totalSeconds){
+    const m = Math.floor(totalSeconds/60), s = totalSeconds%60;
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+
+  /* ---------- Klangschale per Web Audio synthetisieren ---------- */
+  let audioCtx = null;
+  function ensureCtx(){
+    if (!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function strike(intensity){
+    intensity = intensity || 1;
+    const ctx = ensureCtx();
+    const now = ctx.currentTime;
+    const duration = 5.5*intensity + 1.5;
+    const fundamental = 196;
+    const partials = [1, 2.0, 2.76, 3.76, 5.4, 7.1];
+    const gains = [0.55, 0.24, 0.17, 0.11, 0.07, 0.04];
+
+    partials.forEach((ratio,i) => {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = fundamental*ratio;
+      const g = ctx.createGain();
+      const peak = gains[i]*0.5*intensity;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(peak, now+0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, now+duration);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(now); osc.stop(now+duration+0.1);
+    });
+
+    const osc2 = ctx.createOscillator();
+    osc2.type = "sine";
+    osc2.frequency.value = fundamental*1.004;
+    const g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0, now);
+    g2.gain.linearRampToValueAtTime(0.13*intensity, now+0.04);
+    g2.gain.exponentialRampToValueAtTime(0.0001, now+duration);
+    osc2.connect(g2); g2.connect(ctx.destination);
+    osc2.start(now); osc2.stop(now+duration+0.1);
+  }
+
+  function showRipple(){
+    const wrap = document.getElementById("ringWrap");
+    const old = wrap.querySelectorAll(".ripple");
+    old.forEach(el => el.remove());
+    for (let i=0;i<3;i++){
+      const r = document.createElement("div");
+      r.className = "ripple";
+      r.style.animationDelay = (i*0.35)+"s";
+      wrap.appendChild(r);
+      void r.offsetWidth;
+      r.classList.add("go");
+      setTimeout(() => r.remove(), 3000);
+    }
+  }
+
+  function ring(){ strike(1); showRipple(); }
+  function ringMultiple(count, intensity, gap){
+    gap = gap || 2600; // ruhiger Abstand - jeder Schlag darf kurz ausklingen, bevor der naechste kommt
+    for (let i=0;i<count;i++){
+      setTimeout(() => { strike(intensity); showRipple(); }, i*gap);
+    }
+  }
+
+  /* ---------- Setup-Felder ---------- */
+  let returnSec = 30;
+  document.querySelectorAll("[data-return]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-return]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      returnSec = parseInt(btn.dataset.return, 10);
+      updateTotalEstimate();
+      saveSettings();
+    });
+  });
+
+  let intervalOn = false;
+  const intervalToggle = document.getElementById("intervalToggle");
+  const intervalInputWrap = document.getElementById("intervalInputWrap");
+  intervalToggle.addEventListener("click", () => {
+    intervalOn = !intervalOn;
+    intervalToggle.classList.toggle("on", intervalOn);
+    intervalInputWrap.style.display = intervalOn ? "flex" : "none";
+    updateTotalEstimate();
+    saveSettings();
+  });
+
+  /* Schnellwahl Meditationszeit: setzt NUR die Meditationsdauer, alles andere bleibt */
+  function markQuickMed(){
+    const min = parseInt(document.getElementById("medMin").value,10)||0;
+    const sec = parseInt(document.getElementById("medSec").value,10)||0;
+    document.querySelectorAll("[data-med]").forEach(b => {
+      b.classList.toggle("active", sec === 0 && min === parseInt(b.dataset.med,10));
+    });
+  }
+  document.querySelectorAll("[data-med]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.getElementById("medMin").value = btn.dataset.med;
+      document.getElementById("medSec").value = 0;
+      markQuickMed();
+      updateTotalEstimate();
+      saveSettings();
+    });
+  });
+
+  function getPrepTotal(){
+    return (parseInt(document.getElementById("prepMin").value,10)||0)*60 +
+           (parseInt(document.getElementById("prepSec").value,10)||0);
+  }
+  function getMedTotal(){
+    return (parseInt(document.getElementById("medMin").value,10)||0)*60 +
+           (parseInt(document.getElementById("medSec").value,10)||0);
+  }
+  function updateTotalEstimate(){
+    const total = getPrepTotal() + getMedTotal() + returnSec;
+    document.getElementById("totalEst").textContent = "Gesamtdauer der Sitzung: " + fmt(total);
+    document.getElementById("startBtn").disabled = getMedTotal() === 0;
+  }
+  ["prepMin","prepSec","medMin","medSec"].forEach(id => {
+    document.getElementById(id).addEventListener("input", () => {
+      markQuickMed();
+      updateTotalEstimate();
+      saveSettings();
+    });
+  });
+  document.getElementById("intervalMin").addEventListener("input", saveSettings);
+
+  /* ---------- Einstellungen dauerhaft speichern ---------- */
+  const SETTINGS_KEY = "klangschale_settings";
+
+  function saveSettings(){
+    try{
+      const s = {
+        prepMin: document.getElementById("prepMin").value,
+        prepSec: document.getElementById("prepSec").value,
+        medMin: document.getElementById("medMin").value,
+        medSec: document.getElementById("medSec").value,
+        returnSec: returnSec,
+        intervalOn: intervalOn,
+        intervalMin: document.getElementById("intervalMin").value
+      };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+    }catch(e){}
+  }
+
+  function loadSettingsKS(){
+    try{
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      if (s.prepMin !== undefined) document.getElementById("prepMin").value = s.prepMin;
+      if (s.prepSec !== undefined) document.getElementById("prepSec").value = s.prepSec;
+      if (s.medMin !== undefined) document.getElementById("medMin").value = s.medMin;
+      if (s.medSec !== undefined) document.getElementById("medSec").value = s.medSec;
+      if (s.returnSec !== undefined){
+        returnSec = parseInt(s.returnSec,10) || 30;
+        document.querySelectorAll("[data-return]").forEach(b => {
+          b.classList.toggle("active", parseInt(b.dataset.return,10) === returnSec);
+        });
+      }
+      if (typeof s.intervalOn === "boolean" && s.intervalOn !== intervalOn){
+        intervalOn = s.intervalOn;
+        intervalToggle.classList.toggle("on", intervalOn);
+        intervalInputWrap.style.display = intervalOn ? "flex" : "none";
+      }
+      if (s.intervalMin !== undefined) document.getElementById("intervalMin").value = s.intervalMin;
+    }catch(e){}
+  }
+
+  loadSettingsKS();
+  markQuickMed();
+  updateTotalEstimate();
+
+  /* ---------- Sitzungs-Log & Statistik ---------- */
+  const LOG_KEY = "klangschale_sessions";
+  const ACTIVE_KEY = "klangschale_active_session";
+
+  function loadLog(){
+    try{
+      const raw = localStorage.getItem(LOG_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+
+  function saveSession(medSeconds){
+    try{
+      const log = loadLog();
+      log.push({ date: new Date().toISOString().slice(0,10), minutes: Math.round(medSeconds/60) });
+      localStorage.setItem(LOG_KEY, JSON.stringify(log));
+      return log.length;
+    }catch(e){ return null; }
+  }
+
+  /* Laufende Sitzung fortlaufend sichern, damit bei einem harten Abbruch
+     (z.B. wenn Android die Seite im Hintergrund beendet) zumindest die
+     bereits absolvierte Meditationszeit nicht verloren geht. */
+  function saveCheckpoint(){
+    try{
+      localStorage.setItem(ACTIVE_KEY, JSON.stringify({
+        sequence: sequence,
+        durations: durations,
+        phaseIndex: phaseIndex,
+        phaseEndsAt: phaseEndsAt,
+        savedAt: Date.now()
+      }));
+    }catch(e){}
+  }
+
+  function clearCheckpoint(){
+    try{ localStorage.removeItem(ACTIVE_KEY); }catch(e){}
+  }
+
+  /* Beim Start der App prüfen, ob eine Sitzung existiert, die nicht regulär
+     beendet wurde (kein finishSession()/cancelSession() aufgerufen hat).
+     Falls ja: die bis zum letzten Speicherpunkt tatsächlich abgeschlossene
+     Meditationszeit nachträglich als Sitzung verbuchen. */
+  function tryRecoverInterruptedSession(){
+    try{
+      const raw = localStorage.getItem(ACTIVE_KEY);
+      if (!raw) return;
+      const cp = JSON.parse(raw);
+      localStorage.removeItem(ACTIVE_KEY);
+      if (!cp || !cp.durations || !cp.sequence || cp.phaseIndex === undefined) return;
+
+      const medPos = cp.sequence.indexOf("meditation");
+      let elapsedMed = 0;
+      if (medPos > -1){
+        if (cp.phaseIndex > medPos){
+          elapsedMed = cp.durations.meditation || 0; // Meditationsphase war schon komplett durchlaufen
+        } else if (cp.phaseIndex === medPos){
+          const phaseStart = cp.phaseEndsAt - (cp.durations.meditation || 0)*1000;
+          elapsedMed = Math.max(0, Math.min(cp.durations.meditation || 0, Math.round((cp.savedAt - phaseStart)/1000)));
+        }
+      }
+
+      if (elapsedMed >= 60){
+        const count = saveSession(elapsedMed);
+        const status = document.getElementById("backupStatus");
+        if (status){
+          status.textContent = "Eine unterbrochene Sitzung wurde erkannt und mit " +
+            Math.round(elapsedMed/60) + " Min. Meditation nachträglich gespeichert" +
+            (count ? " (Sitzung " + count + ")." : ".");
+        }
+      }
+    }catch(e){}
+  }
+
+  function updateStats(){
+    const log = loadLog();
+    const now = new Date(); now.setHours(0,0,0,0);
+    const dayMs = 24*60*60*1000;
+    let week = 0, month = 0, minutes = 0;
+    log.forEach(e => {
+      const d = new Date(e.date + "T00:00:00");
+      const diff = (now - d) / dayMs;
+      if (diff < 7) week++;
+      if (diff < 30) month++;
+      minutes += e.minutes || 0;
+    });
+    document.getElementById("statWeek").textContent = week;
+    document.getElementById("statMonth").textContent = month;
+    document.getElementById("statTotal").textContent = log.length;
+    document.getElementById("statMinutes").textContent = minutes;
+  }
+
+  /* ---------- Wake Lock ---------- */
+  let wakeLock = null;
+  async function requestWakeLock(){
+    try{ if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){}
+  }
+  function releaseWakeLock(){
+    if (wakeLock){ wakeLock.release().catch(()=>{}); wakeLock = null; }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (running && document.visibilityState === "visible") requestWakeLock();
+  });
+
+  /* ---------- Zeitstempel-basierte Session-Engine ---------- */
+  let sequence = [];
+  let durations = {};
+  let phaseIndex = -1;
+  let phaseEndsAt = 0;
+  let nextIntervalAt = null;
+  let pausedAt = null;
+  let running = false;
+  let tickTimer = null;
+  let intervalMinVal = 5;
+  let sessionStartedAt = null;
+
+  const els = {
+    setup: document.getElementById("setupScreen"),
+    session: document.getElementById("sessionScreen"),
+    done: document.getElementById("doneScreen"),
+    phaseLabel: document.getElementById("phaseLabel"),
+    timerText: document.getElementById("timerText"),
+    progressCircle: document.getElementById("progressCircle"),
+    pauseIcon: document.getElementById("pauseIcon"),
+    backToMenu: document.getElementById("backToMenu"),
+    prayerBtn: document.getElementById("prayerBtn"),
+    prayerNote: document.getElementById("prayerNote")
+  };
+
+  const PHASE_LABELS = { prep:"Vorbereitung", meditation:"Meditation", return:"Rückkehr" };
+  const CIRC = 2*Math.PI*45;
+
+  function startSession(){
+    ensureCtx();
+    sessionStartedAt = new Date();
+    const prepTotal = getPrepTotal();
+    const medTotal = getMedTotal();
+    intervalMinVal = parseInt(document.getElementById("intervalMin").value,10) || 5;
+
+    sequence = prepTotal > 0 ? ["prep","meditation","return"] : ["meditation","return"];
+    durations = { prep: prepTotal, meditation: medTotal, return: returnSec };
+    phaseIndex = 0;
+    const now = Date.now();
+    phaseEndsAt = now + durations[sequence[0]]*1000;
+    pausedAt = null;
+
+    if (sequence[0] === "prep"){
+      ring();
+      nextIntervalAt = null;
+    } else {
+      ringMultiple(3,1);
+      nextIntervalAt = intervalOn && intervalMinVal>0 ? now + intervalMinVal*60*1000 : null;
+    }
+
+    els.setup.style.display = "none";
+    els.done.classList.remove("active");
+    els.session.classList.add("active");
+    running = true;
+    requestWakeLock();
+    renderPhase();
+    saveCheckpoint();
+    startTick();
+  }
+
+  function renderPhase(){
+    els.phaseLabel.textContent = PHASE_LABELS[sequence[phaseIndex]] || "";
+  }
+
+
+  function isPrayerWindow(dateObj){
+    const h = dateObj.getHours();
+    return (h >= 6 && h < 12) || (h >= 20 && h < 24);
+  }
+
+  function updatePrayerOption(){
+    const finishedAt = new Date();
+    const eligible = isPrayerWindow(finishedAt);
+    els.prayerBtn.classList.toggle("visible", eligible);
+    els.prayerNote.classList.toggle("visible", eligible);
+  }
+
+  function finishSession(){
+    running = false;
+    releaseWakeLock();
+    clearInterval(tickTimer);
+    clearCheckpoint();
+    els.session.classList.remove("active");
+    els.done.classList.add("active");
+    els.backToMenu.classList.remove("hidden");
+    updatePrayerOption();
+    const count = saveSession(durations.meditation || 0);
+    if (count){
+      document.getElementById("doneText").textContent =
+        "Das war deine " + count + ". Meditation. Nimm dir einen Moment, bevor du zurückkehrst.";
+    }
+    updateStats();
+  }
+
+  function cancelSession(){
+    running = false;
+    releaseWakeLock();
+    clearInterval(tickTimer);
+    clearCheckpoint();
+    phaseIndex = -1;
+    nextIntervalAt = null;
+    pausedAt = null;
+    els.session.classList.remove("active");
+    els.done.classList.remove("active");
+    els.setup.style.display = "block";
+    els.prayerBtn.classList.remove("visible");
+    els.prayerNote.classList.remove("visible");
+    els.backToMenu.classList.remove("hidden");
+  }
+
+  function startTick(){
+    clearInterval(tickTimer);
+    let tickCount = 0;
+    tickTimer = setInterval(() => {
+      if (!running) return;
+      const now = Date.now();
+      let landedPhase = null;
+
+      while (phaseIndex >= 0 && phaseIndex < sequence.length && now >= phaseEndsAt){
+        phaseIndex += 1;
+        if (phaseIndex < sequence.length){
+          const nextName = sequence[phaseIndex];
+          phaseEndsAt += durations[nextName]*1000;
+          landedPhase = nextName;
+          if (nextName === "meditation"){
+            nextIntervalAt = intervalOn && intervalMinVal>0
+              ? phaseEndsAt - durations.meditation*1000 + intervalMinVal*60*1000
+              : null;
+          } else {
+            nextIntervalAt = null;
+          }
+        } else {
+          landedPhase = "done";
+        }
+      }
+
+      if (landedPhase === "meditation"){ ringMultiple(3,1); renderPhase(); saveCheckpoint(); }
+      else if (landedPhase === "return"){ ringMultiple(3,1); renderPhase(); saveCheckpoint(); }
+      else if (landedPhase === "done"){ strike(1.3); showRipple(); finishSession(); return; }
+
+      if (sequence[phaseIndex] === "meditation" && nextIntervalAt && now >= nextIntervalAt){
+        let rang = false;
+        while (nextIntervalAt && now >= nextIntervalAt && nextIntervalAt < phaseEndsAt){
+          nextIntervalAt += intervalMinVal*60*1000;
+          rang = true;
+        }
+        if (rang) ringMultiple(2, 0.7);
+      }
+
+      if (phaseIndex >= 0 && phaseIndex < sequence.length){
+        const remaining = Math.max(0, Math.round((phaseEndsAt-now)/1000));
+        const total = durations[sequence[phaseIndex]] || 1;
+        els.timerText.textContent = fmt(remaining);
+        const ratio = 1-(remaining/total);
+        els.progressCircle.style.strokeDasharray = CIRC;
+        els.progressCircle.style.strokeDashoffset = CIRC*(1-ratio);
+      }
+
+      /* Regelmäßiger Speicherpunkt (ca. alle 10 Sek.), damit bei einem harten
+         Abbruch möglichst wenig tatsächlich meditierte Zeit verloren geht. */
+      tickCount++;
+      if (tickCount % 20 === 0) saveCheckpoint();
+    }, 500);
+  }
+
+  function togglePause(){
+    if (running){
+      running = false;
+      pausedAt = Date.now();
+      releaseWakeLock();
+    } else if (phaseIndex >= 0) {
+      if (pausedAt){
+        const pauseDuration = Date.now()-pausedAt;
+        phaseEndsAt += pauseDuration;
+        if (nextIntervalAt) nextIntervalAt += pauseDuration;
+      }
+      pausedAt = null;
+      running = true;
+      requestWakeLock();
+    }
+    saveCheckpoint();
+    els.pauseIcon.innerHTML = running
+      ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>'
+      : '<path d="M7 4 L20 12 L7 20 Z"/>';
+  }
+
+
+  document.getElementById("startBtn").addEventListener("click", startSession);
+  document.getElementById("pauseBtn").addEventListener("click", togglePause);
+  document.getElementById("cancelBtn").addEventListener("click", cancelSession);
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    els.done.classList.remove("active");
+    els.prayerBtn.classList.remove("visible");
+    els.prayerNote.classList.remove("visible");
+    els.setup.style.display = "block";
+    updateStats();
+  });
+
+  tryRecoverInterruptedSession();
+  updateStats();
+
+  /* ---------- Export / Import (Datensicherung) ---------- */
+  function exportData(){
+    const status = document.getElementById("backupStatus");
+    try{
+      const log = loadLog();
+      const blob = new Blob([JSON.stringify({ app:"klangschale", exported:new Date().toISOString(), sessions: log }, null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "klangschale_sicherung_" + new Date().toISOString().slice(0,10) + ".json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      status.textContent = "Sicherung erstellt (" + log.length + " Sitzungen).";
+    }catch(e){
+      status.textContent = "Sicherung fehlgeschlagen.";
+    }
+  }
+
+  async function importData(file){
+    const status = document.getElementById("backupStatus");
+    try{
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || parsed.app !== "klangschale" || !Array.isArray(parsed.sessions)){
+        status.textContent = "Datei nicht erkannt — bitte eine Klangschale-Sicherung wählen.";
+        return;
+      }
+      const current = loadLog();
+      const finalLog = parsed.sessions.length >= current.length ? parsed.sessions : current;
+      localStorage.setItem(LOG_KEY, JSON.stringify(finalLog));
+      status.textContent = finalLog.length + " Sitzungen wiederhergestellt.";
+      updateStats();
+    }catch(e){
+      status.textContent = "Wiederherstellung fehlgeschlagen.";
+    }
+  }
+
+  document.getElementById("exportBtn").addEventListener("click", exportData);
+  document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+  document.getElementById("importFile").addEventListener("change", (e) => {
+    if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = "";
+  });
+
+})();
+</script>
+<script src="android-file-bridge.js"></script>
+<script src="alltagsbegleiter-stability.js"></script>
+</body>
+</html>
